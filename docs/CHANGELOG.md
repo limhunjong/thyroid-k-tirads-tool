@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.11
+
+- Moved Diagram bottom `Right` / `Left` labels upward so they no longer overlap the rounded diagram box border.
+- Added click-and-drag zone selection in the Diagram.
+- Dragging within the same lobe now creates multi-zone nodules such as Upper to middle, Middle to lower, or Upper to lower.
+- Single-zone click behavior is preserved.
+
 ## ver0.10
 
 - Redesigned the interactive Diagram thyroid schematic.
