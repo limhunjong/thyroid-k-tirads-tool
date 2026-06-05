@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.13</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.12</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1384,10 +1384,6 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   fill: rgba(10,132,255,0.24);
   stroke: rgba(10,132,255,0.48);
 }
-.diagram-marker-dragging {
-  opacity: 0.72;
-  filter: drop-shadow(0 4px 10px rgba(10,132,255,0.42));
-}
 .diagram-hint {
   padding: 4px 16px 11px;
   font-size: 11px;
@@ -1754,7 +1750,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
           <g id="diagram-markers"></g>
         </svg>
       </div>
-      <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker to move location &nbsp;·&nbsp; Click marker to edit</div>
+      <div class="diagram-hint">Click or drag across zones to add a nodule &nbsp;·&nbsp; Multi-zone markers span selected zones &nbsp;·&nbsp; Click marker to edit</div>
     </div>
 
     <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
@@ -3952,7 +3948,6 @@ function toggleDiagram() {
 
 let diagramDragStart = null;
 let diagramDragHover = null;
-let diagramMarkerDrag = null;
 
 function diagramLocationRange(startLoc, endLoc) {
   const order = ['upper', 'middle', 'lower'];
@@ -3990,45 +3985,6 @@ function getDiagramZoneFromPoint(clientX, clientY) {
   if (zone.id === 'zone-isthmus') return { lobe: 'isthmus', location: 'middle' };
   const m = zone.id.match(/^zone-(right|left)-(upper|middle|lower)$/);
   return m ? { lobe: m[1], location: m[2] } : null;
-}
-
-function getDiagramZoneFromSvgPosition(clientX, clientY) {
-  const svg = document.getElementById('thyroid-svg');
-  if (!svg || !svg.createSVGPoint || !svg.getScreenCTM()) return getDiagramZoneFromPoint(clientX, clientY);
-  const pt = svg.createSVGPoint();
-  pt.x = clientX; pt.y = clientY;
-  const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
-  if (svgPt.x < 18 || svgPt.x > 282 || svgPt.y < 14 || svgPt.y > 188) return null;
-  if (svgPt.x >= 112 && svgPt.x <= 188 && svgPt.y >= 86 && svgPt.y <= 118) {
-    return { lobe: 'isthmus', location: 'middle' };
-  }
-  const lobe = svgPt.x < 150 ? 'right' : 'left';
-  let location = 'middle';
-  if (svgPt.y < 84) location = 'upper';
-  else if (svgPt.y > 132) location = 'lower';
-  return { lobe, location };
-}
-
-function diagramLocationsForDroppedMarker(nod, targetZone) {
-  if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  const count = ['upper','middle','lower'].filter(loc => {
-    if (loc === 'upper') return !!nod.locationUpper;
-    if (loc === 'middle') return !!nod.locationMiddle;
-    return !!nod.locationLower;
-  }).length || 1;
-  if (count >= 3) return ['upper','middle','lower'];
-  if (count === 2) {
-    return targetZone.location === 'upper' ? ['upper','middle'] : ['middle','lower'];
-  }
-  return [targetZone.location];
-}
-
-function previewDiagramLocations(lobe, locations) {
-  clearDiagramDragPreview();
-  (locations || ['middle']).forEach(loc => {
-    const el = document.getElementById(lobe === 'isthmus' ? 'zone-isthmus' : `zone-${lobe}-${loc}`);
-    if (el) el.classList.add('zone-drag-preview');
-  });
 }
 
 function diagramZonePointerDown(event, lobe, location) {
@@ -4090,84 +4046,6 @@ function diagramAddNodule(lobe, locations) {
 
 function diagramZoneClick(lobe, location) {
   diagramAddNodule(lobe, [location]);
-}
-
-function diagramMarkerPointerDown(event, lobe, idx) {
-  event.preventDefault();
-  event.stopPropagation();
-  const nod = state.nodules[lobe] && state.nodules[lobe][idx];
-  if (!nod) return;
-  diagramMarkerDrag = {
-    lobe, idx, startX: event.clientX, startY: event.clientY,
-    lastZone: null, moved: false
-  };
-  const marker = event.currentTarget;
-  if (marker) marker.classList.add('diagram-marker-dragging');
-  document.addEventListener('pointermove', diagramMarkerPointerMove, { passive: false });
-  document.addEventListener('pointerup', diagramMarkerPointerUp, { once: true });
-  document.addEventListener('pointercancel', diagramMarkerPointerCancel, { once: true });
-}
-
-function diagramMarkerPointerMove(event) {
-  if (!diagramMarkerDrag) return;
-  event.preventDefault();
-  const dx = event.clientX - diagramMarkerDrag.startX;
-  const dy = event.clientY - diagramMarkerDrag.startY;
-  if (Math.hypot(dx, dy) > 4) diagramMarkerDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone) return;
-  const nod = state.nodules[diagramMarkerDrag.lobe] && state.nodules[diagramMarkerDrag.lobe][diagramMarkerDrag.idx];
-  if (!nod) return;
-  diagramMarkerDrag.lastZone = zone;
-  previewDiagramLocations(zone.lobe, diagramLocationsForDroppedMarker(nod, zone));
-}
-
-function diagramMarkerPointerUp(event) {
-  document.removeEventListener('pointermove', diagramMarkerPointerMove);
-  const drag = diagramMarkerDrag;
-  diagramMarkerDrag = null;
-  document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
-  clearDiagramDragPreview();
-  if (!drag) return;
-  if (!drag.moved) {
-    openNodulePopup(drag.lobe, drag.idx);
-    return;
-  }
-  const targetZone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY) || drag.lastZone;
-  if (!targetZone) { renderDiagramMarkers(); return; }
-  const nodules = state.nodules[drag.lobe] || [];
-  const nod = nodules[drag.idx];
-  if (!nod) { renderDiagramMarkers(); return; }
-  if (targetZone.lobe !== drag.lobe && (state.nodules[targetZone.lobe] || []).length >= 3) {
-    renderDiagramMarkers(); updateZoneFullState(); return;
-  }
-  const locations = diagramLocationsForDroppedMarker(nod, targetZone);
-  nod.locationUpper = locations.includes('upper');
-  nod.locationMiddle = locations.includes('middle');
-  nod.locationLower = locations.includes('lower');
-  if (targetZone.lobe === 'isthmus') {
-    nod.locationUpper = false; nod.locationMiddle = true; nod.locationLower = false;
-  }
-  const affectedLobes = new Set([drag.lobe, targetZone.lobe]);
-  if (targetZone.lobe !== drag.lobe) {
-    state.nodules[drag.lobe].splice(drag.idx, 1);
-    if (!state.nodules[targetZone.lobe]) state.nodules[targetZone.lobe] = [];
-    state.nodules[targetZone.lobe].push(nod);
-    activePopupLobe = null; activePopupIdx = null;
-  }
-  saveState();
-  affectedLobes.forEach(renderNoduleCol);
-  updateLobeBadges();
-  renderDiagramMarkers();
-  updateZoneFullState();
-}
-
-function diagramMarkerPointerCancel() {
-  document.removeEventListener('pointermove', diagramMarkerPointerMove);
-  diagramMarkerDrag = null;
-  document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
-  clearDiagramDragPreview();
-  renderDiagramMarkers();
 }
 
 function openNodulePopup(lobe, idx) {
@@ -4254,10 +4132,9 @@ function renderDiagramMarkers() {
       else if (tirads.includes('3')) fill = '#30D158';
 
       const grp = document.createElementNS(ns, 'g');
-      grp.style.cursor = 'grab';
+      grp.style.cursor = 'pointer';
       grp.setAttribute('role', 'button');
-      grp.setAttribute('aria-label', `Drag ${LOBE_LABELS[lobe]}${idx + 1} marker to move location; click to edit`);
-      grp.addEventListener('pointerdown', (event) => diagramMarkerPointerDown(event, lobe, idx));
+      grp.onclick = () => openNodulePopup(lobe, idx);
 
       const markerShape = document.createElementNS(ns, 'ellipse');
       markerShape.setAttribute('cx', cx); markerShape.setAttribute('cy', cy);

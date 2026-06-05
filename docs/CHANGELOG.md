@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.13
+
+- Added drag-to-move interaction for existing Diagram nodule markers.
+- Dragging a marker updates the nodule's stored location and generated report without creating a duplicate nodule.
+- Dragging a single-zone marker reassigns it to the dropped zone; dragging a two-zone marker preserves a two-zone span when moved.
+- Markers can be moved across right lobe, left lobe, and isthmus when the destination lobe is not full.
+- Clicking a marker still opens the existing edit popup.
+
 ## ver0.12
 
 - Enlarged the interactive Diagram display from 320px to 640px width.
