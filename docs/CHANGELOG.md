@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.12
+
+- Enlarged the interactive Diagram display from 320px to 640px width.
+- Removed redundant side `R` / `L` orientation pills while keeping the bottom `Right` / `Left` labels.
+- Changed Diagram markers from fixed circles to ellipses.
+- Multi-zone dragged nodules now render as taller vertical markers spanning the selected zone range, including Upper to middle and Upper to lower.
+
 ## ver0.11
 
 - Moved Diagram bottom `Right` / `Left` labels upward so they no longer overlap the rounded diagram box border.

@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.12</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.11</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1305,12 +1305,12 @@ body.light #diagram-panel {
   border: 0.5px solid rgba(0,0,0,0.08);
 }
 .diagram-svg-wrap {
-  padding: 18px 20px 8px;
+  padding: 14px 16px 6px;
   display: flex;
   justify-content: center;
 }
 #thyroid-svg {
-  width: 640px;
+  width: 320px;
   max-width: 100%;
   height: auto;
   display: block;
@@ -1367,6 +1367,19 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   pointer-events: none;
   user-select: none;
 }
+#thyroid-svg .rl-label {
+  fill: var(--label3);
+  font-size: 9px;
+  font-weight: 800;
+  pointer-events: none;
+  user-select: none;
+}
+#thyroid-svg .orientation-pill {
+  fill: var(--fill3);
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 0.5;
+}
+body.light #thyroid-svg .orientation-pill { stroke: rgba(0,0,0,0.05); }
 .zone-path {
   fill: rgba(0,0,0,0.001); /* keeps the anatomical shape clickable */
   cursor: pointer;
@@ -1746,11 +1759,13 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
           <text class="zone-label" x="150" y="106" text-anchor="middle">Isthmus</text>
           <text class="lobe-label" x="82" y="183" text-anchor="middle">Right</text>
           <text class="lobe-label" x="218" y="183" text-anchor="middle">Left</text>
+          <g transform="translate(28 97)"><rect class="orientation-pill" x="-13" y="-11" width="26" height="22" rx="11"></rect><text class="rl-label" x="0" y="3" text-anchor="middle">R</text></g>
+          <g transform="translate(272 97)"><rect class="orientation-pill" x="-13" y="-11" width="26" height="22" rx="11"></rect><text class="rl-label" x="0" y="3" text-anchor="middle">L</text></g>
           <!-- Markers (dynamically updated) -->
           <g id="diagram-markers"></g>
         </svg>
       </div>
-      <div class="diagram-hint">Click or drag across zones to add a nodule &nbsp;·&nbsp; Multi-zone markers span selected zones &nbsp;·&nbsp; Click marker to edit</div>
+      <div class="diagram-hint">Click or drag across zones to add a nodule &nbsp;·&nbsp; Click a marker to edit &nbsp;·&nbsp; Max 3 per lobe</div>
     </div>
 
     <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
@@ -4104,27 +4119,17 @@ function renderDiagramMarkers() {
   ['right', 'isthmus', 'left'].forEach(lobe => {
     (state.nodules[lobe] || []).forEach((nod, idx) => {
       const cx = LOBE_CX[lobe] + X_OFFSETS[idx];
-      // marker geometry from location flags
-      // Single-zone nodules remain compact. Multi-zone nodules become a taller
-      // vertical ellipse so the marker visually spans the dragged zone range
-      // instead of sitting on the divider line.
+      // y from location flags
       let cy = 100;
-      let rx = 11;
-      let ry = 11;
       const u = nod.locationUpper, m = nod.locationMiddle, l = nod.locationLower;
-      const zoneCenters = [];
-      if (u) zoneCenters.push(62);
-      if (m) zoneCenters.push(102);
-      if (l) zoneCenters.push(143);
-      if (zoneCenters.length) {
-        cy = zoneCenters.reduce((sum, y) => sum + y, 0) / zoneCenters.length;
-        if (zoneCenters.length === 2) { rx = 12; ry = 23; }
-        else if (zoneCenters.length === 3) { rx = 13; ry = 43; }
-      }
-      if (lobe === 'isthmus') { cy = 100; rx = 11; ry = 11; }
+      if      (u && !m && !l) cy = 62;
+      else if (!u && m && !l) cy = 102;
+      else if (!u && !m && l) cy = 143;
+      else if (u &&  m && !l) cy = 82;
+      else if (!u && m &&  l) cy = 122;
+      if (lobe === 'isthmus') cy = 100;
 
       const isActive = (activePopupLobe === lobe && activePopupIdx === idx);
-      if (isActive) { rx += 2; ry += 2; }
       const tirads = getKTIRADS(nod, state.normalThyroid);
       let fill = '#0A84FF';
       if      (tirads.includes('5')) fill = '#FF453A';
@@ -4136,13 +4141,13 @@ function renderDiagramMarkers() {
       grp.setAttribute('role', 'button');
       grp.onclick = () => openNodulePopup(lobe, idx);
 
-      const markerShape = document.createElementNS(ns, 'ellipse');
-      markerShape.setAttribute('cx', cx); markerShape.setAttribute('cy', cy);
-      markerShape.setAttribute('rx', rx); markerShape.setAttribute('ry', ry);
-      markerShape.setAttribute('fill', fill);
-      markerShape.setAttribute('stroke', '#fff');
-      markerShape.setAttribute('stroke-width', isActive ? '2.5' : '1.5');
-      grp.appendChild(markerShape);
+      const circ = document.createElementNS(ns, 'circle');
+      circ.setAttribute('cx', cx); circ.setAttribute('cy', cy);
+      circ.setAttribute('r', isActive ? '13' : '11');
+      circ.setAttribute('fill', fill);
+      circ.setAttribute('stroke', '#fff');
+      circ.setAttribute('stroke-width', isActive ? '2.5' : '1.5');
+      grp.appendChild(circ);
 
       const txt = document.createElementNS(ns, 'text');
       txt.setAttribute('x', cx); txt.setAttribute('y', cy + 4);
