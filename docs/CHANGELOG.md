@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.15
+
+- Added fine-grained Diagram marker positioning with persisted `diagramX` / `diagramY` coordinates.
+- Dragged markers now remain at the exact dropped SVG position instead of snapping back to fixed zone centers.
+- Newly added Diagram nodules are placed at the clicked/dropped point within the selected lobe.
+- Coarse location flags and report text still follow Upper / Middle / Lower zone logic, while the marker can be visually positioned more precisely.
+
 ## ver0.14
 
 - Added a live ghost marker while dragging an existing Diagram nodule marker.
