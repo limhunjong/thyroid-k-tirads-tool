@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.14
+
+- Added a live ghost marker while dragging an existing Diagram nodule marker.
+- The dragged nodule now follows the mouse cursor visually during movement.
+- The original marker is dimmed during drag, while the cursor-following marker remains prominent.
+- Drop behavior from ver0.13 is preserved: releasing the marker updates the existing nodule location and report.
+
 ## ver0.13
 
 - Added drag-to-move interaction for existing Diagram nodule markers.

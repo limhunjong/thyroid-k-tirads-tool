@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.14</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.13</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1385,16 +1385,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   stroke: rgba(10,132,255,0.48);
 }
 .diagram-marker-dragging {
-  opacity: 0.34;
+  opacity: 0.72;
   filter: drop-shadow(0 4px 10px rgba(10,132,255,0.42));
-}
-#thyroid-svg .diagram-drag-ghost {
-  pointer-events: none;
-  opacity: 0.95;
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.34));
-}
-#thyroid-svg .diagram-drag-ghost ellipse {
-  stroke-width: 2.4;
 }
 .diagram-hint {
   padding: 4px 16px 11px;
@@ -1760,10 +1752,9 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
           <text class="lobe-label" x="218" y="183" text-anchor="middle">Left</text>
           <!-- Markers (dynamically updated) -->
           <g id="diagram-markers"></g>
-          <g id="diagram-drag-ghost" class="diagram-drag-ghost"></g>
         </svg>
       </div>
-      <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker to move; marker follows cursor &nbsp;·&nbsp; Click marker to edit</div>
+      <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker to move location &nbsp;·&nbsp; Click marker to edit</div>
     </div>
 
     <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
@@ -4040,67 +4031,6 @@ function previewDiagramLocations(lobe, locations) {
   });
 }
 
-function getDiagramSvgPoint(clientX, clientY) {
-  const svg = document.getElementById('thyroid-svg');
-  if (!svg || !svg.createSVGPoint || !svg.getScreenCTM()) return null;
-  const pt = svg.createSVGPoint();
-  pt.x = clientX; pt.y = clientY;
-  return pt.matrixTransform(svg.getScreenCTM().inverse());
-}
-
-function diagramMarkerShapeForNodule(nod, lobe, isActive) {
-  let rx = 11;
-  let ry = 11;
-  if (lobe !== 'isthmus') {
-    const zoneCenters = [];
-    if (nod.locationUpper) zoneCenters.push(62);
-    if (nod.locationMiddle) zoneCenters.push(102);
-    if (nod.locationLower) zoneCenters.push(143);
-    if (zoneCenters.length === 2) { rx = 12; ry = 23; }
-    else if (zoneCenters.length >= 3) { rx = 13; ry = 43; }
-  }
-  if (isActive) { rx += 2; ry += 2; }
-  return { rx, ry };
-}
-
-function clearDiagramDragGhost() {
-  const ghost = document.getElementById('diagram-drag-ghost');
-  if (ghost) ghost.innerHTML = '';
-}
-
-function updateDiagramDragGhost(clientX, clientY) {
-  if (!diagramMarkerDrag) return;
-  const ghost = document.getElementById('diagram-drag-ghost');
-  const svgPt = getDiagramSvgPoint(clientX, clientY);
-  if (!ghost || !svgPt) return;
-  const nod = state.nodules[diagramMarkerDrag.lobe] && state.nodules[diagramMarkerDrag.lobe][diagramMarkerDrag.idx];
-  if (!nod) return;
-  const ns = 'http://www.w3.org/2000/svg';
-  const shape = diagramMarkerShapeForNodule(nod, diagramMarkerDrag.lobe, true);
-  ghost.innerHTML = '';
-
-  const markerShape = document.createElementNS(ns, 'ellipse');
-  markerShape.setAttribute('cx', svgPt.x);
-  markerShape.setAttribute('cy', svgPt.y);
-  markerShape.setAttribute('rx', shape.rx);
-  markerShape.setAttribute('ry', shape.ry);
-  markerShape.setAttribute('fill', diagramMarkerDrag.fill || '#0A84FF');
-  markerShape.setAttribute('stroke', '#fff');
-  markerShape.setAttribute('stroke-width', '2.4');
-  ghost.appendChild(markerShape);
-
-  const txt = document.createElementNS(ns, 'text');
-  txt.setAttribute('x', svgPt.x);
-  txt.setAttribute('y', svgPt.y + 4);
-  txt.setAttribute('text-anchor', 'middle');
-  txt.setAttribute('font-size', '9');
-  txt.setAttribute('font-weight', '700');
-  txt.setAttribute('fill', '#fff');
-  txt.style.pointerEvents = 'none';
-  txt.textContent = diagramMarkerDrag.label || '';
-  ghost.appendChild(txt);
-}
-
 function diagramZonePointerDown(event, lobe, location) {
   if ((state.nodules[lobe] || []).length >= 3) return;
   event.preventDefault();
@@ -4167,19 +4097,12 @@ function diagramMarkerPointerDown(event, lobe, idx) {
   event.stopPropagation();
   const nod = state.nodules[lobe] && state.nodules[lobe][idx];
   if (!nod) return;
-  const tirads = getKTIRADS(nod, state.normalThyroid);
-  let fill = '#0A84FF';
-  if      (tirads.includes('5')) fill = '#FF453A';
-  else if (tirads.includes('4')) fill = '#FF9F0A';
-  else if (tirads.includes('3')) fill = '#30D158';
   diagramMarkerDrag = {
     lobe, idx, startX: event.clientX, startY: event.clientY,
-    lastZone: null, moved: false,
-    label: LOBE_LABELS[lobe] + (idx + 1), fill
+    lastZone: null, moved: false
   };
   const marker = event.currentTarget;
   if (marker) marker.classList.add('diagram-marker-dragging');
-  updateDiagramDragGhost(event.clientX, event.clientY);
   document.addEventListener('pointermove', diagramMarkerPointerMove, { passive: false });
   document.addEventListener('pointerup', diagramMarkerPointerUp, { once: true });
   document.addEventListener('pointercancel', diagramMarkerPointerCancel, { once: true });
@@ -4191,7 +4114,6 @@ function diagramMarkerPointerMove(event) {
   const dx = event.clientX - diagramMarkerDrag.startX;
   const dy = event.clientY - diagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) diagramMarkerDrag.moved = true;
-  updateDiagramDragGhost(event.clientX, event.clientY);
   const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
   if (!zone) return;
   const nod = state.nodules[diagramMarkerDrag.lobe] && state.nodules[diagramMarkerDrag.lobe][diagramMarkerDrag.idx];
@@ -4206,7 +4128,6 @@ function diagramMarkerPointerUp(event) {
   diagramMarkerDrag = null;
   document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
   clearDiagramDragPreview();
-  clearDiagramDragGhost();
   if (!drag) return;
   if (!drag.moved) {
     openNodulePopup(drag.lobe, drag.idx);
@@ -4246,7 +4167,6 @@ function diagramMarkerPointerCancel() {
   diagramMarkerDrag = null;
   document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
   clearDiagramDragPreview();
-  clearDiagramDragGhost();
   renderDiagramMarkers();
 }
 
@@ -4311,6 +4231,8 @@ function renderDiagramMarkers() {
       // vertical ellipse so the marker visually spans the dragged zone range
       // instead of sitting on the divider line.
       let cy = 100;
+      let rx = 11;
+      let ry = 11;
       const u = nod.locationUpper, m = nod.locationMiddle, l = nod.locationLower;
       const zoneCenters = [];
       if (u) zoneCenters.push(62);
@@ -4318,13 +4240,13 @@ function renderDiagramMarkers() {
       if (l) zoneCenters.push(143);
       if (zoneCenters.length) {
         cy = zoneCenters.reduce((sum, y) => sum + y, 0) / zoneCenters.length;
+        if (zoneCenters.length === 2) { rx = 12; ry = 23; }
+        else if (zoneCenters.length === 3) { rx = 13; ry = 43; }
       }
-      if (lobe === 'isthmus') cy = 100;
+      if (lobe === 'isthmus') { cy = 100; rx = 11; ry = 11; }
 
       const isActive = (activePopupLobe === lobe && activePopupIdx === idx);
-      const shape = diagramMarkerShapeForNodule(nod, lobe, isActive);
-      const rx = shape.rx;
-      const ry = shape.ry;
+      if (isActive) { rx += 2; ry += 2; }
       const tirads = getKTIRADS(nod, state.normalThyroid);
       let fill = '#0A84FF';
       if      (tirads.includes('5')) fill = '#FF453A';
