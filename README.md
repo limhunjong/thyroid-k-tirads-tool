@@ -1,0 +1,28 @@
+# Thyroid Finding Tool - K-TIRADS 2021
+
+Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workflow.
+
+## Latest version
+
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.10.html`.
+- Open `index.html` directly in a browser to use the tool.
+
+## Version history
+
+All incremental versions are kept in `versions/`.
+
+- ver0.1: Original baseline.
+- ver0.2: Nodule-level Previous Biopsy / Current Biopsy restructuring.
+- ver0.3: Mobile/narrow nodule-card layout fix.
+- ver0.4: Size input blur/click race fix.
+- ver0.5: Size Change Initial / Follow-up converted to mutually exclusive radio behavior.
+- ver0.6: Hide follow-up subtype choices when Initial is selected.
+- ver0.7: Lobe order changed to Right lobe → Isthmus → Left lobe.
+- ver0.8: Bethesda / CNB category select layout improved to prevent overflow.
+- ver0.9: Extrathyroidal Lesion input correctly reflected in generated report and conclusion.
+- ver0.10: Diagram thyroid schematic redesigned with a cleaner, modern, simple anatomical SVG while preserving click-zone behavior.
+
+## Notes
+
+- This repository preserves the iterative development process as separate versioned HTML files.
+- Clinical guideline logic should be validated separately against K-TIRADS 2021 source material before clinical deployment.
