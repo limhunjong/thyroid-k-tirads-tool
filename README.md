@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.24.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.25.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -35,6 +35,7 @@ All incremental versions are kept in `versions/`.
 - ver0.22: Existing Diagram marker drag now edits multi-zone spans, so Middle→Lower becomes Middle to lower and Upper-to-middle can shift to Middle to lower instead of collapsing to Lower.
 - ver0.23: Diagram marker body drag now moves/repositions while preserving span size; separate blue upper/lower handles resize the location span.
 - ver0.24: QUICK ADD is limited to PTC and Follicular Neoplasm, existing/Diagram-opened nodule forms now include QUICK ADD, and span handles were redesigned as polished blue pill grips.
+- ver0.25: Diagram deletion restore now keeps a multi-item history so older deleted nodules can be restored sequentially, and the top-right `판독문` button is white when inactive but changes color when active.
 
 ## Notes
 

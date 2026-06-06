@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.25</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.24</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -119,12 +119,11 @@ label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
 .top-spacer { flex: 1; }
 .report-btn {
-  background: #FFFFFF; color: var(--blue); border: 0.5px solid rgba(0,0,0,0.08);
+  background: var(--blue); color: #fff; border: none;
   padding: 8px 18px; border-radius: 20px;
   cursor: pointer; font-size: 14px; font-weight: 600;
   letter-spacing: -0.2px; margin-right: 8px;
-  transition: background 0.18s, color 0.18s, border-color 0.18s, opacity 0.15s;
-  font-family: inherit;
+  transition: opacity 0.15s; font-family: inherit;
   box-shadow: var(--shadow-btn);
 }
 .report-btn:active { opacity: 0.72; }
@@ -674,11 +673,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 }
 #right-panel.preview-open { display: block; }
 #right-panel.preview-open .preview-close-btn { display: flex; }
-.report-btn.active {
-  background: var(--green);
-  color: #fff;
-  border-color: transparent;
-}
+.report-btn.active { background: var(--green); }
 
 /* ===== LIVE PREVIEW PANE ===== */
 #live-preview-pane {
@@ -2537,9 +2532,7 @@ function removeNodule(lobe, idx, opts = {}) {
   const removed = list[idx];
   if (!removed) return null;
   if (opts.rememberUndo) {
-    const deleted = { lobe, idx, nod: JSON.parse(JSON.stringify(removed)), label: LOBE_LABELS[lobe] + (idx + 1) };
-    diagramDeletedNoduleHistory.push(deleted);
-    if (diagramDeletedNoduleHistory.length > DIAGRAM_DELETE_HISTORY_LIMIT) diagramDeletedNoduleHistory.shift();
+    lastDiagramDeletedNodule = { lobe, idx, nod: JSON.parse(JSON.stringify(removed)), label: LOBE_LABELS[lobe] + (idx + 1) };
   }
   // Keep popup index valid after splice
   if (activePopupLobe === lobe) {
@@ -2558,7 +2551,7 @@ function removeNodule(lobe, idx, opts = {}) {
     if (overlay) overlay.classList.remove('show');
   }
   renderDiagramMarkers();
-  if (opts.rememberUndo) showDiagramUndoBar();
+  if (opts.rememberUndo) showDiagramUndoBar(lastDiagramDeletedNodule);
   return removed;
 }
 
@@ -4125,8 +4118,7 @@ let diagramDragStart = null;
 let diagramDragHover = null;
 let diagramMarkerDrag = null;
 let diagramSpanHandleDrag = null;
-const diagramDeletedNoduleHistory = [];
-const DIAGRAM_DELETE_HISTORY_LIMIT = 20;
+let lastDiagramDeletedNodule = null;
 
 function diagramLocationRange(startLoc, endLoc) {
   const order = ['upper', 'middle', 'lower'];
@@ -4582,28 +4574,11 @@ function diagramSpanHandlePointerCancel() {
   renderDiagramMarkers();
 }
 
-function latestRestorableDiagramDeleteIndex() {
-  for (let i = diagramDeletedNoduleHistory.length - 1; i >= 0; i--) {
-    const deleted = diagramDeletedNoduleHistory[i];
-    const list = state.nodules[deleted.lobe] || [];
-    if (list.length < 3) return i;
-  }
-  return -1;
-}
-
-function showDiagramUndoBar() {
+function showDiagramUndoBar(deleted) {
   const bar = document.getElementById('diagram-undo-bar');
   const msg = document.getElementById('diagram-undo-msg');
-  if (!bar) return;
-  const restorableIdx = latestRestorableDiagramDeleteIndex();
-  if (restorableIdx < 0) { hideDiagramUndoBar(); return; }
-  const deleted = diagramDeletedNoduleHistory[restorableIdx];
-  const count = diagramDeletedNoduleHistory.length;
-  if (msg) {
-    msg.textContent = count > 1
-      ? `Nodule ${deleted.label} 삭제됨 · ${count}개 복원 가능`
-      : `Nodule ${deleted.label} 삭제됨`;
-  }
+  if (!bar || !deleted) return;
+  if (msg) msg.textContent = `Nodule ${deleted.label} 삭제됨`;
   bar.classList.add('show');
 }
 
@@ -4619,12 +4594,16 @@ function deleteNoduleFromDiagram(event, lobe, idx) {
 }
 
 function undoLastDiagramDelete() {
-  const restoreIdx = latestRestorableDiagramDeleteIndex();
-  if (restoreIdx < 0) { hideDiagramUndoBar(); return; }
-  const [deleted] = diagramDeletedNoduleHistory.splice(restoreIdx, 1);
+  const deleted = lastDiagramDeletedNodule;
+  if (!deleted) { hideDiagramUndoBar(); return; }
   if (!state.nodules[deleted.lobe]) state.nodules[deleted.lobe] = [];
   const insertIdx = Math.min(deleted.idx, state.nodules[deleted.lobe].length);
+  if (state.nodules[deleted.lobe].length >= 3) {
+    hideDiagramUndoBar();
+    return;
+  }
   state.nodules[deleted.lobe].splice(insertIdx, 0, JSON.parse(JSON.stringify(deleted.nod)));
+  lastDiagramDeletedNodule = null;
   saveState();
   renderNoduleCol(deleted.lobe);
   updateLobeBadges();
@@ -4632,7 +4611,7 @@ function undoLastDiagramDelete() {
   renderDiagramMarkers();
   updateZoneFullState();
   if (window.innerWidth < 768) switchLobeTab(deleted.lobe);
-  showDiagramUndoBar();
+  hideDiagramUndoBar();
 }
 
 function openNodulePopup(lobe, idx) {

@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.25
+
+- Replaced single-item Diagram delete restore with a multi-item delete history stack.
+- Repeated `복원` clicks now restore previously deleted nodules sequentially, not only the immediately deleted one.
+- The inline Diagram undo bar now shows how many deleted nodules remain restorable.
+- Updated the top-right `판독문` button styling: inactive state uses a white background, while active preview state changes to green with white text.
+- Verified JavaScript syntax, multi-item delete/restore behavior, and inactive/active report button colors in browser.
+
 ## ver0.24
 
 - Reduced QUICK ADD presets to only `PTC` and `Follicular Neoplasm`.
