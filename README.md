@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.26.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.27.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -37,6 +37,7 @@ All incremental versions are kept in `versions/`.
 - ver0.24: QUICK ADD is limited to PTC and Follicular Neoplasm, existing/Diagram-opened nodule forms now include QUICK ADD, and span handles were redesigned as polished blue pill grips.
 - ver0.25: Diagram deletion restore now keeps a multi-item history so older deleted nodules can be restored sequentially, and the top-right `판독문` button is white when inactive but changes color when active.
 - ver0.26: Form typography was enlarged and standardized; compact fields such as Clinical Information `custom` and Thyroid Size AP/T/L boxes are centered and easier to read.
+- ver0.27: Date selects use visually centered Year/MM/DD values, and segmented controls now keep compact, similar-width buttons instead of stretching sparse options across the full row.
 
 ## Notes
 

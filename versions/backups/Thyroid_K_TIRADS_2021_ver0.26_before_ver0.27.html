@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.27</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.26</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -311,12 +311,10 @@ table.data-table td.section-header {
   display: inline-flex; flex-wrap: wrap;
   background: var(--fill3);
   border-radius: var(--r-md); padding: 3px; gap: 2px;
-  align-items: center; width: fit-content; max-width: 100%;
+  align-items: center;
 }
 .radio-group label {
   position: relative; display: flex; align-items: center; justify-content: center;
-  flex: 0 0 auto;
-  min-width: 96px;
   padding: 9px 18px; border-radius: 10px; cursor: pointer;
   font-size: var(--font-md); font-weight: 600; color: var(--label2);
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
@@ -377,7 +375,7 @@ input[type=text]:disabled {
   background: var(--fill4); color: var(--label4);
 }
 select {
-  padding: 9px 11px; border: none; border-radius: var(--r-sm);
+  padding: 9px 28px 9px 11px; border: none; border-radius: var(--r-sm);
   min-height: var(--control-min-h); line-height: var(--control-line);
   font-size: var(--font-base); font-weight: 500; background: var(--fill3);
   cursor: pointer; color: var(--label1); font-family: inherit;
@@ -568,16 +566,12 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 
 /* ===== DATE SELECT ===== */
 .date-select {
-  padding: 8px 10px; border: none; border-radius: var(--r-sm);
+  padding: 8px 28px 8px 10px; border: none; border-radius: var(--r-sm);
   min-height: var(--control-min-h);
   font-size: var(--font-base); font-weight: 500; background: var(--fill3);
   cursor: pointer; color: var(--label1); font-family: inherit;
   transition: box-shadow 0.15s; text-align: center; text-align-last: center;
 }
-#compYear, .date-select[data-date-part="year"] { min-width: 78px; }
-#compMonth, #compDay,
-.date-select[data-date-part="month"],
-.date-select[data-date-part="day"] { min-width: 64px; }
 .date-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
 
 /* ===== DYNAMICALLY-RENDERED CELLS (nodule / LN tables) ===== */
@@ -656,12 +650,12 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   .nodule-col { width: 100%; }
   .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 8px !important; }
   .nodule-section-title { font-size: var(--font-md); padding: 10px 14px; }
-  .radio-group { width: fit-content; max-width: 100%; }
-  .radio-group label { flex: 0 0 auto; min-width: 96px; }
+  .radio-group { width: 100%; }
+  .radio-group label { flex: 1; }
   .radio-group label { padding: 10px 12px; min-height: 46px; font-size: var(--font-md); }
   input[type=text], select, textarea { font-size: var(--font-base) !important; }
   input[type=text] { padding: 10px 11px; min-height: 46px; }
-  select { padding: 10px 11px; min-height: 46px; }
+  select { padding: 10px 28px 10px 11px; min-height: 46px; }
   .inline-check-label { min-height: 48px; padding: 12px 13px; font-size: var(--font-md); }
   .check-group label { min-height: 46px; padding: 10px 12px; font-size: var(--font-md); }
   .check-group { gap: 3px; }
@@ -2403,9 +2397,6 @@ function deletePrevBiopsy(i) {
 function makeDateSel(placeholder, options, val, onChange) {
   const sel = document.createElement('select');
   sel.className = 'date-select';
-  if (placeholder === 'Year') sel.dataset.datePart = 'year';
-  else if (placeholder === 'MM') sel.dataset.datePart = 'month';
-  else if (placeholder === 'DD') sel.dataset.datePart = 'day';
   const def = document.createElement('option'); def.value = ''; def.textContent = placeholder; sel.appendChild(def);
   options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === val) opt.selected = true; sel.appendChild(opt); });
   sel.onchange = () => onChange(sel.value);

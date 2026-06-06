@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.27
+
+- Fixed visual centering for Date `Year` / `MM` / `DD` selects by removing asymmetric select padding and assigning explicit compact date widths.
+- Applied the same date-select sizing to dynamically generated biopsy date controls via `data-date-part` attributes.
+- Changed segmented controls from full-row stretching to compact `fit-content` sizing with similar button widths.
+- Removed mobile `radio-group` forced `width:100%` and `label flex:1`, so sparse groups such as `Initial` / `Follow-up` keep natural, consistent widths.
+- Verified JavaScript syntax, browser-computed date select alignment, compact segmented group widths, and visual layout in browser.
+
 ## ver0.26
 
 - Added shared typography/control tokens for more consistent font sizing across the tool.
