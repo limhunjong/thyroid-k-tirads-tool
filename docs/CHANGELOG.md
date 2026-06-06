@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.22
+
+- Fixed existing Diagram marker drag so a marker dragged from Middle to Lower is recognized as `Middle to lower`, not only `Lower`.
+- Existing markers now support left-click drag span editing within the same lobe: Middle→Lower, Middle→Upper, Upper→Lower, and shifting Upper-to-middle downward to Middle-to-lower.
+- Dropped multi-zone markers are re-centered on the selected zone span so the visual ellipse continues to cover the recognized locations.
+
 ## ver0.21
 
 - Diagram marker drag now updates the nodule `Location` state to match the marker's dropped anatomical zone.

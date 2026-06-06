@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.22</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.21</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -4133,67 +4133,15 @@ function getDiagramZoneFromSvgPosition(clientX, clientY) {
   return { lobe, location };
 }
 
-function diagramSelectedLocations(nod) {
-  const locs = [];
-  if (nod && nod.locationUpper) locs.push('upper');
-  if (nod && nod.locationMiddle) locs.push('middle');
-  if (nod && nod.locationLower) locs.push('lower');
-  return locs.length ? locs : ['middle'];
-}
-
-function diagramNearestLocationFromSvgY(svgY, allowedLocations, dragDirection) {
-  const centers = { upper: 62, middle: 102, lower: 143 };
-  const locs = (allowedLocations && allowedLocations.length ? allowedLocations : ['middle'])
-    .filter(loc => centers[loc] !== undefined);
-  if (!locs.length) return 'middle';
-  const y = Number.isFinite(Number(svgY)) ? Number(svgY) : centers[locs[0]];
-  let best = locs[0];
-  let bestDist = Math.abs(y - centers[best]);
-  for (let i = 1; i < locs.length; i++) {
-    const loc = locs[i];
-    const dist = Math.abs(y - centers[loc]);
-    if (dist < bestDist) {
-      best = loc;
-      bestDist = dist;
-    } else if (Math.abs(dist - bestDist) < 0.001) {
-      const order = ['upper', 'middle', 'lower'];
-      const goingDown = dragDirection === 'down';
-      if ((goingDown && order.indexOf(loc) > order.indexOf(best)) ||
-          (!goingDown && order.indexOf(loc) < order.indexOf(best))) {
-        best = loc;
-      }
-    }
-  }
-  return best;
-}
-
-function diagramLocationsForDroppedMarker(nod, targetZone, drag) {
-  // Existing-marker drag now edits the marker's vertical span, not just its
-  // center point. A left-button drag from a Middle marker to Lower becomes
-  // Middle-to-Lower; drag from Middle to Upper becomes Upper-to-Middle; and
-  // dragging an Upper-to-Middle marker downward shifts it to Middle-to-Lower
-  // when the drag starts near the marker's middle/lower side.
+function diagramLocationsForDroppedMarker(nod, targetZone) {
+  // When an existing marker is moved in the diagram, make the nodule's
+  // Location checkboxes follow the marker's new anatomical zone. Previously
+  // multi-zone nodules preserved their old span during drag, so a marker moved
+  // to Lower could still remain checked as Upper/Middle/Lower. Existing
+  // multi-zone creation by dragging across zones is preserved separately in
+  // diagramZonePointerUp().
   if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  if (!drag || targetZone.lobe !== drag.lobe || drag.lobe === 'isthmus') return [targetZone.location || 'middle'];
-  const startLoc = drag.startLocation || diagramNearestLocationFromSvgY(
-    drag.startSvgPt && drag.startSvgPt.y,
-    diagramSelectedLocations(nod),
-    targetZone.location === 'lower' ? 'down' : 'up'
-  );
-  return diagramLocationRange(startLoc, targetZone.location || startLoc || 'middle');
-}
-
-function diagramPointForLocations(lobe, locations, svgPt) {
-  const pt = svgPt ? { x: svgPt.x, y: svgPt.y } : null;
-  if (!pt) return null;
-  if (lobe === 'isthmus') {
-    pt.y = 100;
-  } else {
-    const centers = { upper: 62, middle: 102, lower: 143 };
-    const ys = (locations || []).map(loc => centers[loc]).filter(y => Number.isFinite(y));
-    if (ys.length) pt.y = ys.reduce((sum, y) => sum + y, 0) / ys.length;
-  }
-  return pt;
+  return [targetZone.location || 'middle'];
 }
 
 function previewDiagramLocations(lobe, locations) {
@@ -4365,11 +4313,8 @@ function diagramMarkerPointerDown(event, lobe, idx) {
   if      (tirads.includes('5')) fill = '#FF453A';
   else if (tirads.includes('4')) fill = '#FF9F0A';
   else if (tirads.includes('3')) fill = '#30D158';
-  const startSvgPt = getDiagramSvgPoint(event.clientX, event.clientY);
   diagramMarkerDrag = {
     lobe, idx, startX: event.clientX, startY: event.clientY,
-    startSvgPt,
-    startLocation: diagramNearestLocationFromSvgY(startSvgPt && startSvgPt.y, diagramSelectedLocations(nod), null),
     lastZone: null, moved: false,
     label: LOBE_LABELS[lobe] + (idx + 1), fill
   };
@@ -4393,7 +4338,7 @@ function diagramMarkerPointerMove(event) {
   const nod = state.nodules[diagramMarkerDrag.lobe] && state.nodules[diagramMarkerDrag.lobe][diagramMarkerDrag.idx];
   if (!nod) return;
   diagramMarkerDrag.lastZone = zone;
-  previewDiagramLocations(zone.lobe, diagramLocationsForDroppedMarker(nod, zone, diagramMarkerDrag));
+  previewDiagramLocations(zone.lobe, diagramLocationsForDroppedMarker(nod, zone));
 }
 
 function diagramMarkerPointerUp(event) {
@@ -4416,14 +4361,14 @@ function diagramMarkerPointerUp(event) {
   if (targetZone.lobe !== drag.lobe && (state.nodules[targetZone.lobe] || []).length >= 3) {
     renderDiagramMarkers(); updateZoneFullState(); return;
   }
-  const locations = diagramLocationsForDroppedMarker(nod, targetZone, drag);
+  const locations = diagramLocationsForDroppedMarker(nod, targetZone);
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
   if (targetZone.lobe === 'isthmus') {
     nod.locationUpper = false; nod.locationMiddle = true; nod.locationLower = false;
   }
-  setNoduleDiagramPoint(nod, diagramPointForLocations(targetZone.lobe, locations, getDiagramSvgPoint(event.clientX, event.clientY)), targetZone.lobe);
+  setNoduleDiagramPoint(nod, getDiagramSvgPoint(event.clientX, event.clientY), targetZone.lobe);
   const affectedLobes = new Set([drag.lobe, targetZone.lobe]);
   if (targetZone.lobe !== drag.lobe) {
     state.nodules[drag.lobe].splice(drag.idx, 1);
