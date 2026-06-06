@@ -1,5 +1,14 @@
 # Changelog
 
+## ver0.34
+
+- Added a new top-level `Postop` tab between `Thyroid` and `Cervical Lymph Node`, preserving the existing tab styling and overall app design language.
+- Added operation-type-driven section rendering for right lobectomy, left lobectomy, total thyroidectomy, isthmusectomy, and custom/other postop anatomy.
+- Added postop operation-bed lesion cards with existing nodule-card visual styling, dedicated op-bed lesion fields, automatic impression-category suggestions, deletion, and lesion-level reset.
+- Added separate Postop state for residual thyroid nodules and op-bed lesions so the original Thyroid tab nodule state and K-TIRADS calculation logic are not directly polluted.
+- Integrated Postop findings, residual thyroid nodules, recommendations, Postop reset, op-bed reset, residual nodule reset, and global reset behavior into the live preview workflow.
+- Verified JavaScript syntax and browser scenarios for operation-type section visibility, op-bed lesion add/delete, residual nodule add/delete, suspicious-recurrence auto-impression, preview text generation, and reset behavior.
+
 ## ver0.33
 
 - Increased small UI typography tokens and supporting label/chip text sizes so previously tiny labels, preset chips, section headers, and preview title are easier to read.

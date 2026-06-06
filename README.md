@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.33.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.34.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -44,6 +44,7 @@ All incremental versions are kept in `versions/`.
 - ver0.31: Isthmus nodule Location now uses optional Right/Left/Paraisthmus modifiers instead of Upper/Middle/Lower; Right and Left are mutually exclusive while no modifier remains valid for central isthmus.
 - ver0.32: Nodule option buttons now use a tokenized equal-grid system so selected blue rectangles such as Macro/Rim have consistent width, height, and symmetric left/right padding.
 - ver0.33: Small UI typography was enlarged, nodule headers now show clearer `Nodule R1/I1/L1` pills without an empty dash badge, and the Report Preview close `×` is anchored to the preview pane's upper-right corner.
+- ver0.34: Added a Postop tab between Thyroid and Cervical Lymph Node with operation-type-specific residual thyroid/op-bed sections, postop lesion cards, postop state/reset handling, and preview report integration.
 
 ## Notes
 
