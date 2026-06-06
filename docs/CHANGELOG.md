@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.32
+
+- Reworked nodule option controls into a tokenized equal-grid button system using shared CSS variables for column width, gaps, minimum height, and horizontal padding.
+- Fixed selected blue backgrounds in multi-option groups so examples like `Macro` and `Rim` use the same rectangle width/height with symmetric left/right padding.
+- Applied the same systematic layout to two-option and 3+ option nodule rows while keeping sparse rows compact rather than stretching them across the full column.
+- Verified representative nodule option groups including Echogenic foci, Orientation, Diffuse lesion, Margin, Composition, Echogenicity, and Vascularity.
+
 ## ver0.31
 
 - Changed isthmus nodule `Location` controls from `Upper / Middle / Lower` to optional `Right / Left / Paraisthmus` modifiers.

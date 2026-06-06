@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.32</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.31</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -335,18 +335,11 @@ table.data-table td.section-header {
 }
 .radio-group label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
 
-/* Multi-option groups: tokenized, equal button system for nodule option controls */
+/* Multi-option groups: keep buttons equal and orderly without stretching sparse rows */
 .radio-group:not(:has(input[type=text])):has(> label:nth-child(3)) label {
   flex-basis: 112px;
   width: 112px;
   min-width: 112px;
-}
-.nodule-data-cell {
-  --nodule-option-col: 112px;
-  --nodule-option-gap: 3px;
-  --nodule-option-min-h: 58px;
-  --nodule-option-pad-x: 12px;
-  --nodule-option-grid-max: 360px;
 }
 .nodule-data-cell .radio-group,
 .nodule-data-cell .check-group {
@@ -360,9 +353,6 @@ table.data-table td.section-header {
   flex: 0 0 auto;
   min-width: 96px;
   max-width: 240px;
-  box-sizing: border-box;
-  padding-left: var(--nodule-option-pad-x);
-  padding-right: var(--nodule-option-pad-x);
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: keep-all;
@@ -370,33 +360,16 @@ table.data-table td.section-header {
 .nodule-data-cell .radio-group:has(> label:nth-child(3)),
 .nodule-data-cell .check-group:has(> label:nth-child(3)) {
   display: inline-grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--nodule-option-col), 1fr));
-  grid-auto-rows: minmax(var(--nodule-option-min-h), 1fr);
-  width: min(100%, var(--nodule-option-grid-max));
-  gap: var(--nodule-option-gap);
-  align-items: stretch;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))),
-.nodule-data-cell .check-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) {
-  display: inline-grid;
-  grid-template-columns: repeat(2, minmax(98px, 1fr));
-  grid-auto-rows: minmax(var(--nodule-option-min-h), 1fr);
-  width: min(100%, calc((var(--nodule-option-col) * 2) + var(--nodule-option-gap)));
-  gap: var(--nodule-option-gap);
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  width: min(100%, 360px);
+  gap: 3px;
   align-items: stretch;
 }
 .nodule-data-cell .radio-group:has(> label:nth-child(3)) label,
-.nodule-data-cell .check-group:has(> label:nth-child(3)) label,
-.nodule-data-cell .radio-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) label,
-.nodule-data-cell .check-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) label {
+.nodule-data-cell .check-group:has(> label:nth-child(3)) label {
   width: auto;
-  height: 100%;
-  min-width: 0;
   max-width: none;
-  padding-left: var(--nodule-option-pad-x);
-  padding-right: var(--nodule-option-pad-x);
-  justify-self: stretch;
-  align-self: stretch;
+  min-width: 0;
 }
 .nodule-data-cell .radio-group:not(:has(> label:nth-child(4))) label {
   flex-basis: clamp(98px, 32%, 132px);
@@ -409,7 +382,6 @@ table.data-table td.section-header {
 }
 .nodule-data-cell .radio-group.isthmus-location-group label {
   flex: 0 0 auto;
-  height: auto;
   min-width: 78px;
   white-space: nowrap;
 }

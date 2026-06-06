@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.31.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.32.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -42,6 +42,7 @@ All incremental versions are kept in `versions/`.
 - ver0.29: QUICK ADD preset chips now use flex-centered labels so `PTC` and `Follicular Neoplasm` are visually centered in their rounded buttons.
 - ver0.30: Diagram-opened nodule Quick add rows now use symmetric preset-strip padding and fixed chip height so top/bottom spacing is balanced.
 - ver0.31: Isthmus nodule Location now uses optional Right/Left/Paraisthmus modifiers instead of Upper/Middle/Lower; Right and Left are mutually exclusive while no modifier remains valid for central isthmus.
+- ver0.32: Nodule option buttons now use a tokenized equal-grid system so selected blue rectangles such as Macro/Rim have consistent width, height, and symmetric left/right padding.
 
 ## Notes
 
