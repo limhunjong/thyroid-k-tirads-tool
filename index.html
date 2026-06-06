@@ -1885,7 +1885,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 
 /* ===== POSTOP TAB ===== */
 .postop-diagram { padding:6px 0 0; }
-.postop-diagram-svg-wrap { padding-left: 6px; padding-right: 6px; width:100%; max-width: min(100%, 1440px, calc((100dvh - var(--nav-h, 52px) - 170px) * 1.4423)); margin:0 auto; }
+.postop-diagram-svg-wrap { padding-left: 6px; padding-right: 6px; width:100%; max-width: min(100%, 1280px, calc((100dvh - var(--nav-h, 52px) - 120px) * 1.4423)); margin:0 auto; }
 .postop-diagram-svg { width:100%; height:auto; display:block; }
 .postop-diagram .postop-zone { cursor:pointer; transition:opacity .15s, stroke-width .15s, filter .15s; }
 .postop-diagram .postop-zone:hover { opacity:.92; stroke-width:2.6; filter: drop-shadow(0 3px 7px rgba(10,132,255,.22)); }
@@ -3952,7 +3952,7 @@ function renderPostopDiagram(present) {
   addPostopDiagramMarkers(svg);
   const shell=document.createElement('div'); shell.className='postop-diagram-svg-wrap'; shell.appendChild(svg); wrap.appendChild(shell);
   const refSvg = document.getElementById('thyroid-svg');
-  if (refSvg) { const refW = refSvg.getBoundingClientRect().width; if (refW) { wrap.style.setProperty('width', refW + 'px', 'important'); wrap.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('width', '100%', 'important'); shell.style.setProperty('max-width', '100%', 'important'); shell.style.setProperty('min-width', '0', 'important'); svg.style.setProperty('width', '100%', 'important'); svg.style.setProperty('min-width', '0', 'important'); svg.removeAttribute('width'); } }
+  if (refSvg) { const refW = refSvg.getBoundingClientRect().width; if (refW) { wrap.style.setProperty('width', refW + 'px', 'important'); wrap.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('width', '100%', 'important'); shell.style.setProperty('max-width', '100%', 'important'); shell.style.setProperty('min-width', '0', 'important'); svg.removeAttribute('width'); } }
   const hint=document.createElement('div'); hint.className='postop-diagram-hint'; hint.textContent='Click a thyroid lobe or thyroidectomy site to add a lesion · Drag marker freely · Click marker to edit · Tap ✕ to delete'; wrap.appendChild(hint);
 }
 const POSTOP_PATHS = {
