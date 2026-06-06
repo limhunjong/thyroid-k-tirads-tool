@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.39
+
+- Restored the Thyroid diagram light-mode card background styling so the day-mode diagram no longer appears black.
+- Centered the Postop diagram more consistently in its section.
+- Added Thyroid-like drag/resize behavior for Postop residual nodules and draggable Postop op-bed lesion markers.
+
 ## ver0.38
 
 - Made the Postop diagram open a popup input window on click, matching the Thyroid diagram behavior instead of only scrolling to cards.
