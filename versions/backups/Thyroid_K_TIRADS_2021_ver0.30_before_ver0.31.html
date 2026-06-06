@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.31</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.30</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -370,23 +370,6 @@ table.data-table td.section-header {
   width: auto;
   max-width: none;
   min-width: 0;
-}
-.nodule-data-cell .radio-group:not(:has(> label:nth-child(4))) label {
-  flex-basis: clamp(98px, 32%, 132px);
-}
-.nodule-data-cell .radio-group.isthmus-location-group,
-.nodule-data-cell .radio-group.isthmus-location-group:has(> label:nth-child(3)) {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-}
-.nodule-data-cell .radio-group.isthmus-location-group label {
-  flex: 0 0 auto;
-  min-width: 78px;
-  white-space: nowrap;
-}
-.nodule-data-cell .radio-group.isthmus-location-group label:last-child {
-  min-width: 118px;
 }
 
 /* ===== CHECKBOX GROUPS ===== */
@@ -2241,7 +2224,6 @@ function defaultLN() {
 function defaultNodule() {
   return {
     locationUpper: false, locationMiddle: false, locationLower: false,
-    locationIsthmusRight: false, locationIsthmusLeft: false, locationParaisthmus: false,
     diamAP: '', diamT: '', diamL: '', diamUnit: 'mm', maxSize: '',
     composition: '',
     echogenicity: '',
@@ -2301,12 +2283,6 @@ function loadState() {
             nod.locationLower  = (v === 'Lower');
             delete nod.location;
           }
-          if (typeof nod.locationIsthmusRight !== 'boolean') nod.locationIsthmusRight = false;
-          if (typeof nod.locationIsthmusLeft !== 'boolean') nod.locationIsthmusLeft = false;
-          if (typeof nod.locationParaisthmus !== 'boolean') nod.locationParaisthmus = false;
-          if (nod.locationIsthmusRight && nod.locationIsthmusLeft) nod.locationIsthmusLeft = false;
-          // Isthmus nodules now use Right/Left/Paraisthmus instead of Upper/Middle/Lower;
-          // absence of these optional modifiers represents the central isthmus itself.
           // Migrate biopsyType string → booleans
           if (typeof nod.biopsyType === 'string') {
             nod.biopsyFNA = (nod.biopsyType === 'FNA');
@@ -2789,36 +2765,18 @@ function buildNoduleTable(lobe, idx, nod) {
   // --- Quick set presets for existing nodules, including nodules opened from Diagram ---
   tbody.appendChild(row('Quick add', buildPresetStrip(lobe, { applyMode: true, idx, inCard: true }), false));
 
-  // --- Location ---
+  // --- Location (required, multi-select) ---
   const locDiv = document.createElement('div');
   locDiv.className = 'radio-group';
-  if (lobe === 'isthmus') {
-    locDiv.classList.add('isthmus-location-group');
-    [['Right','locationIsthmusRight'],['Left','locationIsthmusLeft'],['Paraisthmus','locationParaisthmus']].forEach(([labelT, key]) => {
-      const lbl = document.createElement('label');
-      const chk = document.createElement('input'); chk.type='checkbox';
-      chk.checked = (nod[key] === true);
-      chk.addEventListener('change', () => {
-        nod[key] = chk.checked;
-        if (key === 'locationIsthmusRight' && chk.checked) nod.locationIsthmusLeft = false;
-        if (key === 'locationIsthmusLeft' && chk.checked) nod.locationIsthmusRight = false;
-        updateNodule(lobe, idx, nod);
-      });
-      lbl.appendChild(chk); lbl.append(' ' + labelT);
-      locDiv.appendChild(lbl);
-    });
-    tbody.appendChild(row('Location', locDiv, false));
-  } else {
-    [['Upper','locationUpper'],['Middle','locationMiddle'],['Lower','locationLower']].forEach(([labelT, key]) => {
-      const lbl = document.createElement('label');
-      const chk = document.createElement('input'); chk.type='checkbox';
-      chk.checked = (nod[key] === true);
-      chk.addEventListener('change', () => { delete nod.diagramX; delete nod.diagramY; nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
-      lbl.appendChild(chk); lbl.append(' ' + labelT);
-      locDiv.appendChild(lbl);
-    });
-    tbody.appendChild(row('Location *', locDiv, true));
-  }
+  [['Upper','locationUpper'],['Middle','locationMiddle'],['Lower','locationLower']].forEach(([labelT, key]) => {
+    const lbl = document.createElement('label');
+    const chk = document.createElement('input'); chk.type='checkbox';
+    chk.checked = (nod[key] === true);
+    chk.addEventListener('change', () => { delete nod.diagramX; delete nod.diagramY; nod[key] = chk.checked; updateNodule(lobe, idx, nod); });
+    lbl.appendChild(chk); lbl.append(' ' + labelT);
+    locDiv.appendChild(lbl);
+  });
+  tbody.appendChild(row('Location *', locDiv, true));
 
   // --- Diameter (required) ---
   const diamDiv = document.createElement('div');
@@ -3416,12 +3374,6 @@ function calcMaxSize(nod) {
 }
 
 function updateNodule(lobe, idx, nod) {
-  if (lobe === 'isthmus') {
-    if (nod.locationIsthmusRight && nod.locationIsthmusLeft) nod.locationIsthmusLeft = false;
-    nod.locationUpper = false; nod.locationMiddle = false; nod.locationLower = false;
-  } else {
-    nod.locationIsthmusRight = false; nod.locationIsthmusLeft = false; nod.locationParaisthmus = false;
-  }
   state.nodules[lobe][idx] = nod;
   // Auto-recommendation
   const tirads = getKTIRADS(nod, state.normalThyroid);
@@ -3864,8 +3816,8 @@ function buildReportText() {
       lines.push('   ' + lobeName);
       nods.forEach((nod, idx) => {
         const label = LOBE_LABELS[lobe] + (idx+1);
-        const parts = [];
-        const locText = getLocationText(nod, lobe);
+        const parts = [label + ':'];
+        const locText = getLocationText(nod);
         if (locText) parts.push(locText);
         const ms = calcMaxSize(nod);
         if (nod.diamAP || nod.diamT || nod.diamL) {
@@ -3907,7 +3859,7 @@ function buildReportText() {
         else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
         const tirads = getKTIRADS(nod, state.normalThyroid);
         if (tirads) parts.push(tirads);
-        lines.push('      ' + label + ': ' + parts.join(', '));
+        lines.push('      ' + parts.join(', '));
         if (nod.comment) lines.push('      Comment: ' + nod.comment);
       });
     });
@@ -3959,7 +3911,7 @@ function buildReportText() {
       const ms = calcMaxSize(nod);
       const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
       let line = nodNum++ + ') ' + label;
-      const locT = getLocationText(nod, lobe); if (locT) line += ', ' + locT;
+      const locT = getLocationText(nod); if (locT) line += ', ' + locT;
       if (msStr) line += ', ' + msStr;
       if (tirads) line += ', ' + tirads;
       if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
@@ -4073,14 +4025,7 @@ function buildLNConclusionLines() {
   return buildLNFindingLines();
 }
 
-function getLocationText(nod, lobe) {
-  if (lobe === 'isthmus') {
-    const parts = [];
-    if (nod.locationIsthmusRight) parts.push('Right');
-    else if (nod.locationIsthmusLeft) parts.push('Left');
-    if (nod.locationParaisthmus) parts.push('Paraisthmus');
-    return parts.join(' ');
-  }
+function getLocationText(nod) {
   const u = nod.locationUpper, m = nod.locationMiddle, l = nod.locationLower;
   if (u && m && !l) return 'Upper to middle';
   if (!u && m && l) return 'Middle to lower';
@@ -4141,7 +4086,7 @@ function validateReport() {
       const label = LOBE_LABELS[lobe]+(idx+1);
       const hasContent = nod.composition || nod.echogenicity || nod.comment || nod.diamAP || nod.diamT || nod.diamL;
       if (!hasContent) return; // skip empty nodules
-      if (lobe !== 'isthmus' && !nod.locationUpper && !nod.locationMiddle && !nod.locationLower) errors.push('Nodule '+label+': Location is required');
+      if (!nod.locationUpper && !nod.locationMiddle && !nod.locationLower) errors.push('Nodule '+label+': Location is required');
       if (!nod.diamAP && !nod.diamT && !nod.diamL && !nod.comment)
         errors.push('Nodule '+label+': Diameter or Comment is required');
     });
@@ -4563,7 +4508,7 @@ function diagramZonePointerUp(event) {
   const endZone = getDiagramZoneFromPoint(event.clientX, event.clientY) || diagramDragHover || diagramDragStart;
   const lobe = diagramDragStart.lobe;
   const endLocation = endZone.lobe === lobe ? endZone.location : diagramDragStart.location;
-  const locations = lobe === 'isthmus' ? [] : diagramLocationRange(diagramDragStart.location, endLocation);
+  const locations = lobe === 'isthmus' ? ['middle'] : diagramLocationRange(diagramDragStart.location, endLocation);
   const dropPoint = getDiagramSvgPoint(event.clientX, event.clientY) || endZone.svgPt || diagramDragStart.svgPt;
   diagramDragStart = null;
   diagramDragHover = null;
@@ -4581,10 +4526,11 @@ function diagramZonePointerCancel() {
 function diagramAddNodule(lobe, locations, svgPt) {
   if ((state.nodules[lobe] || []).length >= 3) return;
   const nod = defaultNodule();
-  const locs = new Set(lobe === 'isthmus' ? [] : (locations && locations.length ? locations : ['middle']));
+  const locs = new Set(locations && locations.length ? locations : ['middle']);
   nod.locationUpper = locs.has('upper');
   nod.locationMiddle = locs.has('middle');
   nod.locationLower = locs.has('lower');
+  if (lobe === 'isthmus' && !nod.locationMiddle) nod.locationMiddle = true;
   setNoduleDiagramPoint(nod, svgPt, lobe);
   if (!state.nodules[lobe]) state.nodules[lobe] = [];
   state.nodules[lobe].push(nod);
@@ -4665,10 +4611,7 @@ function diagramMarkerPointerUp(event) {
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
   if (targetZone.lobe === 'isthmus') {
-    nod.locationUpper = false; nod.locationMiddle = false; nod.locationLower = false;
-    nod.locationIsthmusRight = false; nod.locationIsthmusLeft = false; nod.locationParaisthmus = false;
-  } else {
-    nod.locationIsthmusRight = false; nod.locationIsthmusLeft = false; nod.locationParaisthmus = false;
+    nod.locationUpper = false; nod.locationMiddle = true; nod.locationLower = false;
   }
   setNoduleDiagramPoint(nod, diagramPointForLocations(targetZone.lobe, locations, getDiagramSvgPoint(event.clientX, event.clientY)), targetZone.lobe);
   const affectedLobes = new Set([drag.lobe, targetZone.lobe]);

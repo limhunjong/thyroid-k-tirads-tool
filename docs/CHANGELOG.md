@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.31
+
+- Changed isthmus nodule `Location` controls from `Upper / Middle / Lower` to optional `Right / Left / Paraisthmus` modifiers.
+- Enforced mutual exclusivity between `Right` and `Left` for isthmus nodules while allowing `Paraisthmus` to combine with either side.
+- Allowed no isthmus location modifier as a valid central-isthmus state; validation no longer requires Location for isthmus nodules, but still requires Location for right/left lobe nodules.
+- Updated report formatting so central isthmus nodules omit the extra location comma, while selected modifiers appear as text such as `Right Paraisthmus`.
+- Kept diagram-created isthmus nodules valid without auto-setting `Middle`, and verified diagram popup/card location UI synchronization.
+
 ## ver0.30
 
 - Fixed the Diagram-opened nodule Quick add row where `PTC` and `Follicular Neoplasm` still looked vertically off because the surrounding `.preset-strip.in-card` had asymmetric top/bottom padding.
