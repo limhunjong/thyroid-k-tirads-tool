@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.23</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.22</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1412,21 +1412,6 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 }
 #thyroid-svg .diagram-delete-hit {
   cursor: pointer;
-}
-#thyroid-svg .diagram-span-handle {
-  cursor: ns-resize;
-}
-#thyroid-svg .diagram-span-handle-circle {
-  fill: rgba(10,132,255,0.96);
-  stroke: rgba(255,255,255,0.95);
-  stroke-width: 1.6;
-  filter: drop-shadow(0 3px 7px rgba(0,0,0,0.34));
-}
-#thyroid-svg .diagram-span-handle-line {
-  stroke: rgba(255,255,255,0.78);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  pointer-events: none;
 }
 #thyroid-svg .diagram-delete-circle {
   fill: rgba(255,69,58,0.95);
@@ -4091,7 +4076,6 @@ function toggleDiagram() {
 let diagramDragStart = null;
 let diagramDragHover = null;
 let diagramMarkerDrag = null;
-let diagramSpanHandleDrag = null;
 let lastDiagramDeletedNodule = null;
 
 function diagramLocationRange(startLoc, endLoc) {
@@ -4183,40 +4167,20 @@ function diagramNearestLocationFromSvgY(svgY, allowedLocations, dragDirection) {
   return best;
 }
 
-function diagramLocationIndex(loc) {
-  return ['upper', 'middle', 'lower'].indexOf(loc);
-}
-
-function diagramLocationsForMovedMarker(nod, targetZone) {
-  // Marker body drag is now a move operation: it preserves the span length
-  // instead of resizing the nodule. Single-zone stays single-zone, two-zone
-  // stays two-zone, and three-zone stays Upper-to-lower.
+function diagramLocationsForDroppedMarker(nod, targetZone, drag) {
+  // Existing-marker drag now edits the marker's vertical span, not just its
+  // center point. A left-button drag from a Middle marker to Lower becomes
+  // Middle-to-Lower; drag from Middle to Upper becomes Upper-to-Middle; and
+  // dragging an Upper-to-Middle marker downward shifts it to Middle-to-Lower
+  // when the drag starts near the marker's middle/lower side.
   if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  const current = diagramSelectedLocations(nod).sort((a, b) => diagramLocationIndex(a) - diagramLocationIndex(b));
-  if (current.length >= 3) return ['upper', 'middle', 'lower'];
-  if (current.length === 2) {
-    if (targetZone.location === 'lower') return ['middle', 'lower'];
-    if (targetZone.location === 'upper') return ['upper', 'middle'];
-    return current;
-  }
-  return [targetZone.location || current[0] || 'middle'];
-}
-
-function diagramLocationsForSpanHandle(nod, targetZone, drag) {
-  // Span handles resize the nodule's vertical location range. The opposite end
-  // of the current span is the anchor; the dragged handle chooses the new end.
-  if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  const current = diagramSelectedLocations(nod).sort((a, b) => diagramLocationIndex(a) - diagramLocationIndex(b));
-  const handle = drag && drag.handle;
-  if (handle === 'upper') {
-    const anchor = current[current.length - 1] || 'middle';
-    return diagramLocationRange(targetZone.location || anchor, anchor);
-  }
-  if (handle === 'lower') {
-    const anchor = current[0] || 'middle';
-    return diagramLocationRange(anchor, targetZone.location || anchor);
-  }
-  return diagramLocationsForMovedMarker(nod, targetZone);
+  if (!drag || targetZone.lobe !== drag.lobe || drag.lobe === 'isthmus') return [targetZone.location || 'middle'];
+  const startLoc = drag.startLocation || diagramNearestLocationFromSvgY(
+    drag.startSvgPt && drag.startSvgPt.y,
+    diagramSelectedLocations(nod),
+    targetZone.location === 'lower' ? 'down' : 'up'
+  );
+  return diagramLocationRange(startLoc, targetZone.location || startLoc || 'middle');
 }
 
 function diagramPointForLocations(lobe, locations, svgPt) {
@@ -4405,7 +4369,7 @@ function diagramMarkerPointerDown(event, lobe, idx) {
   diagramMarkerDrag = {
     lobe, idx, startX: event.clientX, startY: event.clientY,
     startSvgPt,
-    mode: 'move',
+    startLocation: diagramNearestLocationFromSvgY(startSvgPt && startSvgPt.y, diagramSelectedLocations(nod), null),
     lastZone: null, moved: false,
     label: LOBE_LABELS[lobe] + (idx + 1), fill
   };
@@ -4429,7 +4393,7 @@ function diagramMarkerPointerMove(event) {
   const nod = state.nodules[diagramMarkerDrag.lobe] && state.nodules[diagramMarkerDrag.lobe][diagramMarkerDrag.idx];
   if (!nod) return;
   diagramMarkerDrag.lastZone = zone;
-  previewDiagramLocations(zone.lobe, diagramLocationsForMovedMarker(nod, zone));
+  previewDiagramLocations(zone.lobe, diagramLocationsForDroppedMarker(nod, zone, diagramMarkerDrag));
 }
 
 function diagramMarkerPointerUp(event) {
@@ -4452,7 +4416,7 @@ function diagramMarkerPointerUp(event) {
   if (targetZone.lobe !== drag.lobe && (state.nodules[targetZone.lobe] || []).length >= 3) {
     renderDiagramMarkers(); updateZoneFullState(); return;
   }
-  const locations = diagramLocationsForMovedMarker(nod, targetZone);
+  const locations = diagramLocationsForDroppedMarker(nod, targetZone, drag);
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
@@ -4481,70 +4445,6 @@ function diagramMarkerPointerCancel() {
   document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
   clearDiagramDragPreview();
   clearDiagramDragGhost();
-  renderDiagramMarkers();
-}
-
-function diagramSpanHandlePointerDown(event, lobe, idx, handle) {
-  event.preventDefault();
-  event.stopPropagation();
-  const nod = state.nodules[lobe] && state.nodules[lobe][idx];
-  if (!nod || lobe === 'isthmus') return;
-  diagramSpanHandleDrag = {
-    lobe, idx, handle,
-    startX: event.clientX, startY: event.clientY,
-    lastZone: null, moved: false
-  };
-  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
-  if (marker) marker.classList.add('diagram-marker-dragging');
-  previewDiagramLocations(lobe, diagramSelectedLocations(nod));
-  document.addEventListener('pointermove', diagramSpanHandlePointerMove, { passive: false });
-  document.addEventListener('pointerup', diagramSpanHandlePointerUp, { once: true });
-  document.addEventListener('pointercancel', diagramSpanHandlePointerCancel, { once: true });
-}
-
-function diagramSpanHandlePointerMove(event) {
-  if (!diagramSpanHandleDrag) return;
-  event.preventDefault();
-  const dx = event.clientX - diagramSpanHandleDrag.startX;
-  const dy = event.clientY - diagramSpanHandleDrag.startY;
-  if (Math.hypot(dx, dy) > 4) diagramSpanHandleDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone) return;
-  const nod = state.nodules[diagramSpanHandleDrag.lobe] && state.nodules[diagramSpanHandleDrag.lobe][diagramSpanHandleDrag.idx];
-  if (!nod) return;
-  diagramSpanHandleDrag.lastZone = zone;
-  previewDiagramLocations(zone.lobe, diagramLocationsForSpanHandle(nod, zone, diagramSpanHandleDrag));
-}
-
-function diagramSpanHandlePointerUp(event) {
-  document.removeEventListener('pointermove', diagramSpanHandlePointerMove);
-  const drag = diagramSpanHandleDrag;
-  diagramSpanHandleDrag = null;
-  document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
-  clearDiagramDragPreview();
-  if (!drag || !drag.moved) { renderDiagramMarkers(); return; }
-  const targetZone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY) || drag.lastZone;
-  if (!targetZone || targetZone.lobe !== drag.lobe || targetZone.lobe === 'isthmus') { renderDiagramMarkers(); return; }
-  const nod = state.nodules[drag.lobe] && state.nodules[drag.lobe][drag.idx];
-  if (!nod) { renderDiagramMarkers(); return; }
-  const locations = diagramLocationsForSpanHandle(nod, targetZone, drag);
-  nod.locationUpper = locations.includes('upper');
-  nod.locationMiddle = locations.includes('middle');
-  nod.locationLower = locations.includes('lower');
-  setNoduleDiagramPoint(nod, diagramPointForLocations(drag.lobe, locations, getDiagramSvgPoint(event.clientX, event.clientY)), drag.lobe);
-  saveState();
-  renderNoduleCol(drag.lobe);
-  updateLobeBadges();
-  refreshPopupIfOpen(drag.lobe);
-  renderDiagramMarkers();
-  updateZoneFullState();
-}
-
-function diagramSpanHandlePointerCancel() {
-  document.removeEventListener('pointermove', diagramSpanHandlePointerMove);
-  diagramSpanHandleDrag = null;
-  document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
-  clearDiagramDragPreview();
   renderDiagramMarkers();
 }
 
@@ -4674,10 +4574,9 @@ function renderDiagramMarkers() {
       else if (tirads.includes('3')) fill = '#30D158';
 
       const grp = document.createElementNS(ns, 'g');
-      grp.classList.add('diagram-marker-group');
       grp.style.cursor = 'grab';
       grp.setAttribute('role', 'button');
-      grp.setAttribute('aria-label', `Drag ${LOBE_LABELS[lobe]}${idx + 1} marker body to move without resizing; drag blue handles to resize location span; click to edit`);
+      grp.setAttribute('aria-label', `Drag ${LOBE_LABELS[lobe]}${idx + 1} marker to move location; click to edit`);
       grp.addEventListener('pointerdown', (event) => diagramMarkerPointerDown(event, lobe, idx));
 
       const markerShape = document.createElementNS(ns, 'ellipse');
@@ -4697,31 +4596,6 @@ function renderDiagramMarkers() {
       txt.style.pointerEvents = 'none';
       txt.textContent = LOBE_LABELS[lobe] + (idx + 1);
       grp.appendChild(txt);
-
-      if (lobe !== 'isthmus') {
-        [
-          { handle: 'upper', y: Math.max(24, cy - ry - 7), lineY: cy - ry },
-          { handle: 'lower', y: Math.min(180, cy + ry + 7), lineY: cy + ry }
-        ].forEach(h => {
-          const handleG = document.createElementNS(ns, 'g');
-          handleG.classList.add('diagram-span-handle');
-          handleG.setAttribute('role', 'button');
-          handleG.setAttribute('aria-label', `${h.handle === 'upper' ? 'Upper' : 'Lower'} span handle for ${LOBE_LABELS[lobe]}${idx + 1}`);
-          handleG.addEventListener('pointerdown', (event) => diagramSpanHandlePointerDown(event, lobe, idx, h.handle));
-          const handleLine = document.createElementNS(ns, 'line');
-          handleLine.setAttribute('x1', cx); handleLine.setAttribute('y1', h.lineY);
-          handleLine.setAttribute('x2', cx); handleLine.setAttribute('y2', h.y);
-          handleLine.setAttribute('class', 'diagram-span-handle-line');
-          handleG.appendChild(handleLine);
-          const handleCircle = document.createElementNS(ns, 'circle');
-          handleCircle.setAttribute('cx', cx);
-          handleCircle.setAttribute('cy', h.y);
-          handleCircle.setAttribute('r', 4.8);
-          handleCircle.setAttribute('class', 'diagram-span-handle-circle');
-          handleG.appendChild(handleCircle);
-          grp.appendChild(handleG);
-        });
-      }
 
       const del = document.createElementNS(ns, 'g');
       // Keep the delete badge in a fixed, marker-local upper-right position.

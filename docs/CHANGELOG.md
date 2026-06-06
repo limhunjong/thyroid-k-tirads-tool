@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.23
+
+- Split Diagram marker interactions into two explicit modes.
+- Dragging the marker body now moves/repositions the nodule while preserving span size: single-zone stays single-zone, two-zone stays two-zone, and three-zone stays Upper-to-lower.
+- Added separate blue upper/lower span handles; dragging these handles changes the location span/marker size intentionally.
+- Verified body drag `Middle → Lower` becomes `Lower`, handle drag `Middle → Lower` becomes `Middle to lower`, and body drag `Upper to middle → Lower` shifts to `Middle to lower`.
+
 ## ver0.22
 
 - Fixed existing Diagram marker drag so a marker dragged from Middle to Lower is recognized as `Middle to lower`, not only `Lower`.
