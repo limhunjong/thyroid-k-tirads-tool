@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.38</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.37</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1528,26 +1528,14 @@ body.light #diagram-panel {
   .diagram-svg-wrap { padding-left: 6px; padding-right: 6px; }
   #thyroid-svg { width: 100%; }
 }
-#postop-svg {
-  width: min(100%, 1280px, calc((100dvh - var(--nav-h, 52px) - 120px) * 1.4423));
-  max-width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
-}
-@media (min-height: 900px) {
-  #postop-svg { width: min(100%, 1440px, calc((100dvh - var(--nav-h, 52px) - 170px) * 1.4423)); }
-}
-@media (max-width: 767px) {
-  #postop-svg { width: 100%; }
-}
+#thyroid-svg .diagram-card-bg,
 .postop-diagram-svg .diagram-card-bg {
   fill: var(--fill4);
   stroke: rgba(255,255,255,0.05);
   stroke-width: 1;
 }
+body.light #thyroid-svg .diagram-card-bg,
 body.light .postop-diagram-svg .diagram-card-bg { stroke: rgba(0,0,0,0.05); }
-
 #thyroid-svg .lobe-bg {
   fill: url(#thyroidLobeGradient);
   stroke: rgba(130,170,210,0.42);
@@ -1707,10 +1695,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   backdrop-filter: saturate(160%) blur(12px);
   -webkit-backdrop-filter: saturate(160%) blur(12px);
 }
-#nodule-popup-overlay.show,
-#postop-popup-overlay.show { display: flex; }
-#nodule-popup-box,
-#postop-popup-box {
+#nodule-popup-overlay.show { display: flex; }
+#nodule-popup-box {
   background: var(--bg1);
   border-radius: var(--r-xl);
   width: min(540px, 96vw);
@@ -1746,23 +1732,19 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   transition: background 0.15s;
 }
 .popup-close-btn:active { background: var(--fill2); }
-#nodule-popup-body,
-#postop-popup-body {
+#nodule-popup-body {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
   -webkit-overflow-scrolling: touch;
 }
-#nodule-popup-body .nodule-item,
-#postop-popup-body .nodule-item {
+#nodule-popup-body .nodule-item {
   border-radius: var(--r-md);
   margin-bottom: 0;
 }
 @media (max-width: 767px) {
-  #nodule-popup-overlay,
-  #postop-popup-overlay { align-items: flex-end; }
-  #nodule-popup-box,
-  #postop-popup-box {
+  #nodule-popup-overlay { align-items: flex-end; }
+  #nodule-popup-box {
     width: 100%;
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     max-height: 92dvh;
@@ -2380,17 +2362,6 @@ Biopsy recommendation</div>
   </div>
 </div>
 
-<!-- POSTOP POPUP (from diagram click) -->
-<div id="postop-popup-overlay" onclick="handlePostopPopupOverlayClick(event)">
-  <div id="postop-popup-box">
-    <div class="popup-header">
-      <div class="popup-header-title" id="postop-popup-title">Postop lesion</div>
-      <button class="popup-close-btn" onclick="closePostopPopup()" aria-label="Close">✕</button>
-    </div>
-    <div id="postop-popup-body"></div>
-  </div>
-</div>
-
 <script>
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
@@ -2568,13 +2539,8 @@ function deepMerge(target, source) {
 
 // ==================== TAB SWITCHING ====================
 function switchTab(tab) {
-  const changed = state.activeTab !== tab;
   state.activeTab = tab;
   saveState();
-  if (changed) {
-    if (typeof closeNodulePopup === 'function') closeNodulePopup();
-    if (typeof closePostopPopup === 'function') closePostopPopup();
-  }
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   const tabBtn = document.getElementById('tab-' + tab);
@@ -3908,7 +3874,6 @@ function renderPostopDiagram(present) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox','0 0 300 208');
   svg.setAttribute('class','postop-diagram-svg');
-  svg.setAttribute('id','postop-svg');
   svg.setAttribute('aria-label','Interactive postoperative thyroid diagram');
   svg.innerHTML = `
     <defs>
@@ -3952,7 +3917,7 @@ function renderPostopDiagram(present) {
   addPostopDiagramMarkers(svg);
   const shell=document.createElement('div'); shell.className='postop-diagram-svg-wrap'; shell.appendChild(svg); wrap.appendChild(shell);
   const refSvg = document.getElementById('thyroid-svg');
-  if (refSvg) { const refW = refSvg.getBoundingClientRect().width; if (refW) { wrap.style.setProperty('width', refW + 'px', 'important'); wrap.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('width', '100%', 'important'); shell.style.setProperty('max-width', '100%', 'important'); shell.style.setProperty('min-width', '0', 'important'); svg.style.setProperty('width', '100%', 'important'); svg.style.setProperty('min-width', '0', 'important'); svg.removeAttribute('width'); } }
+  if (refSvg) { const refW = refSvg.getBoundingClientRect().width; if (refW) { wrap.style.setProperty('width', refW + 'px', 'important'); wrap.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('width', refW + 'px', 'important'); shell.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('min-width', refW + 'px', 'important'); svg.style.setProperty('width', refW + 'px', 'important'); svg.style.setProperty('min-width', refW + 'px', 'important'); svg.setAttribute('width', String(refW)); const curW = svg.getBoundingClientRect().width; if (curW && Math.abs(curW - refW) > 1) { const ratio = refW / curW; svg.style.transformOrigin = 'top left'; svg.style.transform = 'scale(' + ratio + ')'; const curH = svg.getBoundingClientRect().height; if (curH) shell.style.height = (curH * ratio) + 'px'; } } }
   const hint=document.createElement('div'); hint.className='postop-diagram-hint'; hint.textContent='Click a thyroid lobe or thyroidectomy site to add a lesion · Drag marker freely · Click marker to edit · Tap ✕ to delete'; wrap.appendChild(hint);
 }
 const POSTOP_PATHS = {
@@ -4006,12 +3971,12 @@ function postopDiagramPointForOpBed(site, idx) {
 function addPostopDiagramMarkers(svg) {
   const po=ensurePostopState();
   ['right','isthmus','left'].forEach(lobe => (po.residualThyroidNodules[lobe]||[]).forEach((nod,idx)=>{
-    const pt=postopDiagramPointForResidual(lobe,idx,nod); const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','postop-diagram-marker residual'); g.style.cursor='pointer'; g.addEventListener('click', e=>{ e.stopPropagation(); openPostopPopup('residual', lobe, idx); });
+    const pt=postopDiagramPointForResidual(lobe,idx,nod); const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','postop-diagram-marker residual'); g.style.cursor='pointer'; g.addEventListener('click', e=>{ e.stopPropagation(); scrollToPostopCard('postop-nodules-'+lobe, idx); });
     const c=document.createElementNS('http://www.w3.org/2000/svg','ellipse'); c.setAttribute('class','marker-body'); c.setAttribute('cx',pt.x); c.setAttribute('cy',pt.y); c.setAttribute('rx',13); c.setAttribute('ry',10); c.setAttribute('fill','#0A84FF'); g.appendChild(c);
     const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',pt.x); t.setAttribute('y',pt.y+4); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','9'); t.setAttribute('font-weight','800'); t.setAttribute('fill','#fff'); t.textContent=LOBE_LABELS[lobe]+(idx+1); g.appendChild(t); svg.appendChild(g);
   }));
   ['right','isthmus','left','central'].forEach(site => (po.opBedLesions[site]||[]).forEach((les,idx)=>{
-    const pt=postopDiagramPointForOpBed(site,idx); const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','postop-diagram-marker opbed'); g.style.cursor='pointer'; g.addEventListener('click', e=>{ e.stopPropagation(); openPostopPopup('opbed', site, idx); });
+    const pt=postopDiagramPointForOpBed(site,idx); const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','postop-diagram-marker opbed'); g.style.cursor='pointer'; g.addEventListener('click', e=>{ e.stopPropagation(); scrollToPostopCard('postop-opbed-'+site, idx); });
     const c=document.createElementNS('http://www.w3.org/2000/svg','ellipse'); c.setAttribute('class','marker-body'); c.setAttribute('cx',pt.x); c.setAttribute('cy',pt.y); c.setAttribute('rx',15); c.setAttribute('ry',11); g.appendChild(c);
     const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',pt.x); t.setAttribute('y',pt.y+4); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','8'); t.setAttribute('font-weight','800'); t.setAttribute('fill','var(--orange)'); t.textContent='OB'; g.appendChild(t); svg.appendChild(g);
   }));
@@ -4019,11 +3984,11 @@ function addPostopDiagramMarkers(svg) {
 function postopDiagramZoneClick(z) {
   if (z.type === 'opbed') {
     const idx = addPostopOpBedLesion(z.site);
-    openPostopPopup('opbed', z.site, idx);
+    scrollToPostopCard('postop-opbed-'+z.site, idx);
     return;
   }
   const idx = addPostopResidualNodule(z.lobe, z.loc);
-  openPostopPopup('residual', z.lobe, idx);
+  scrollToPostopCard('postop-nodules-'+z.lobe, idx);
 }
 function scrollToPostopCard(containerId, idx) {
   setTimeout(()=>{
@@ -4050,7 +4015,7 @@ function addPostopResidualNodule(lobe, location) {
   return idx;
 }
 function removePostopResidualNodule(lobe, idx) { ensurePostopState().residualThyroidNodules[lobe].splice(idx,1); saveState(); renderPostop(); }
-function updatePostopResidualNodule(lobe, idx, nod) { ensurePostopState().residualThyroidNodules[lobe][idx]=nod; saveState(); renderPostopResidualNoduleCol(lobe); refreshPostopPopupIfOpen(lobe); }
+function updatePostopResidualNodule(lobe, idx, nod) { ensurePostopState().residualThyroidNodules[lobe][idx]=nod; saveState(); renderPostopResidualNoduleCol(lobe); }
 function renderPostopResidualNoduleCol(lobe) {
   const cont=document.getElementById('postop-nodules-'+lobe); if(!cont) return; cont.innerHTML='';
   const map = getPostopAnatomyMap()[lobe];
@@ -4100,7 +4065,7 @@ function mkTextInput(obj,key,onch,ph,w){ const i=document.createElement('input')
 function mkPostopDiameter(obj,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:4px;'; const row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:4px;flex-wrap:wrap;'; ['AP','T','L'].forEach((lab,i)=>{ const key=['diamAP','diamT','diamL'][i]; row.append(lab+':'); row.appendChild(mkTextInput(obj,key,onch,lab,'52px')); if(i<2) row.append(' × '); }); const sel=document.createElement('select'); sel.innerHTML='<option>mm</option><option>cm</option>'; sel.value=obj.diamUnit||'mm'; sel.onchange=()=>{ obj.diamUnit=sel.value; onch(); }; row.appendChild(sel); d.appendChild(row); const auto=document.createElement('div'); auto.className='size-auto'; const ms=calcMaxSize(obj); auto.textContent=ms?('Max: '+ms+' '+(obj.diamUnit||'mm')+(obj.diamAP&&obj.diamT&&obj.diamL?'  Vol: '+formatVolumeMl(parseFloat(obj.diamAP),parseFloat(obj.diamT),parseFloat(obj.diamL)):'')):''; d.appendChild(auto); return d; }
 function addPostopOpBedLesion(site){ const po=ensurePostopState(); po.opBedLesions[site].push(defaultOpBedLesion()); const idx=po.opBedLesions[site].length-1; saveState(); renderPostop(); return idx; }
 function removePostopOpBedLesion(site,idx){ ensurePostopState().opBedLesions[site].splice(idx,1); saveState(); renderPostop(); }
-function updatePostopOpBedLesion(site,idx,les){ autoPostopOpBedImpression(les); ensurePostopState().opBedLesions[site][idx]=les; saveState(); renderPostopResidualNoduleCol(site); refreshPostopPopupIfOpen(site); }
+function updatePostopOpBedLesion(site,idx,les){ autoPostopOpBedImpression(les); ensurePostopState().opBedLesions[site][idx]=les; saveState(); renderPostopResidualNoduleCol(site); }
 function postopOpBedLabel(site, idx) {
   const siteLabel = site === 'right' ? 'R-OB' : site === 'left' ? 'L-OB' : site === 'isthmus' ? 'I-OB' : 'C-OB';
   return siteLabel + (idx + 1);
@@ -4966,7 +4931,6 @@ function updateLobeBadges() {
 let diagramVisible = true;
 let activePopupLobe = null;
 let activePopupIdx  = null;
-let activePostopPopup = null;
 
 function toggleDiagram() {
   diagramVisible = !diagramVisible;
@@ -5514,53 +5478,6 @@ function closeNodulePopup() {
   activePopupLobe = null;
   activePopupIdx  = null;
   renderDiagramMarkers();
-}
-
-function openPostopPopup(kind, slot, idx) {
-  activePostopPopup = { kind, slot, idx };
-  const overlay = document.getElementById('postop-popup-overlay');
-  const body = document.getElementById('postop-popup-body');
-  const title = document.getElementById('postop-popup-title');
-  if (!overlay || !body) return;
-  body.innerHTML = '';
-  const isResidual = kind === 'residual';
-  const label = isResidual ? getPostopLabelFor('residual', slot) : getPostopLabelFor('opbed', slot);
-  if (title) title.textContent = (isResidual ? 'Postop Nodule ' : 'Postop Lesion ') + (isResidual ? (LOBE_LABELS[slot] || slot) : postopOpBedLabel(slot, idx)) + ' (' + label + ')';
-  const item = isResidual
-    ? buildPostopResidualNoduleTable(slot, idx, ensurePostopState().residualThyroidNodules[slot][idx])
-    : buildPostopOpBedTable(slot, idx, ensurePostopState().opBedLesions[slot][idx]);
-  body.appendChild(item);
-  overlay.classList.add('show');
-}
-
-function closePostopPopup() {
-  const overlay = document.getElementById('postop-popup-overlay');
-  if (overlay) overlay.classList.remove('show');
-  activePostopPopup = null;
-}
-
-function handlePostopPopupOverlayClick(e) {
-  if (e.target === document.getElementById('postop-popup-overlay')) closePostopPopup();
-}
-
-function refreshPostopPopupIfOpen(slot) {
-  if (!activePostopPopup || activePostopPopup.slot !== slot) return;
-  const overlay = document.getElementById('postop-popup-overlay');
-  if (!overlay || !overlay.classList.contains('show')) return;
-  const body = document.getElementById('postop-popup-body');
-  const title = document.getElementById('postop-popup-title');
-  const scrollTop = body ? body.scrollTop : 0;
-  const { kind, idx } = activePostopPopup;
-  const isResidual = kind === 'residual';
-  const label = isResidual ? getPostopLabelFor('residual', slot) : getPostopLabelFor('opbed', slot);
-  if (title) title.textContent = (isResidual ? 'Postop Nodule ' : 'Postop Lesion ') + (isResidual ? (LOBE_LABELS[slot] || slot) : postopOpBedLabel(slot, idx)) + ' (' + label + ')';
-  if (body) {
-    body.innerHTML = '';
-    body.appendChild(isResidual
-      ? buildPostopResidualNoduleTable(slot, idx, ensurePostopState().residualThyroidNodules[slot][idx])
-      : buildPostopOpBedTable(slot, idx, ensurePostopState().opBedLesions[slot][idx]));
-    body.scrollTop = scrollTop;
-  }
 }
 
 function handlePopupOverlayClick(e) {

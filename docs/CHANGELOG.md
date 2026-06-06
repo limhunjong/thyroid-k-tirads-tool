@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.38
+
+- Made the Postop diagram open a popup input window on click, matching the Thyroid diagram behavior instead of only scrolling to cards.
+- Tightened the Postop diagram shell so its visible size stays closer to the Thyroid diagram reference layout.
+- Kept the 3-compartment Postop anatomy map and residual-vs-op-bed state logic intact while improving the input flow.
+
 ## ver0.37
 
 - Consolidated the visible Postop UX into a Thyroid-style three-compartment layout driven by the operative anatomy map.
