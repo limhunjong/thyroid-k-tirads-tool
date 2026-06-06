@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.29
+
+- Centered QUICK ADD preset-chip labels such as `PTC` and `Follicular Neoplasm` by converting `.preset-chip` to `inline-flex` with `align-items: center` and `justify-content: center`.
+- Removed asymmetric vertical chip padding in favor of fixed min-height plus symmetric horizontal padding so labels sit visually centered in rounded buttons.
+- Verified JavaScript syntax, browser-computed preset-chip alignment, and visual centering of both top-level and in-card QUICK ADD chips.
+
 ## ver0.28
 
 - Refined nodule option-control layout so sparse long choices such as `Extensive parenchymal PEF` and `Diffuse infiltrative lesion` stay compact instead of stretching with excessive right-side whitespace.

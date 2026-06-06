@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.28.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.29.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -39,6 +39,7 @@ All incremental versions are kept in `versions/`.
 - ver0.26: Form typography was enlarged and standardized; compact fields such as Clinical Information `custom` and Thyroid Size AP/T/L boxes are centered and easier to read.
 - ver0.27: Date selects use visually centered Year/MM/DD values, and segmented controls now keep compact, similar-width buttons instead of stretching sparse options across the full row.
 - ver0.28: Nodule option controls were refined so sparse long choices stay compact, 3+ option groups use equal-width wrapping grids, and validation errors open as centered alerts.
+- ver0.29: QUICK ADD preset chips now use flex-centered labels so `PTC` and `Follicular Neoplasm` are visually centered in their rounded buttons.
 
 ## Notes
 
