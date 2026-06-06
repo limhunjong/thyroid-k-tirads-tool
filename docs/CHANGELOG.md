@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.37
+
+- Consolidated the visible Postop UX into a Thyroid-style three-compartment layout driven by the operative anatomy map.
+- Kept the residual-vs-op-bed split internally for compatibility, but rendered the visible section with Right / Isthmus / Left compartments and dynamic labels based on operation status.
+- Removed visible `residual` wording from diagram labels, hints, section titles, and report text so remaining thyroid tissue keeps its anatomical names while only removed structures are shown as thyroidectomy sites.
+- Synchronized Postop diagram, card titles, and report labels with the same operation-state-driven anatomy map and kept the single-file HTML runnable.
+
 ## ver0.36
 
 - Added a hybrid `with Isthmusectomy` checkbox that becomes available for `Right lobectomy` and `Left lobectomy`, persists in Postop state, and is automatically cleared/disabled for `Total thyroidectomy`, standalone `Isthmusectomy`, and `Other / Custom`.

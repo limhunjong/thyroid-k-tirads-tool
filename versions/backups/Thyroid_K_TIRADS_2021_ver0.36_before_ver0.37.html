@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.37</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.36</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1866,8 +1866,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 }
 
 /* ===== POSTOP TAB ===== */
-.postop-diagram { padding:6px 0 0; }
-.postop-diagram-svg-wrap { padding-left: 6px; padding-right: 6px; width:100%; max-width: min(100%, 1440px, calc((100dvh - var(--nav-h, 52px) - 170px) * 1.4423)); margin:0 auto; }
+.postop-diagram { padding:12px; }
+.postop-diagram-svg-wrap { width:100%; max-width:640px; margin:0 auto; }
 .postop-diagram-svg { width:100%; height:auto; display:block; }
 .postop-diagram .postop-zone { cursor:pointer; transition:opacity .15s, stroke-width .15s, filter .15s; }
 .postop-diagram .postop-zone:hover { opacity:.92; stroke-width:2.6; filter: drop-shadow(0 3px 7px rgba(10,132,255,.22)); }
@@ -2169,15 +2169,15 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
     <div class="nodule-section-title">Postoperative Diagram / Sections</div>
     <div class="table-card"><div class="postop-diagram" id="postopDiagram"></div></div>
 
-    <div class="nodule-section-title">Postop Lesions</div>
+    <div class="nodule-section-title">Residual Thyroid Nodules</div>
     <div class="nodule-section" id="postopResidualNoduleSection">
-      <div class="nodule-col" id="postop-col-right"><div class="nodule-col-header">Right Lobe</div><div id="postop-nodules-right"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('right')">+ Add Lesion</button></div>
-      <div class="nodule-col" id="postop-col-isthmus"><div class="nodule-col-header">Isthmus</div><div id="postop-nodules-isthmus"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('isthmus')">+ Add Lesion</button></div>
-      <div class="nodule-col" id="postop-col-left"><div class="nodule-col-header">Left Lobe</div><div id="postop-nodules-left"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('left')">+ Add Lesion</button></div>
+      <div class="nodule-col" id="postop-col-right"><div class="nodule-col-header">Right Lobe</div><div id="postop-nodules-right"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('right')">+ Add Residual Nodule</button></div>
+      <div class="nodule-col" id="postop-col-isthmus"><div class="nodule-col-header">Isthmus</div><div id="postop-nodules-isthmus"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('isthmus')">+ Add Residual Nodule</button></div>
+      <div class="nodule-col" id="postop-col-left"><div class="nodule-col-header">Left Lobe</div><div id="postop-nodules-left"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('left')">+ Add Residual Nodule</button></div>
     </div>
 
-    <div class="nodule-section-title" style="display:none;">Operation Bed Lesions</div>
-    <div class="nodule-section" id="postopOpBedSection" style="display:none;">
+    <div class="nodule-section-title">Operation Bed Lesions</div>
+    <div class="nodule-section" id="postopOpBedSection">
       <div class="nodule-col" id="postop-opbed-col-right"><div class="nodule-col-header">Right Op. Bed</div><div id="postop-opbed-right"></div><button class="add-nodule-btn" onclick="addPostopOpBedLesion('right')">+ Add Op Bed Lesion</button></div>
       <div class="nodule-col" id="postop-opbed-col-isthmus"><div class="nodule-col-header">Isthmus Op. Bed</div><div id="postop-opbed-isthmus"></div><button class="add-nodule-btn" onclick="addPostopOpBedLesion('isthmus')">+ Add Op Bed Lesion</button></div>
       <div class="nodule-col" id="postop-opbed-col-left"><div class="nodule-col-header">Left Op. Bed</div><div id="postop-opbed-left"></div><button class="add-nodule-btn" onclick="addPostopOpBedLesion('left')">+ Add Op Bed Lesion</button></div>
@@ -3816,7 +3816,7 @@ function getPostopLabelFor(kind, key) {
   const map = getPostopAnatomyMap();
   if (kind === 'residual') {
     const found = Object.values(map).find(m => m.kind === 'residual' && m.lobe === key);
-    return found ? found.label : (key === 'isthmus' ? 'Isthmus' : (POSTOP_STRUCTURE_LABELS[key+'Lobe'] || LOBE_LABELS[key] || key));
+    return found ? found.label : (POSTOP_STRUCTURE_LABELS[key+'Lobe'] || LOBE_LABELS[key] || key);
   }
   if (kind === 'opbed') {
     const found = Object.values(map).find(m => m.kind === 'opbed' && m.site === key);
@@ -3861,10 +3861,13 @@ function renderPostop() {
   const present = getPostopPresentStructures();
   const map = getPostopAnatomyMap();
   renderPostopDiagram(present);
-  setVisible('postopResidualNoduleSection', true);
-  setVisible('postopOpBedSection', false);
+  setVisible('postop-col-right', map.right.kind === 'residual'); setVisible('postop-col-left', map.left.kind === 'residual'); setVisible('postop-col-isthmus', map.isthmus.kind === 'residual');
+  setVisible('postop-opbed-col-right', map.right.kind === 'opbed' && map.right.site === 'right'); setVisible('postop-opbed-col-left', map.left.kind === 'opbed' && map.left.site === 'left');
+  setVisible('postop-opbed-col-isthmus', map.isthmus.kind === 'opbed' && map.isthmus.site === 'isthmus'); setVisible('postop-opbed-col-central', Object.values(map).some(m => m.kind === 'opbed' && m.site === 'central'));
   setText('postop-col-right', getPostopLabelFor('residual','right')); setText('postop-col-left', getPostopLabelFor('residual','left')); setText('postop-col-isthmus', getPostopLabelFor('residual','isthmus'));
-  ['right','isthmus','left'].forEach(renderPostopResidualNoduleCol);
+  setText('postop-opbed-col-right', getPostopLabelFor('opbed','right')); setText('postop-opbed-col-left', getPostopLabelFor('opbed','left')); setText('postop-opbed-col-isthmus', getPostopLabelFor('opbed','isthmus')); setText('postop-opbed-col-central', getPostopLabelFor('opbed','central'));
+  ['right','left','isthmus'].forEach(renderPostopResidualNoduleCol);
+  ['right','left','central','isthmus'].forEach(renderPostopOpBedCol);
 }
 function renderPostopDiagram(present) {
   const wrap = document.getElementById('postopDiagram'); if (!wrap) return; wrap.innerHTML='';
@@ -3916,9 +3919,7 @@ function renderPostopDiagram(present) {
   addPostopDiagramLabels(svg, present);
   addPostopDiagramMarkers(svg);
   const shell=document.createElement('div'); shell.className='postop-diagram-svg-wrap'; shell.appendChild(svg); wrap.appendChild(shell);
-  const refSvg = document.getElementById('thyroid-svg');
-  if (refSvg) { const refW = refSvg.getBoundingClientRect().width; if (refW) { wrap.style.setProperty('width', refW + 'px', 'important'); wrap.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('width', refW + 'px', 'important'); shell.style.setProperty('max-width', refW + 'px', 'important'); shell.style.setProperty('min-width', refW + 'px', 'important'); svg.style.setProperty('width', refW + 'px', 'important'); svg.style.setProperty('min-width', refW + 'px', 'important'); svg.setAttribute('width', String(refW)); const curW = svg.getBoundingClientRect().width; if (curW && Math.abs(curW - refW) > 1) { const ratio = refW / curW; svg.style.transformOrigin = 'top left'; svg.style.transform = 'scale(' + ratio + ')'; const curH = svg.getBoundingClientRect().height; if (curH) shell.style.height = (curH * ratio) + 'px'; } } }
-  const hint=document.createElement('div'); hint.className='postop-diagram-hint'; hint.textContent='Click a thyroid lobe or thyroidectomy site to add a lesion · Drag marker freely · Click marker to edit · Tap ✕ to delete'; wrap.appendChild(hint);
+  const hint=document.createElement('div'); hint.className='postop-diagram-hint'; hint.textContent='Click residual thyroid tissue to add a nodule · Click dashed operation bed to add a postop lesion'; wrap.appendChild(hint);
 }
 const POSTOP_PATHS = {
   rightLobe: 'M83 36 C58 36 39 60 38 101 C37 143 57 170 83 170 C108 170 120 143 119 103 C118 61 108 36 83 36 Z',
@@ -3931,7 +3932,7 @@ function addSvgText(svg, cls, x, y, txt, anchor='middle') {
 }
 function addPostopDiagramLabels(svg, present) {
   const map = getPostopAnatomyMap();
-  const labelAt = (m, x, y, residualSub='lobe') => {
+  const labelAt = (m, x, y, residualSub='residual lobe') => {
     if (m.kind === 'residual') {
       const words = (m.shortLabel || m.label).split(' ');
       addSvgText(svg,'postop-diagram-label',x,y,words.slice(0,2).join(' '));
@@ -3942,14 +3943,14 @@ function addPostopDiagramLabels(svg, present) {
     addSvgText(svg,'postop-diagram-label',x,y,side);
     addSvgText(svg,'postop-diagram-sub',x,y+15,m.label.replace(side,'').trim() || 'Op. Bed');
   };
-  if (map.right.kind === 'residual') { labelAt(map.right,82,62,'lobe'); addSvgText(svg,'zone-label',82,105,'Middle'); addSvgText(svg,'zone-label',82,146,'Lower'); }
+  if (map.right.kind === 'residual') { labelAt(map.right,82,62,'residual lobe'); addSvgText(svg,'zone-label',82,105,'Middle'); addSvgText(svg,'zone-label',82,146,'Lower'); }
   else if (map.right.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',82,84,'Right'); addSvgText(svg,'postop-diagram-sub',82,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',82,114,'Site'); }
-  if (map.left.kind === 'residual') { labelAt(map.left,218,62,'lobe'); addSvgText(svg,'zone-label',218,105,'Middle'); addSvgText(svg,'zone-label',218,146,'Lower'); }
+  if (map.left.kind === 'residual') { labelAt(map.left,218,62,'residual lobe'); addSvgText(svg,'zone-label',218,105,'Middle'); addSvgText(svg,'zone-label',218,146,'Lower'); }
   else if (map.left.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',218,84,'Left'); addSvgText(svg,'postop-diagram-sub',218,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',218,114,'Site'); }
-  if (map.isthmus.kind === 'residual') { addSvgText(svg,'postop-diagram-label',150,106,map.isthmus.label); addSvgText(svg,'postop-diagram-sub',150,121,''); }
+  if (map.isthmus.kind === 'residual') { addSvgText(svg,'postop-diagram-label',150,106,map.isthmus.label); addSvgText(svg,'postop-diagram-sub',150,121,'residual'); }
   else if (map.isthmus.kind === 'opbed') {
     if (map.isthmus.site === 'central') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
-    else { addSvgText(svg,'postop-diagram-label',150,106,'Isthmus'); addSvgText(svg,'postop-diagram-sub',150,121,'Site'); }
+    else { addSvgText(svg,'postop-diagram-label',150,106,'Isthmus'); addSvgText(svg,'postop-diagram-sub',150,121,'ectomy Site'); }
   }
   if (map.central && map.central.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
 }
@@ -4018,30 +4019,16 @@ function removePostopResidualNodule(lobe, idx) { ensurePostopState().residualThy
 function updatePostopResidualNodule(lobe, idx, nod) { ensurePostopState().residualThyroidNodules[lobe][idx]=nod; saveState(); renderPostopResidualNoduleCol(lobe); }
 function renderPostopResidualNoduleCol(lobe) {
   const cont=document.getElementById('postop-nodules-'+lobe); if(!cont) return; cont.innerHTML='';
-  const map = getPostopAnatomyMap()[lobe];
-  const po = ensurePostopState();
-  const isOpBed = map && map.kind === 'opbed';
-  const list = isOpBed ? (po.opBedLesions[lobe]||[]) : (po.residualThyroidNodules[lobe]||[]);
-  const emptyText = isOpBed ? 'No op bed lesion.' : 'No residual thyroid nodule.';
-  if (!list.length) { const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent=emptyText; cont.appendChild(e); }
-  list.forEach((item,idx)=>cont.appendChild(isOpBed ? buildPostopOpBedTable(lobe,idx,item) : buildPostopResidualNoduleTable(lobe,idx,item)));
-  const btn = cont.parentElement && cont.parentElement.querySelector('button.add-nodule-btn');
-  if (btn) {
-    if (isOpBed) {
-      btn.textContent = lobe === 'central' ? '+ Add Central Lesion' : '+ Add Op Bed Lesion';
-      btn.onclick = () => addPostopOpBedLesion(lobe);
-    } else {
-      btn.textContent = '+ Add Thyroid Lesion';
-      btn.onclick = () => addPostopResidualNodule(lobe);
-    }
-  }
+  const list=ensurePostopState().residualThyroidNodules[lobe]||[];
+  if (!list.length) { const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent='No residual thyroid nodule.'; cont.appendChild(e); }
+  list.forEach((nod,idx)=>cont.appendChild(buildPostopResidualNoduleTable(lobe,idx,nod)));
 }
 function buildPostopResidualNoduleTable(lobe, idx, nod) {
   const wrap=document.createElement('div'); wrap.className='nodule-item'; const label=LOBE_LABELS[lobe]+(idx+1); const anatomyLabel=getPostopLabelFor('residual', lobe); const info=getKTIRADSInfo(nod,false);
   const table=document.createElement('table'); table.className='nodule-table-el';
   const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el';
   const hin=document.createElement('div'); hin.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap';
-  const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Nodule '+label+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="tirads-display '+(info.tirads.includes('5')?'tirads-5':info.tirads.includes('4')?'tirads-4':info.tirads.includes('3')?'tirads-3':info.tirads.includes('2')?'tirads-2':'')+'">'+(info.tirads||'[K-TIRADS]')+'</span>'; tw.appendChild(main);
+  const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Residual Nodule '+label+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="tirads-display '+(info.tirads.includes('5')?'tirads-5':info.tirads.includes('4')?'tirads-4':info.tirads.includes('3')?'tirads-3':info.tirads.includes('2')?'tirads-2':'')+'">'+(info.tirads||'[K-TIRADS]')+'</span>'; tw.appendChild(main);
   if(info.risk){ const ri=document.createElement('div'); ri.className='tirads-risk-info'; ri.innerHTML='<span class="'+info.riskClass+'">'+info.risk+' malignancy</span> · '+info.threshold; tw.appendChild(ri); }
   const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopResidualNodule(lobe,idx); hin.appendChild(tw); hin.appendChild(del); th.appendChild(hin); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead);
   const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
@@ -4065,7 +4052,7 @@ function mkTextInput(obj,key,onch,ph,w){ const i=document.createElement('input')
 function mkPostopDiameter(obj,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:4px;'; const row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:4px;flex-wrap:wrap;'; ['AP','T','L'].forEach((lab,i)=>{ const key=['diamAP','diamT','diamL'][i]; row.append(lab+':'); row.appendChild(mkTextInput(obj,key,onch,lab,'52px')); if(i<2) row.append(' × '); }); const sel=document.createElement('select'); sel.innerHTML='<option>mm</option><option>cm</option>'; sel.value=obj.diamUnit||'mm'; sel.onchange=()=>{ obj.diamUnit=sel.value; onch(); }; row.appendChild(sel); d.appendChild(row); const auto=document.createElement('div'); auto.className='size-auto'; const ms=calcMaxSize(obj); auto.textContent=ms?('Max: '+ms+' '+(obj.diamUnit||'mm')+(obj.diamAP&&obj.diamT&&obj.diamL?'  Vol: '+formatVolumeMl(parseFloat(obj.diamAP),parseFloat(obj.diamT),parseFloat(obj.diamL)):'')):''; d.appendChild(auto); return d; }
 function addPostopOpBedLesion(site){ const po=ensurePostopState(); po.opBedLesions[site].push(defaultOpBedLesion()); const idx=po.opBedLesions[site].length-1; saveState(); renderPostop(); return idx; }
 function removePostopOpBedLesion(site,idx){ ensurePostopState().opBedLesions[site].splice(idx,1); saveState(); renderPostop(); }
-function updatePostopOpBedLesion(site,idx,les){ autoPostopOpBedImpression(les); ensurePostopState().opBedLesions[site][idx]=les; saveState(); renderPostopResidualNoduleCol(site); }
+function updatePostopOpBedLesion(site,idx,les){ autoPostopOpBedImpression(les); ensurePostopState().opBedLesions[site][idx]=les; saveState(); renderPostopOpBedCol(site); }
 function postopOpBedLabel(site, idx) {
   const siteLabel = site === 'right' ? 'R-OB' : site === 'left' ? 'L-OB' : site === 'isthmus' ? 'I-OB' : 'C-OB';
   return siteLabel + (idx + 1);
@@ -4097,7 +4084,7 @@ function autoPostopOpBedImpression(les){
   }
 }
 function renderPostopOpBedCol(site){ const cont=document.getElementById('postop-opbed-'+site); if(!cont)return; cont.innerHTML=''; const list=ensurePostopState().opBedLesions[site]||[]; if(!list.length){ const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent='No op bed lesion.'; cont.appendChild(e); } list.forEach((les,idx)=>cont.appendChild(buildPostopOpBedTable(site,idx,les))); }
-function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
+function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Postop Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
   addRow('Location', mkOpBedLocation(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Diameter', mkPostopDiameter(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Shape / Orientation', mkPostopRadio('op_shape_ori_'+site+'_'+idx,['Parallel','Nonparallel / Taller-than-wide','Irregular shape'],les,'orientation',()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Margin', mkPostopRadio('op_margin_'+site+'_'+idx,['Smooth','Ill-defined','Irregular','Spiculated','Infiltrative'],les,'margin',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenicity', mkPostopRadio('op_echo_'+site+'_'+idx,['Marked hypoechoic','Mild hypoechoic','Isoechoic','Hyperechoic','Heterogeneous','Cystic / cystic change'],les,'echogenicity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenic foci', mkPostopRadio('op_foci_'+site+'_'+idx,['None','Punctate echogenic foci','Macrocalcification','Rim calcification','Coarse calcification','Surgical clip / artifact suspected'],les,'echogenicFoci',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Vascularity', mkPostopRadio('op_vasc_'+site+'_'+idx,['None','Peripheral','Mild intralesional','Marked intralesional','Abnormal vascularity'],les,'vascularity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Suspicious Features', mkPostopChecks([['suspPEF','Punctate echogenic foci'],['suspIrregular','Irregular or infiltrative margin'],['suspTaller','Nonparallel orientation'],['suspMarkedHypoechoic','Marked hypoechogenicity'],['suspAbnormalVascularity','Abnormal vascularity'],['suspGrowth','Interval growth'],['suspInvasion','Adjacent structure invasion']],les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Adjacent Structure Invasion', mkOpBedInvasion(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Size Change', mkOpBedSizeChange(site,idx,les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Biopsy/Procedure', mkOpBedBiopsy(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Impression Category', mkOpBedImpression(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Comment', mkTextarea(les,'comment',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Recommendation', mkTextarea(les,'recommendation',()=>updatePostopOpBedLesion(site,idx,les)),false); const rr=document.createElement('tr'); const rc=document.createElement('td'); rc.colSpan=2; rc.className='nodule-reset-cell'; const rb=document.createElement('button'); rb.className='pink-btn'; rb.textContent='Reset this op bed lesion'; rb.onclick=()=>{ ensurePostopState().opBedLesions[site][idx]=defaultOpBedLesion(); saveState(); renderPostop(); }; rc.appendChild(rb); rr.appendChild(rc); tbody.appendChild(rr); table.appendChild(tbody); wrap.appendChild(table); return wrap; }
 function mkOpBedLocation(les,onch){ const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:6px;'; wrap.appendChild(mkPostopRadio('oploc_'+Math.random(),['Right Op. Bed','Left Op. Bed','Isthmus Op. Bed','Central Neck / Thyroidectomy Bed','Strap muscle adjacent area','Tracheoesophageal groove','Paraesophageal area','Other'],les,'location',onch)); if(les.location==='Other'){ const i=mkTextInput(les,'locationOtherText',onch,'Other location','180px'); wrap.appendChild(i); } return wrap; }
 function mkOpBedTwoRadios(site,idx,les,k1,o1,k2,o2,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopRadio('op_'+k1+'_'+site+'_'+idx,o1,les,k1,onch)); d.appendChild(mkPostopRadio('op_'+k2+'_'+site+'_'+idx,o2,les,k2,onch)); return d; }
@@ -4619,28 +4606,28 @@ function describePostopOpBedLesion(site, les, idx) {
   if(les.invasionStatus && les.invasionStatus !== 'None') { const targets=[]; if(les.invasionStrapMuscle) targets.push('strap muscle'); if(les.invasionTrachea) targets.push('trachea'); if(les.invasionEsophagus) targets.push('esophagus'); if(les.invasionRLN) targets.push('recurrent laryngeal nerve area'); if(les.invasionCarotid) targets.push('carotid artery'); if(les.invasionIJV) targets.push('internal jugular vein'); if(les.invasionOtherSoftTissue) targets.push('other soft tissue'); if(les.invasionOther) targets.push(les.invasionOtherText||'other'); parts.push(les.invasionStatus.toLowerCase()+' invasion'+(targets.length?' ('+targets.join(', ')+')':'')); }
   if(les.sizeChangeFU && les.sizeChangeType) parts.push('follow-up: '+les.sizeChangeType.toLowerCase()+(les.prevSize?' from '+les.prevSize:'')); else if(les.sizeChangeInitial) parts.push('initial');
   if(les.impressionCategory) parts.push(les.impressionCategory);
-  return 'Lesion '+postopOpBedLabel(site, idx) + ' at ' + anatomyLabel + ': ' + parts.join(', ');
+  return postopOpBedLabel(site, idx) + ' (' + anatomyLabel + '): ' + parts.join(', ');
 }
 function buildPostopFindingLines() {
   const po = ensurePostopState(); const lines=[]; if(!postopHasData()) return lines;
   const opText = postopOperationText(); if(opText) lines.push('Operation status: ' + opText);
   const map = getPostopAnatomyMap();
-  const structures = ['right','isthmus','left','central'].map(k => map[k]).filter(m => m && m.kind !== 'hidden').map(m => m.label + (m.kind === 'residual' ? ' (lobe)' : ' (thyroidectomy site)'));
+  const structures = ['right','isthmus','left','central'].map(k => map[k]).filter(m => m && m.kind !== 'hidden').map(m => m.label + (m.kind === 'residual' ? ' (residual)' : ' (thyroidectomy site/op bed)'));
   if(structures.length) lines.push('Postoperative anatomical sections: ' + structures.join(', '));
   const res=[]; ['right','isthmus','left'].forEach(lobe => (po.residualThyroidNodules[lobe]||[]).forEach((nod,idx)=>{
     const parts=[]; const anatomyLabel=getPostopLabelFor('residual', lobe); const loc=getLocationText(nod,lobe); if(loc) parts.push(loc); if(nod.diamAP||nod.diamT||nod.diamL) parts.push([nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×')+' '+(nod.diamUnit||'mm')); if(nod.composition) parts.push(nod.composition); if(nod.echogenicity) parts.push(nod.echogenicity); const tir=getKTIRADS(nod,false); if(tir) parts.push(tir); res.push(LOBE_LABELS[lobe]+(idx+1)+' ('+anatomyLabel+'): '+parts.join(', ')); if(nod.comment) res.push('Comment: '+nod.comment);
   }));
-  if(res.length){ lines.push('Thyroid nodules:'); res.forEach(l=>lines.push('  '+l)); }
+  if(res.length){ lines.push('Residual thyroid parenchymal nodules:'); res.forEach(l=>lines.push('  '+l)); }
   const op=[]; ['right','isthmus','left','central'].forEach(site => (po.opBedLesions[site]||[]).forEach((les,idx)=>{ autoPostopOpBedImpression(les); op.push(describePostopOpBedLesion(site,les,idx)); if(les.comment) op.push('Comment: '+les.comment); }));
-  if(op.length){ lines.push('Thyroidectomy site lesions:'); op.forEach(l=>lines.push('  '+l)); }
+  if(op.length){ lines.push('Thyroidectomy site / operation bed lesions:'); op.forEach(l=>lines.push('  '+l)); }
   return lines;
 }
 function buildPostopConclusionLines() {
   const po=ensurePostopState(); const lines=[]; if(!postopHasData()) return lines;
   const lesionLines=[]; ['right','isthmus','left','central'].forEach(site => (po.opBedLesions[site]||[]).forEach((les,idx)=>{ autoPostopOpBedImpression(les); let s=postopOpBedLabel(site,idx)+' ('+getPostopLabelFor('opbed', site)+'): '+(les.impressionCategory||'Indeterminate lesion'); if(les.recommendation) s+='\n   Recommendation: '+les.recommendation; lesionLines.push(s); }));
   const nodLines=[]; ['right','isthmus','left'].forEach(lobe => (po.residualThyroidNodules[lobe]||[]).forEach((nod,idx)=>{ const tir=getKTIRADS(nod,false); let s=LOBE_LABELS[lobe]+(idx+1)+' ('+getPostopLabelFor('residual', lobe)+')'; const ms=calcMaxSize(nod); if(ms) s+=', '+ms+' '+(nod.diamUnit||'mm'); if(tir) s+=', '+tir; if(nod.recommendation) s+='\n   Recommendation: '+nod.recommendation; nodLines.push(s); }));
-  if(lesionLines.length){ lines.push('Thyroidectomy site lesion'); lesionLines.forEach(l=>lines.push('  '+l)); }
-  if(nodLines.length){ lines.push('Thyroid nodule'); nodLines.forEach(l=>lines.push('  '+l)); }
+  if(lesionLines.length){ lines.push('Thyroidectomy site / operation bed lesion'); lesionLines.forEach(l=>lines.push('  '+l)); }
+  if(nodLines.length){ lines.push('Residual thyroid parenchymal nodule'); nodLines.forEach(l=>lines.push('  '+l)); }
   if(!lesionLines.length && !nodLines.length && postopOperationText()) lines.push('Postoperative status: '+postopOperationText());
   return lines;
 }
