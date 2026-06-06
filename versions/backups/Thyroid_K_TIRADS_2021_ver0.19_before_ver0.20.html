@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.21</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.19</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -4134,14 +4134,17 @@ function getDiagramZoneFromSvgPosition(clientX, clientY) {
 }
 
 function diagramLocationsForDroppedMarker(nod, targetZone) {
-  // When an existing marker is moved in the diagram, make the nodule's
-  // Location checkboxes follow the marker's new anatomical zone. Previously
-  // multi-zone nodules preserved their old span during drag, so a marker moved
-  // to Lower could still remain checked as Upper/Middle/Lower. Existing
-  // multi-zone creation by dragging across zones is preserved separately in
-  // diagramZonePointerUp().
   if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  return [targetZone.location || 'middle'];
+  const count = ['upper','middle','lower'].filter(loc => {
+    if (loc === 'upper') return !!nod.locationUpper;
+    if (loc === 'middle') return !!nod.locationMiddle;
+    return !!nod.locationLower;
+  }).length || 1;
+  if (count >= 3) return ['upper','middle','lower'];
+  if (count === 2) {
+    return targetZone.location === 'upper' ? ['upper','middle'] : ['middle','lower'];
+  }
+  return [targetZone.location];
 }
 
 function previewDiagramLocations(lobe, locations) {
@@ -4379,7 +4382,6 @@ function diagramMarkerPointerUp(event) {
   saveState();
   affectedLobes.forEach(renderNoduleCol);
   updateLobeBadges();
-  refreshPopupIfOpen(targetZone.lobe);
   renderDiagramMarkers();
   updateZoneFullState();
 }
@@ -4543,13 +4545,11 @@ function renderDiagramMarkers() {
       grp.appendChild(txt);
 
       const del = document.createElementNS(ns, 'g');
-      // Keep the delete badge in a fixed, marker-local upper-right position.
-      // Previously it was anchored to each ellipse's rx/ry, so tall multi-zone
-      // markers and active markers placed the ✕ badge at slightly different offsets.
-      const deleteBadgeOffsetX = 12;
-      const deleteBadgeOffsetY = -12;
-      const delX = Math.min(274, Math.max(26, cx + deleteBadgeOffsetX));
-      const delY = Math.min(180, Math.max(24, cy + deleteBadgeOffsetY));
+      // Keep the delete badge close to the marker, but outside the central label area.
+      // The badge sits just outside the marker's upper-right edge with a tiny overlap,
+      // so R1/L1 text remains readable while the control still feels attached.
+      const delX = Math.min(274, Math.max(26, cx + rx + 2));
+      const delY = Math.min(180, Math.max(24, cy - ry + 2));
       del.classList.add('diagram-delete-hit');
       del.setAttribute('role', 'button');
       del.setAttribute('aria-label', `Delete ${LOBE_LABELS[lobe]}${idx + 1} marker`);

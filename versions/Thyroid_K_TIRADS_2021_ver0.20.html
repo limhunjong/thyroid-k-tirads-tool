@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.21</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.20</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -4134,14 +4134,17 @@ function getDiagramZoneFromSvgPosition(clientX, clientY) {
 }
 
 function diagramLocationsForDroppedMarker(nod, targetZone) {
-  // When an existing marker is moved in the diagram, make the nodule's
-  // Location checkboxes follow the marker's new anatomical zone. Previously
-  // multi-zone nodules preserved their old span during drag, so a marker moved
-  // to Lower could still remain checked as Upper/Middle/Lower. Existing
-  // multi-zone creation by dragging across zones is preserved separately in
-  // diagramZonePointerUp().
   if (!targetZone || targetZone.lobe === 'isthmus') return ['middle'];
-  return [targetZone.location || 'middle'];
+  const count = ['upper','middle','lower'].filter(loc => {
+    if (loc === 'upper') return !!nod.locationUpper;
+    if (loc === 'middle') return !!nod.locationMiddle;
+    return !!nod.locationLower;
+  }).length || 1;
+  if (count >= 3) return ['upper','middle','lower'];
+  if (count === 2) {
+    return targetZone.location === 'upper' ? ['upper','middle'] : ['middle','lower'];
+  }
+  return [targetZone.location];
 }
 
 function previewDiagramLocations(lobe, locations) {
@@ -4379,7 +4382,6 @@ function diagramMarkerPointerUp(event) {
   saveState();
   affectedLobes.forEach(renderNoduleCol);
   updateLobeBadges();
-  refreshPopupIfOpen(targetZone.lobe);
   renderDiagramMarkers();
   updateZoneFullState();
 }

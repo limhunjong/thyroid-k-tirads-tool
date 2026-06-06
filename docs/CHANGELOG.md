@@ -1,5 +1,17 @@
 # Changelog
 
+## ver0.21
+
+- Diagram marker drag now updates the nodule `Location` state to match the marker's dropped anatomical zone.
+- Moving an existing marker to Upper / Middle / Lower updates the corresponding Location checkbox and downstream report text.
+- The nodule edit popup refreshes after a diagram drag so visible Location checkboxes stay synchronized.
+
+## ver0.20
+
+- Standardized the Diagram nodule marker delete `×` badge position.
+- The badge now uses a fixed marker-local upper-right offset instead of changing with marker ellipse size or active-state size.
+- This keeps the `×` placement visually consistent across single-zone, multi-zone, and active markers.
+
 ## ver0.19
 
 - Report Preview is hidden by default on desktop so the main form can use the full screen width.
