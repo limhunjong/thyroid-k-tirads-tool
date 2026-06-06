@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.17
+
+- Moved the Diagram marker delete `×` badge closer to the marker itself.
+- The delete badge now overlaps the marker's upper-right shoulder using proportional offsets, so it remains visually attached for both small circular markers and taller multi-zone ellipses.
+- Preserved in-diagram deletion and one-step restore behavior from ver0.16.
+
 ## ver0.16
 
 - Diagram is now visible by default when the Thyroid Nodule section loads.

@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.17</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.16</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -4497,10 +4497,8 @@ function renderDiagramMarkers() {
       grp.appendChild(txt);
 
       const del = document.createElementNS(ns, 'g');
-      // Keep the delete badge attached to the marker's upper-right shoulder.
-      // Use proportional offsets so single-zone circles and tall multi-zone ellipses both feel visually connected.
-      const delX = Math.min(274, Math.max(26, cx + Math.max(6, rx * 0.72)));
-      const delY = Math.min(180, Math.max(24, cy - Math.max(6, ry * 0.72)));
+      const delY = Math.max(24, cy - ry - 8);
+      const delX = Math.min(274, Math.max(26, cx + rx + 7));
       del.classList.add('diagram-delete-hit');
       del.setAttribute('role', 'button');
       del.setAttribute('aria-label', `Delete ${LOBE_LABELS[lobe]}${idx + 1} marker`);
