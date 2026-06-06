@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.33
+
+- Increased small UI typography tokens and supporting label/chip text sizes so previously tiny labels, preset chips, section headers, and preview title are easier to read.
+- Reworked nodule card headers to show `Nodule R1`, `Nodule I1`, and `Nodule L1` as clear blue-tinted pills.
+- Removed the empty K-TIRADS dash badge from nodule headers when no K-TIRADS category has been calculated yet; the badge appears only when a real value exists.
+- Anchored the Report Preview close `×` button absolutely to the preview pane's upper-right corner across desktop, tablet/mobile sheet, and compact landscape layouts.
+- Verified JavaScript syntax, browser-computed nodule header text/no-dash state, preview close button position, and absence of console errors.
+
 ## ver0.32
 
 - Reworked nodule option controls into a tokenized equal-grid button system using shared CSS variables for column width, gaps, minimum height, and horizontal padding.
