@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.30
+
+- Fixed the Diagram-opened nodule Quick add row where `PTC` and `Follicular Neoplasm` still looked vertically off because the surrounding `.preset-strip.in-card` had asymmetric top/bottom padding.
+- Made `.preset-strip` padding symmetric and gave in-card preset strips a control-height row with centered alignment.
+- Set preset chips to a fixed 34px height with zero vertical padding and centered flex alignment, producing equal top/bottom spacing in both the popup and nodule add areas.
+- Verified JavaScript syntax, browser-computed popup Quick add top/bottom gaps, and visual alignment in the Diagram nodule popup and below-diagram nodule add area.
+
 ## ver0.29
 
 - Centered QUICK ADD preset-chip labels such as `PTC` and `Follicular Neoplasm` by converting `.preset-chip` to `inline-flex` with `align-items: center` and `justify-content: center`.
