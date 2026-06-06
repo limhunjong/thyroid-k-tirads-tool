@@ -1,5 +1,14 @@
 # Changelog
 
+## ver0.36
+
+- Added a hybrid `with Isthmusectomy` checkbox that becomes available for `Right lobectomy` and `Left lobectomy`, persists in Postop state, and is automatically cleared/disabled for `Total thyroidectomy`, standalone `Isthmusectomy`, and `Other / Custom`.
+- Added an anatomy mapping engine for postoperative right/isthmus/left sections so residual thyroid tissue and thyroidectomy-site/op-bed labels switch dynamically between `Right Lobe`, `Left Lobe`, `Isthmus`, `Right Thyroidectomy Site`, `Left Thyroidectomy Site`, `Isthmusectomy Site`, and `Central / Isthmus Bed`.
+- Synchronized section headers, residual nodule card titles, op-bed lesion card titles, SVG `<title>` tooltips, clickable diagram zones, and report text with the dynamic anatomical labels.
+- Updated report Findings/Conclusion/Recommendation text to distinguish residual thyroid parenchymal nodules from thyroidectomy site / operation bed lesions.
+- Hardened Postop state hydration so residual nodule and op-bed lesion arrays remain available while the operation type is changed repeatedly.
+- Verified JavaScript syntax and browser scenarios for right/left lobectomy with and without isthmusectomy, total thyroidectomy mutual exclusion, standalone isthmusectomy, diagram click-to-add, dynamic labels, and report output.
+
 ## ver0.35
 
 - Replaced the Postop section-card diagram with a clickable thyroid-style postoperative SVG diagram that reuses the existing visual language.
