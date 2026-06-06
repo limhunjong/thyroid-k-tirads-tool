@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.28
+
+- Refined nodule option-control layout so sparse long choices such as `Extensive parenchymal PEF` and `Diffuse infiltrative lesion` stay compact instead of stretching with excessive right-side whitespace.
+- Added equal-width wrapping grid behavior for nodule option sections with 3+ choices, improving alignment and consistency across Composition, Echogenicity, Margin, Echogenic foci, Vascularity, and ETE-style groups.
+- Preserved compact two-option groups such as `Initial` / `Follow-up` and long diffuse lesion choices without forcing full-row expansion.
+- Changed validation errors triggered by `판독문` from bottom-sheet placement to a centered alert dialog, and removed the inline `max-width:500px` override so centered alert CSS applies consistently.
+- Verified JavaScript syntax, browser-computed control widths, compact long-option groups, equal-width 3+ groups, and centered validation dialog placement.
+
 ## ver0.27
 
 - Fixed visual centering for Date `Year` / `MM` / `DD` selects by removing asymmetric select padding and assigning explicit compact date widths.

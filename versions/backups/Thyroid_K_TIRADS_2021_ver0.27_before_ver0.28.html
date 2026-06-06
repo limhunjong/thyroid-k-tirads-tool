@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.28</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.27</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -335,43 +335,6 @@ table.data-table td.section-header {
 }
 .radio-group label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
 
-/* Multi-option groups: keep buttons equal and orderly without stretching sparse rows */
-.radio-group:not(:has(input[type=text])):has(> label:nth-child(3)) label {
-  flex-basis: 112px;
-  width: 112px;
-  min-width: 112px;
-}
-.nodule-data-cell .radio-group,
-.nodule-data-cell .check-group {
-  width: fit-content;
-  max-width: 100%;
-  align-items: center;
-}
-.nodule-data-cell .radio-group label,
-.nodule-data-cell .check-group label,
-.nodule-data-cell .inline-check-label {
-  flex: 0 0 auto;
-  min-width: 96px;
-  max-width: 240px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: keep-all;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(3)),
-.nodule-data-cell .check-group:has(> label:nth-child(3)) {
-  display: inline-grid;
-  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-  width: min(100%, 360px);
-  gap: 3px;
-  align-items: stretch;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(3)) label,
-.nodule-data-cell .check-group:has(> label:nth-child(3)) label {
-  width: auto;
-  max-width: none;
-  min-width: 0;
-}
-
 /* ===== CHECKBOX GROUPS ===== */
 .check-group { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
 .check-group label {
@@ -579,25 +542,14 @@ table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
 .prev-bx-del-btn:hover { color: var(--red); }
 
 /* Confirm dialog — centered alert */
-#confirmDialog.dialog-overlay,
-#errorDialog.dialog-overlay { align-items: center; }
-#confirmDialog .dialog-box,
-#errorDialog .dialog-box {
+#confirmDialog.dialog-overlay { align-items: center; }
+#confirmDialog .dialog-box {
   border-radius: var(--r-xl);
-  max-width: 360px; align-self: center;
+  max-width: 300px; align-self: center;
   padding: 22px 20px 20px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.7);
 }
-#confirmDialog .dialog-box { max-width: 300px; }
-#confirmDialog .dialog-box::before,
-#errorDialog .dialog-box::before { display: none; }
-#errorDialog .dialog-title { text-align: center; }
-#errorDialog .dialog-body {
-  max-height: min(52vh, 360px);
-  font-family: inherit !important;
-  text-align: left;
-}
-#errorDialog .dialog-actions { justify-content: center; }
+#confirmDialog .dialog-box::before { display: none; }
 
 /* ===== MISC ===== */
 hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margin: 6px 0; }
@@ -721,13 +673,6 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   .dialog-actions { flex-wrap: wrap; gap: 8px; }
   .dialog-actions .blue-btn, .dialog-actions .pink-btn, .dialog-actions button { flex: 1; min-width: 0; }
   #confirmDialog .dialog-box { border-radius: var(--r-xl) var(--r-xl) 0 0; max-width: 100%; }
-  #errorDialog.dialog-overlay { align-items: center; padding: 16px; }
-  #errorDialog .dialog-box {
-    border-radius: var(--r-xl);
-    width: min(360px, 94vw);
-    max-width: 360px;
-    padding: 20px 18px;
-  }
 }
 @media (max-width: 390px) {
   .tab-btn { font-size: 10px; }
@@ -1132,13 +1077,6 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .dialog-actions { flex-wrap: wrap; gap: 8px; }
   .dialog-actions .blue-btn, .dialog-actions .pink-btn, .dialog-actions button { flex: 1; min-width: 0; }
   #confirmDialog .dialog-box { border-radius: var(--r-xl) var(--r-xl) 0 0; max-width: 100%; }
-  #errorDialog.dialog-overlay { align-items: center; padding: 16px; }
-  #errorDialog .dialog-box {
-    border-radius: var(--r-xl);
-    width: min(360px, 94vw);
-    max-width: 360px;
-    padding: 20px 18px;
-  }
 
   .ln-table-wrap { -webkit-overflow-scrolling: touch; }
 }
@@ -1686,16 +1624,16 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   .nodule-data-cell .check-group {
     display: flex;
     flex-wrap: wrap;
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
-    align-items: center;
+    align-items: stretch;
   }
   .nodule-data-cell .radio-group label,
   .nodule-data-cell .check-group label,
   .nodule-data-cell .inline-check-label {
-    flex: 0 0 auto;
-    min-width: 96px;
-    max-width: 240px;
+    flex: 1 1 120px;
+    min-width: 0;
+    max-width: 100%;
     white-space: normal !important;
     overflow-wrap: anywhere;
     word-break: keep-all;
@@ -1704,19 +1642,6 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   .nodule-data-cell select,
   .nodule-data-cell textarea {
     max-width: 100%;
-  }
-  .nodule-data-cell .radio-group:has(> label:nth-child(3)),
-  .nodule-data-cell .check-group:has(> label:nth-child(3)) {
-    display: inline-grid;
-    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-    width: min(100%, 360px);
-    align-items: stretch;
-  }
-  .nodule-data-cell .radio-group:has(> label:nth-child(3)) label,
-  .nodule-data-cell .check-group:has(> label:nth-child(3)) label {
-    width: auto;
-    max-width: none;
-    min-width: 0;
   }
 }
 
@@ -2136,7 +2061,7 @@ Biopsy recommendation</div>
 
 <!-- ERROR DIALOG -->
 <div class="dialog-overlay" id="errorDialog">
-  <div class="dialog-box">
+  <div class="dialog-box" style="max-width:500px;">
     <div class="dialog-title">Validation Error</div>
     <div class="dialog-body" id="errorContent" style="font-family:inherit;"></div>
     <div class="dialog-actions">
