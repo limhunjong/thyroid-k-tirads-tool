@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.18</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.17</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1414,7 +1414,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 }
 #thyroid-svg .diagram-delete-x {
   fill: #fff;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 800;
   pointer-events: none;
   user-select: none;
@@ -4497,11 +4497,10 @@ function renderDiagramMarkers() {
       grp.appendChild(txt);
 
       const del = document.createElementNS(ns, 'g');
-      // Keep the delete badge close to the marker, but outside the central label area.
-      // The badge sits just outside the marker's upper-right edge with a tiny overlap,
-      // so R1/L1 text remains readable while the control still feels attached.
-      const delX = Math.min(274, Math.max(26, cx + rx + 2));
-      const delY = Math.min(180, Math.max(24, cy - ry + 2));
+      // Keep the delete badge attached to the marker's upper-right shoulder.
+      // Use proportional offsets so single-zone circles and tall multi-zone ellipses both feel visually connected.
+      const delX = Math.min(274, Math.max(26, cx + Math.max(6, rx * 0.72)));
+      const delY = Math.min(180, Math.max(24, cy - Math.max(6, ry * 0.72)));
       del.classList.add('diagram-delete-hit');
       del.setAttribute('role', 'button');
       del.setAttribute('aria-label', `Delete ${LOBE_LABELS[lobe]}${idx + 1} marker`);
@@ -4509,12 +4508,12 @@ function renderDiagramMarkers() {
       const delCircle = document.createElementNS(ns, 'circle');
       delCircle.setAttribute('cx', delX);
       delCircle.setAttribute('cy', delY);
-      delCircle.setAttribute('r', 5.8);
+      delCircle.setAttribute('r', 6.8);
       delCircle.setAttribute('class', 'diagram-delete-circle');
       del.appendChild(delCircle);
       const delText = document.createElementNS(ns, 'text');
       delText.setAttribute('x', delX);
-      delText.setAttribute('y', delY + 2.8);
+      delText.setAttribute('y', delY + 3.2);
       delText.setAttribute('text-anchor', 'middle');
       delText.setAttribute('class', 'diagram-delete-x');
       delText.textContent = '×';

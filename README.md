@@ -4,7 +4,7 @@ Single-file HTML thyroid ultrasound reporting tool based on K-TIRADS 2021 workfl
 
 ## Latest version
 
-- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.17.html`.
+- `index.html` is the current latest version, copied from `versions/Thyroid_K_TIRADS_2021_ver0.18.html`.
 - Open `index.html` directly in a browser to use the tool.
 
 ## Version history
@@ -28,6 +28,7 @@ All incremental versions are kept in `versions/`.
 - ver0.15: Diagram markers now support fine-grained persisted positions, so nodules can be placed more precisely within each zone instead of snapping to fixed centers.
 - ver0.16: Diagram is visible by default, scales responsively to the viewport, and each marker has an in-diagram `×` delete control with one-step restore.
 - ver0.17: Diagram marker delete `×` badge moved closer to the marker upper-right shoulder so it feels attached rather than detached.
+- ver0.18: Diagram marker delete `×` badge remains close but is shifted outside the center label area so `R1` / `L1` text is not obscured.
 
 ## Notes
 

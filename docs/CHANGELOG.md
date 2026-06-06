@@ -1,5 +1,11 @@
 # Changelog
 
+## ver0.18
+
+- Repositioned the Diagram marker delete `×` badge so it remains close to the nodule but no longer covers the center `R1` / `L1` label.
+- Reduced the delete badge size slightly and placed it just outside the marker's upper-right edge.
+- Verified the delete circle does not overlap the marker label bounding box, while deletion and one-step restore still work.
+
 ## ver0.17
 
 - Moved the Diagram marker delete `×` badge closer to the marker itself.
