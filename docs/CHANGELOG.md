@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.24
+
+- Reduced QUICK ADD presets to only `PTC` and `Follicular Neoplasm`.
+- Added QUICK ADD to existing nodule forms, including nodules opened from the Diagram popup, so presets can be applied after diagram-based nodule creation.
+- Redesigned Diagram span resize controls from plain blue circles into polished blue pill-shaped grip handles with subtle stems and grip marks.
+- Verified PTC/Follicular preset application, popup QUICK ADD rendering, and handle SVG shape replacement in browser.
+
 ## ver0.23
 
 - Split Diagram marker interactions into two explicit modes.

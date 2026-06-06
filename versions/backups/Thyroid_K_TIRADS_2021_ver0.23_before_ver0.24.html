@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.24</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.23</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -753,10 +753,6 @@ body.light #preview-content { color: #000000; }
   padding: 8px 10px 6px;
   border-bottom: 0.5px solid var(--sep);
 }
-.preset-strip.in-card {
-  padding: 8px 0 2px;
-  border-bottom: none;
-}
 .preset-strip-label {
   font-size: 10px;
   color: var(--label4);
@@ -1420,26 +1416,17 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 #thyroid-svg .diagram-span-handle {
   cursor: ns-resize;
 }
-#thyroid-svg .diagram-span-handle-stem {
-  stroke: rgba(255,255,255,0.62);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  pointer-events: none;
+#thyroid-svg .diagram-span-handle-circle {
+  fill: rgba(10,132,255,0.96);
+  stroke: rgba(255,255,255,0.95);
+  stroke-width: 1.6;
+  filter: drop-shadow(0 3px 7px rgba(0,0,0,0.34));
 }
-#thyroid-svg .diagram-span-handle-pill {
-  fill: rgba(10,132,255,0.88);
-  stroke: rgba(255,255,255,0.96);
+#thyroid-svg .diagram-span-handle-line {
+  stroke: rgba(255,255,255,0.78);
   stroke-width: 1.4;
-  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.36));
-}
-#thyroid-svg .diagram-span-handle-grip {
-  stroke: rgba(255,255,255,0.86);
-  stroke-width: 1.15;
   stroke-linecap: round;
   pointer-events: none;
-}
-#thyroid-svg .diagram-span-handle:hover .diagram-span-handle-pill {
-  fill: rgba(64,156,255,0.96);
 }
 #thyroid-svg .diagram-delete-circle {
   fill: rgba(255,69,58,0.95);
@@ -2635,9 +2622,6 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const tbody = document.createElement('tbody');
 
-  // --- Quick set presets for existing nodules, including nodules opened from Diagram ---
-  tbody.appendChild(row('Quick add', buildPresetStrip(lobe, { applyMode: true, idx, inCard: true }), false));
-
   // --- Location (required, multi-select) ---
   const locDiv = document.createElement('div');
   locDiv.className = 'radio-group';
@@ -3322,13 +3306,17 @@ function getKTIRADSInfo(nod, normalThy) {
 
 // Nodule quick presets
 const NODULE_PRESETS = [
-  { key: 'ptc', label: 'PTC',
+  { key: 'spongiform', label: 'Spongiform',
+    patch: { composition: 'P.Cystic', spongiform: 'Yes' } },
+  { key: 'ptc', label: 'PTC-like',
     patch: { composition: 'Solid', echogenicity: 'Mild hypo',
              orientation: 'Nonparallel (taller-than-wide)',
              margin: 'Irregular (spiculated/microlobulated)',
              calcification_micro: true } },
-  { key: 'follicular', label: 'Follicular Neoplasm',
+  { key: 'follicular', label: 'Follicular neoplasm',
     patch: { composition: 'Solid', echogenicity: 'Iso' } },
+  { key: 'cyst', label: 'Pure cyst',
+    patch: { composition: 'Cystic' } },
 ];
 
 function addPresetNodule(lobe, presetKey) {
@@ -3344,32 +3332,18 @@ function addPresetNodule(lobe, presetKey) {
   if (window.innerWidth < 768) switchLobeTab(lobe);
 }
 
-function applyPresetToNodule(lobe, idx, presetKey) {
-  const preset = NODULE_PRESETS.find(p => p.key === presetKey);
-  const nod = state.nodules[lobe] && state.nodules[lobe][idx];
-  if (!preset || !nod) return;
-  Object.assign(nod, preset.patch);
-  updateNodule(lobe, idx, nod);
-}
-
-function buildPresetStrip(lobe, opts = {}) {
+function buildPresetStrip(lobe) {
   const strip = document.createElement('div');
-  strip.className = 'preset-strip' + (opts.inCard ? ' in-card' : '');
-  if (!opts.inCard) {
-    const lbl = document.createElement('span');
-    lbl.className = 'preset-strip-label';
-    lbl.textContent = 'Quick add:';
-    strip.appendChild(lbl);
-  }
+  strip.className = 'preset-strip';
+  const lbl = document.createElement('span');
+  lbl.className = 'preset-strip-label';
+  lbl.textContent = 'Quick add:';
+  strip.appendChild(lbl);
   NODULE_PRESETS.forEach(preset => {
     const btn = document.createElement('button');
-    btn.type = 'button';
     btn.className = 'preset-chip';
     btn.textContent = preset.label;
-    btn.onclick = () => {
-      if (opts.applyMode) applyPresetToNodule(lobe, opts.idx, preset.key);
-      else addPresetNodule(lobe, preset.key);
-    };
+    btn.onclick = () => addPresetNodule(lobe, preset.key);
     strip.appendChild(btn);
   });
   return strip;
@@ -4734,26 +4708,17 @@ function renderDiagramMarkers() {
           handleG.setAttribute('role', 'button');
           handleG.setAttribute('aria-label', `${h.handle === 'upper' ? 'Upper' : 'Lower'} span handle for ${LOBE_LABELS[lobe]}${idx + 1}`);
           handleG.addEventListener('pointerdown', (event) => diagramSpanHandlePointerDown(event, lobe, idx, h.handle));
-          const handleStem = document.createElementNS(ns, 'line');
-          handleStem.setAttribute('x1', cx); handleStem.setAttribute('y1', h.lineY);
-          handleStem.setAttribute('x2', cx); handleStem.setAttribute('y2', h.y);
-          handleStem.setAttribute('class', 'diagram-span-handle-stem');
-          handleG.appendChild(handleStem);
-          const handlePill = document.createElementNS(ns, 'rect');
-          handlePill.setAttribute('x', cx - 8.5);
-          handlePill.setAttribute('y', h.y - 4.2);
-          handlePill.setAttribute('width', 17);
-          handlePill.setAttribute('height', 8.4);
-          handlePill.setAttribute('rx', 4.2);
-          handlePill.setAttribute('class', 'diagram-span-handle-pill');
-          handleG.appendChild(handlePill);
-          [-2.6, 2.6].forEach(dx => {
-            const grip = document.createElementNS(ns, 'line');
-            grip.setAttribute('x1', cx + dx); grip.setAttribute('y1', h.y - 2.2);
-            grip.setAttribute('x2', cx + dx); grip.setAttribute('y2', h.y + 2.2);
-            grip.setAttribute('class', 'diagram-span-handle-grip');
-            handleG.appendChild(grip);
-          });
+          const handleLine = document.createElementNS(ns, 'line');
+          handleLine.setAttribute('x1', cx); handleLine.setAttribute('y1', h.lineY);
+          handleLine.setAttribute('x2', cx); handleLine.setAttribute('y2', h.y);
+          handleLine.setAttribute('class', 'diagram-span-handle-line');
+          handleG.appendChild(handleLine);
+          const handleCircle = document.createElementNS(ns, 'circle');
+          handleCircle.setAttribute('cx', cx);
+          handleCircle.setAttribute('cy', h.y);
+          handleCircle.setAttribute('r', 4.8);
+          handleCircle.setAttribute('class', 'diagram-span-handle-circle');
+          handleG.appendChild(handleCircle);
           grp.appendChild(handleG);
         });
       }
