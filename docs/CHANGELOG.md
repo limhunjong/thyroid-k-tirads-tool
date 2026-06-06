@@ -1,5 +1,14 @@
 # Changelog
 
+## ver0.35
+
+- Replaced the Postop section-card diagram with a clickable thyroid-style postoperative SVG diagram that reuses the existing visual language.
+- Operation-type anatomy is now visible in the diagram: right lobectomy shows `Right Op. Bed` plus residual `Isthmus` and `Left Lobe`; isthmusectomy shows residual `Right Lobe` and `Left Lobe` plus `Isthmus Op. Bed`; total thyroidectomy shows op-bed/central thyroidectomy sites.
+- Clicking residual thyroid tissue in the Postop diagram adds a residual thyroid nodule with the clicked lobe/zone prefilled.
+- Clicking dashed thyroidectomy-site/op-bed regions adds a corresponding operation-bed lesion card.
+- Removed the bottom `아래 판독문에 추가하기` checkbox/label.
+- Verified JavaScript syntax and browser scenarios for operation-type diagram mapping, diagram click-to-add behavior, marker creation, and removal of the bottom add-to-report option.
+
 ## ver0.34
 
 - Added a new top-level `Postop` tab between `Thyroid` and `Cervical Lymph Node`, preserving the existing tab styling and overall app design language.
