@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.19
+
+- Report Preview is hidden by default on desktop so the main form can use the full screen width.
+- The top-right `판독문` button now toggles the live Report Preview pane instead of requiring the preview to stay permanently visible.
+- When the preview is opened, the app temporarily reserves right-side space; closing it restores full-width editing.
+- On tablet/mobile, the same `판독문` button opens the existing bottom-sheet preview behavior.
+
 ## ver0.18
 
 - Repositioned the Diagram marker delete `×` badge so it remains close to the nodule but no longer covers the center `R1` / `L1` label.

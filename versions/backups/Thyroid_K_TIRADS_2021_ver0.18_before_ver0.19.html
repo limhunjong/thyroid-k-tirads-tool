@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.19</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.18</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -655,12 +655,10 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   margin-top: 52px;
   min-height: calc(100dvh - 52px);
   align-items: flex-start;
-  padding-right: 0; /* report preview is hidden by default; space is reserved only when opened */
+  padding-right: 416px; /* reserve space for fixed right panel (400px + 16px padding) */
 }
-#app-layout.preview-open { padding-right: 416px; } /* 400px preview + 16px gutter */
 #left-panel { flex: 1; min-width: 0; }
 #right-panel {
-  display: none;
   width: 400px;
   flex-shrink: 0;
   padding: 16px 16px 16px 0;
@@ -671,9 +669,6 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   height: calc(100dvh - var(--nav-h, 52px));
   z-index: 10;
 }
-#right-panel.preview-open { display: block; }
-#right-panel.preview-open .preview-close-btn { display: flex; }
-.report-btn.active { background: var(--green); }
 
 /* ===== LIVE PREVIEW PANE ===== */
 #live-preview-pane {
@@ -918,13 +913,13 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
   #bottom-section { margin: 0 20px 20px; }
   table.data-table th, table.data-table td { padding: 10px 18px; }
   #right-panel { width: 420px; }
-  #app-layout.preview-open { padding-right: 436px; }
+  #app-layout { padding-right: 436px; }
 }
 
 /* ===== LAPTOP (1024px–1439px) ===== */
 @media (min-width: 1024px) and (max-width: 1439px) {
   #right-panel { width: 370px; }
-  #app-layout.preview-open { padding-right: 386px; } /* 370px + 16px */
+  #app-layout { padding-right: 386px; } /* 370px + 16px */
 }
 
 /* ===== TABLET + MOBILE: BOTTOM SHEET (< 1024px) ===== */
@@ -942,7 +937,7 @@ body.light .preset-chip:active { background: var(--blue-bg); color: var(--blue);
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     align-self: auto;
   }
-  #right-panel.sheet-open { display: block; height: 65dvh; }
+  #right-panel.sheet-open { height: 65dvh; }
 
   #live-preview-pane {
     height: 100%;
@@ -1102,7 +1097,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   #app-layout { margin-top: 40px; min-height: calc(100dvh - 40px); }
 
   /* Shorter preview sheet */
-  #right-panel.sheet-open { display: block; height: 45dvh; }
+  #right-panel.sheet-open { height: 45dvh; }
 
   /* Compact table rows */
   table.data-table th { padding: 8px 10px; font-size: 13px; }
@@ -1163,9 +1158,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
     max-height: none;
     box-shadow: var(--shadow-card);
   }
-  #right-panel.preview-open { display: block; }
-
-  /* Compact preview header */
+  /* Compact preview header — no grabber, no close btn */
   .preview-header {
     flex-direction: row;
     padding: 8px 12px;
@@ -1173,8 +1166,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
     border-radius: var(--r-md) var(--r-md) 0 0;
   }
   .preview-header::before { display: none; }
-  #right-panel.preview-open .preview-close-btn { display: flex !important; }
-  /* Hide FAB here; use the top-right 판독문 button to show/hide preview */
+  .preview-close-btn { display: none !important; }
+  /* Hide FAB — preview is always visible */
   #preview-fab { display: none !important; }
 
   /* Show lobe tabs in the left panel (single-column nodule view) */
@@ -1191,7 +1184,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 
 /* ===== iPAD PORTRAIT (768px–1023px, portrait): full-width + drawer ===== */
 @media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
-  #right-panel.sheet-open { display: block; height: 62dvh; }
+  #right-panel.sheet-open { height: 62dvh; }
   table.data-table th { font-size: 14px; }
   .lobe-tab { min-height: 52px; }
 }
@@ -1636,7 +1629,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   <button class="tab-btn" onclick="switchTab(&#39;lymph&#39;)" id="tab-lymph">Cervical Lymph Node</button>
   <button class="tab-btn" onclick="switchTab(&#39;extra&#39;)" id="tab-extra">Extrathyroidal Lesion</button>
   <div class="top-spacer"></div>
-  <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
+  <button class="report-btn" onclick="generateReport()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
   <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
@@ -1926,7 +1919,7 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
     <div class="preview-header" id="previewHeader" onclick="handlePreviewHeaderClick(event)">
       <div class="preview-header-row">
         <span class="preview-title">Report Preview</span>
-        <button class="preview-close-btn" onclick="event.stopPropagation();closeReportPreview()" aria-label="Close">✕</button>
+        <button class="preview-close-btn" onclick="event.stopPropagation();closePreviewSheet()" aria-label="Close">✕</button>
       </div>
     </div>
     <div id="preview-content">Clinical information: Thyroid nodule
@@ -3957,48 +3950,9 @@ function closeDialog(id) {
 
 // ==================== PREVIEW SHEET (tablet + mobile) ====================
 let previewSheetOpen = false;
-let reportPreviewOpen = false;
-
-function toggleReportPreview() {
-  if (reportPreviewOpen || previewSheetOpen) closeReportPreview();
-  else openReportPreview();
-}
-
-function openReportPreview() {
-  const errors = validateReport();
-  if (errors.length > 0) {
-    document.getElementById('errorContent').textContent = errors.join('\n');
-    document.getElementById('errorDialog').classList.add('show');
-    return;
-  }
-  updateLivePreview();
-  const btn = document.getElementById('report-toggle-btn');
-  if (window.innerWidth < 1024) {
-    openPreviewSheet();
-    if (btn) btn.classList.add('active');
-    return;
-  }
-  reportPreviewOpen = true;
-  const panel = document.getElementById('right-panel');
-  const layout = document.getElementById('app-layout');
-  if (panel) panel.classList.add('preview-open');
-  if (layout) layout.classList.add('preview-open');
-  if (btn) btn.classList.add('active');
-}
-
-function closeReportPreview() {
-  reportPreviewOpen = false;
-  closePreviewSheet();
-  const panel = document.getElementById('right-panel');
-  const layout = document.getElementById('app-layout');
-  const btn = document.getElementById('report-toggle-btn');
-  if (panel) panel.classList.remove('preview-open');
-  if (layout) layout.classList.remove('preview-open');
-  if (btn) btn.classList.remove('active');
-}
 
 function togglePreviewSheet() {
-  if (previewSheetOpen) { closeReportPreview(); } else { openReportPreview(); }
+  if (previewSheetOpen) { closePreviewSheet(); } else { openPreviewSheet(); }
 }
 
 function openPreviewSheet() {
@@ -4009,8 +3963,6 @@ function openPreviewSheet() {
   if (panel) panel.classList.add('sheet-open');
   if (backdrop) backdrop.classList.add('show');
   if (fabLabel) fabLabel.textContent = '닫기';
-  const btn = document.getElementById('report-toggle-btn');
-  if (btn) btn.classList.add('active');
   updateLivePreview();
 }
 
@@ -4026,13 +3978,13 @@ function closePreviewSheet() {
 
 function handlePreviewHeaderClick(e) {
   if (window.innerWidth >= 1024) return;
-  closeReportPreview();
+  closePreviewSheet();
 }
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (activePopupLobe !== null) closeNodulePopup();
-    else if (previewSheetOpen || reportPreviewOpen) closeReportPreview();
+    else if (previewSheetOpen) closePreviewSheet();
   }
 });
 
@@ -4699,7 +4651,7 @@ function adjustMainTop() {
     // Sticky right panel for desktop or landscape split
     rp.style.top    = h + 'px';
     rp.style.height = 'calc(100dvh - ' + h + 'px)';
-    if (previewSheetOpen || reportPreviewOpen) closeReportPreview();
+    if (previewSheetOpen) closePreviewSheet();
     // In landscape split, ensure lobe tabs are in correct state
     if (lSplit) switchLobeTab(activeLobeMobile);
   } else {
