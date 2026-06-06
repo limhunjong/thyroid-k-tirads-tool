@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.16</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.15</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1292,7 +1292,7 @@ table.data-table td, table.data-table th { overflow-wrap: break-word; word-break
 .diagram-toggle-btn.active { background: var(--blue-bg); color: var(--blue); }
 .diagram-toggle-btn:active { transform: scale(0.97); }
 #diagram-panel {
-  display: block;
+  display: none;
   background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008)), var(--bg1);
   border-radius: var(--r-lg);
   margin-bottom: 10px;
@@ -1305,23 +1305,16 @@ body.light #diagram-panel {
   border: 0.5px solid rgba(0,0,0,0.08);
 }
 .diagram-svg-wrap {
-  padding: 12px clamp(8px, 1.8vw, 20px) 8px;
+  padding: 18px 20px 8px;
   display: flex;
   justify-content: center;
 }
 #thyroid-svg {
-  width: min(100%, 1280px, calc((100dvh - var(--nav-h, 52px) - 120px) * 1.4423));
+  width: 640px;
   max-width: 100%;
   height: auto;
   display: block;
   overflow: visible;
-}
-@media (min-height: 900px) {
-  #thyroid-svg { width: min(100%, 1440px, calc((100dvh - var(--nav-h, 52px) - 170px) * 1.4423)); }
-}
-@media (max-width: 767px) {
-  .diagram-svg-wrap { padding-left: 6px; padding-right: 6px; }
-  #thyroid-svg { width: 100%; }
 }
 #thyroid-svg .diagram-card-bg {
   fill: var(--fill4);
@@ -1403,47 +1396,6 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 #thyroid-svg .diagram-drag-ghost ellipse {
   stroke-width: 2.4;
 }
-#thyroid-svg .diagram-delete-hit {
-  cursor: pointer;
-}
-#thyroid-svg .diagram-delete-circle {
-  fill: rgba(255,69,58,0.95);
-  stroke: rgba(255,255,255,0.92);
-  stroke-width: 1.6;
-  filter: drop-shadow(0 3px 7px rgba(0,0,0,0.34));
-}
-#thyroid-svg .diagram-delete-x {
-  fill: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  pointer-events: none;
-  user-select: none;
-}
-.diagram-undo-bar {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 0 16px 8px;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  background: rgba(255,159,10,0.13);
-  color: var(--label2);
-  font-size: 12px;
-}
-.diagram-undo-bar.show { display: flex; }
-.diagram-undo-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 5px 11px;
-  background: var(--orange-bg);
-  color: var(--orange);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.diagram-undo-btn:active { transform: scale(0.97); }
 .diagram-hint {
   padding: 4px 16px 11px;
   font-size: 11px;
@@ -1750,7 +1702,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
     <!-- Section C: Thyroid Nodule -->
     <div class="nodule-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <span>Thyroid Nodule</span>
-      <button class="diagram-toggle-btn active" id="diagram-toggle-btn" onclick="toggleDiagram()">Diagram</button>
+      <button class="diagram-toggle-btn" id="diagram-toggle-btn" onclick="toggleDiagram()">Diagram</button>
     </div>
 
     <!-- Interactive Diagram Panel -->
@@ -1811,8 +1763,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
           <g id="diagram-drag-ghost" class="diagram-drag-ghost"></g>
         </svg>
       </div>
-      <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker freely &nbsp;·&nbsp; Click marker to edit &nbsp;·&nbsp; Tap ✕ to delete</div>
-      <div class="diagram-undo-bar" id="diagram-undo-bar"><span id="diagram-undo-msg">Nodule deleted.</span><button class="diagram-undo-btn" type="button" onclick="undoLastDiagramDelete()">복원</button></div>
+      <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker freely for fine position &nbsp;·&nbsp; Click marker to edit</div>
     </div>
 
     <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
@@ -2241,12 +2192,6 @@ function renderAll() {
   // Initialize mobile lobe tab visibility
   if (window.innerWidth < 768) switchLobeTab(activeLobeMobile);
   updateLobeBadges();
-  const panel = document.getElementById('diagram-panel');
-  const btn = document.getElementById('diagram-toggle-btn');
-  if (panel) panel.style.display = diagramVisible ? 'block' : 'none';
-  if (btn) btn.classList.toggle('active', diagramVisible);
-  renderDiagramMarkers();
-  updateZoneFullState();
 }
 
 // ==================== PARENCHYMA ====================
@@ -2492,32 +2437,21 @@ function addNodule(lobe) {
   if (window.innerWidth < 768) switchLobeTab(lobe);
 }
 
-function removeNodule(lobe, idx, opts = {}) {
-  const list = state.nodules[lobe] || [];
-  const removed = list[idx];
-  if (!removed) return null;
-  if (opts.rememberUndo) {
-    lastDiagramDeletedNodule = { lobe, idx, nod: JSON.parse(JSON.stringify(removed)), label: LOBE_LABELS[lobe] + (idx + 1) };
-  }
+function removeNodule(lobe, idx) {
   // Keep popup index valid after splice
   if (activePopupLobe === lobe) {
     if (activePopupIdx === idx) { activePopupLobe = null; activePopupIdx = null; }
     else if (activePopupIdx > idx) { activePopupIdx--; }
   }
-  list.splice(idx, 1);
+  state.nodules[lobe].splice(idx, 1);
   saveState();
   renderNoduleCol(lobe);
-  updateLobeBadges();
-  updateZoneFullState();
-  renderPrevBiopsies();
   // Close popup if the deleted nodule was open (flag set above)
   if (activePopupLobe === null) {
     const overlay = document.getElementById('nodule-popup-overlay');
     if (overlay) overlay.classList.remove('show');
+    renderDiagramMarkers();
   }
-  renderDiagramMarkers();
-  if (opts.rememberUndo) showDiagramUndoBar(lastDiagramDeletedNodule);
-  return removed;
 }
 
 function buildNoduleTable(lobe, idx, nod) {
@@ -4012,7 +3946,7 @@ function updateLobeBadges() {
 }
 
 // ==================== INTERACTIVE DIAGRAM ====================
-let diagramVisible = true;
+let diagramVisible = false;
 let activePopupLobe = null;
 let activePopupIdx  = null;
 
@@ -4028,7 +3962,6 @@ function toggleDiagram() {
 let diagramDragStart = null;
 let diagramDragHover = null;
 let diagramMarkerDrag = null;
-let lastDiagramDeletedNodule = null;
 
 function diagramLocationRange(startLoc, endLoc) {
   const order = ['upper', 'middle', 'lower'];
@@ -4347,46 +4280,6 @@ function diagramMarkerPointerCancel() {
   renderDiagramMarkers();
 }
 
-function showDiagramUndoBar(deleted) {
-  const bar = document.getElementById('diagram-undo-bar');
-  const msg = document.getElementById('diagram-undo-msg');
-  if (!bar || !deleted) return;
-  if (msg) msg.textContent = `Nodule ${deleted.label} 삭제됨`;
-  bar.classList.add('show');
-}
-
-function hideDiagramUndoBar() {
-  const bar = document.getElementById('diagram-undo-bar');
-  if (bar) bar.classList.remove('show');
-}
-
-function deleteNoduleFromDiagram(event, lobe, idx) {
-  event.preventDefault();
-  event.stopPropagation();
-  removeNodule(lobe, idx, { rememberUndo: true });
-}
-
-function undoLastDiagramDelete() {
-  const deleted = lastDiagramDeletedNodule;
-  if (!deleted) { hideDiagramUndoBar(); return; }
-  if (!state.nodules[deleted.lobe]) state.nodules[deleted.lobe] = [];
-  const insertIdx = Math.min(deleted.idx, state.nodules[deleted.lobe].length);
-  if (state.nodules[deleted.lobe].length >= 3) {
-    hideDiagramUndoBar();
-    return;
-  }
-  state.nodules[deleted.lobe].splice(insertIdx, 0, JSON.parse(JSON.stringify(deleted.nod)));
-  lastDiagramDeletedNodule = null;
-  saveState();
-  renderNoduleCol(deleted.lobe);
-  updateLobeBadges();
-  renderPrevBiopsies();
-  renderDiagramMarkers();
-  updateZoneFullState();
-  if (window.innerWidth < 768) switchLobeTab(deleted.lobe);
-  hideDiagramUndoBar();
-}
-
 function openNodulePopup(lobe, idx) {
   activePopupLobe = lobe;
   activePopupIdx  = idx;
@@ -4495,28 +4388,6 @@ function renderDiagramMarkers() {
       txt.style.pointerEvents = 'none';
       txt.textContent = LOBE_LABELS[lobe] + (idx + 1);
       grp.appendChild(txt);
-
-      const del = document.createElementNS(ns, 'g');
-      const delY = Math.max(24, cy - ry - 8);
-      const delX = Math.min(274, Math.max(26, cx + rx + 7));
-      del.classList.add('diagram-delete-hit');
-      del.setAttribute('role', 'button');
-      del.setAttribute('aria-label', `Delete ${LOBE_LABELS[lobe]}${idx + 1} marker`);
-      del.addEventListener('pointerdown', (event) => deleteNoduleFromDiagram(event, lobe, idx));
-      const delCircle = document.createElementNS(ns, 'circle');
-      delCircle.setAttribute('cx', delX);
-      delCircle.setAttribute('cy', delY);
-      delCircle.setAttribute('r', 6.8);
-      delCircle.setAttribute('class', 'diagram-delete-circle');
-      del.appendChild(delCircle);
-      const delText = document.createElementNS(ns, 'text');
-      delText.setAttribute('x', delX);
-      delText.setAttribute('y', delY + 3.2);
-      delText.setAttribute('text-anchor', 'middle');
-      delText.setAttribute('class', 'diagram-delete-x');
-      delText.textContent = '×';
-      del.appendChild(delText);
-      grp.appendChild(del);
 
       g.appendChild(grp);
     });

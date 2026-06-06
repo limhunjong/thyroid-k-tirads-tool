@@ -1,5 +1,12 @@
 # Changelog
 
+## ver0.16
+
+- Diagram is now visible by default when the Thyroid Nodule section loads.
+- Diagram sizing is responsive and expands toward the largest practical size for the current viewport while preserving the SVG aspect ratio.
+- Added a small red `×` delete control above each Diagram nodule marker for quick in-diagram deletion.
+- Added one-step restore for accidental Diagram deletion via an inline `복원` undo bar.
+
 ## ver0.15
 
 - Added fine-grained Diagram marker positioning with persisted `diagramX` / `diagramY` coordinates.
