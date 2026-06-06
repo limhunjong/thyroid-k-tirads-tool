@@ -1,5 +1,13 @@
 # Changelog
 
+## ver0.26
+
+- Added shared typography/control tokens for more consistent font sizing across the tool.
+- Increased base body/form typography for better legibility while preserving the existing compact clinical layout.
+- Center-aligned text and placeholders inside text inputs and selects, including Clinical Information `custom` and Thyroid Size AP/T/L boxes.
+- Standardized segmented controls, checkbox labels, table labels, date selects, nodule cells, and lymph-node table typography/weights.
+- Verified JavaScript syntax and browser-computed styles for centered inputs/selects and larger consistent font sizes.
+
 ## ver0.25
 
 - Replaced single-item Diagram delete restore with a multi-item delete history stack.
