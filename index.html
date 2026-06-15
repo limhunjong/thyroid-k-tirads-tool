@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.39</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.52</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -114,17 +114,83 @@ label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   -webkit-backdrop-filter: saturate(180%) blur(40px);
   border-bottom: 0.5px solid rgba(84,84,88,0.4);
   display: flex; align-items: center;
-  padding: 0 16px; height: 52px; gap: 0;
+  padding: 0 12px; height: 56px; gap: 4px;
 }
-.tab-btn {
-  padding: 0 14px; height: 52px; background: none; border: none;
-  border-bottom: 2px solid transparent; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: var(--label3);
-  letter-spacing: -0.1px;
-  transition: color 0.2s; font-family: inherit;
+/* Thyroid / Postop segmented mode selector */
+.mode-seg {
+  display: inline-flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
 }
-.tab-btn:active { opacity: 0.55; }
-.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+body.light .mode-seg { background: rgba(0,0,0,0.06); }
+.mode-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 0 16px; height: 44px;
+  background: transparent; border: none;
+  border-radius: 9px; cursor: pointer;
+  font-size: 15px; font-weight: 700;
+  color: rgba(235,235,245,0.85);
+  letter-spacing: 0.1px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  font-family: inherit; white-space: nowrap;
+}
+.mode-btn svg { flex-shrink: 0; }
+body.light .mode-btn { color: var(--label2); }
+.mode-btn.active {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(10,132,255,0.5);
+}
+/* Separator between mode-seg and section nav */
+.nav-sep {
+  width: 0.5px; height: 22px;
+  background: rgba(84,84,88,0.45);
+  margin: 0 4px; flex-shrink: 0;
+}
+/* Cervical LN / Extrathyroidal section nav buttons */
+.sec-nav-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0 12px; height: 34px;
+  background: rgba(120,120,128,0.18);
+  border: 0.5px solid rgba(120,120,128,0.28);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px; font-weight: 700;
+  color: rgba(235,235,245,0.72);
+  letter-spacing: 0.2px;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+  font-family: inherit; white-space: nowrap;
+}
+.sec-nav-btn svg { flex-shrink: 0; }
+body.light .sec-nav-btn {
+  background: rgba(120,120,128,0.10);
+  border-color: rgba(120,120,128,0.25);
+  color: var(--label2);
+}
+.sec-nav-btn:hover {
+  background: rgba(120,120,128,0.28);
+  color: rgba(235,235,245,0.92);
+}
+body.light .sec-nav-btn:hover {
+  background: rgba(120,120,128,0.18);
+  color: var(--label1);
+}
+.sec-nav-btn.active {
+  background: rgba(10,132,255,0.18);
+  border-color: rgba(10,132,255,0.55);
+  color: var(--blue);
+  box-shadow: 0 0 0 1px rgba(10,132,255,0.25);
+  font-weight: 700;
+}
+body.light .sec-nav-btn.active {
+  background: rgba(10,132,255,0.10);
+  border-color: rgba(10,132,255,0.45);
+}
+.sec-nav-btn:active { opacity: 0.65; }
 .top-spacer { flex: 1; }
 .report-btn {
   background: #FFFFFF; color: var(--blue); border: 0.5px solid rgba(0,0,0,0.08);
@@ -237,8 +303,7 @@ body.light table.ln-table th.sub-header {
 #main { padding: 16px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-/* Normal Thyroid active: gray out clinical/parenchyma sections */
-#clinicalTable:has(input:disabled),
+/* Normal Thyroid active: gray out parenchyma section only */
 #parenchymaTable:has(input:disabled) {
   opacity: 0.38;
   pointer-events: none;
@@ -253,6 +318,24 @@ body.light table.ln-table th.sub-header {
   color: var(--label2); font-weight: 400;
 }
 .action-bar label:active { background: var(--fill4); }
+/* Normal Thyroid / Normal Postop — same visual weight */
+.action-quick-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: var(--r-md);
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  background: rgba(10,132,255,0.08);
+  border: 1.5px solid rgba(10,132,255,0.30);
+  color: var(--blue);
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit; user-select: none; -webkit-user-select: none;
+  white-space: nowrap; letter-spacing: -0.1px;
+}
+.action-quick-btn:hover { background: rgba(10,132,255,0.14); border-color: rgba(10,132,255,0.50); }
+.action-quick-btn:active { background: rgba(10,132,255,0.22); }
+.action-quick-btn:has(input:checked) {
+  background: var(--blue); color: #fff; border-color: var(--blue);
+  box-shadow: 0 2px 8px rgba(10,132,255,0.40);
+}
 .pink-btn {
   background: var(--red); color: #fff; border: none;
   padding: 10px 18px; border-radius: var(--r-md);
@@ -262,6 +345,19 @@ body.light table.ln-table th.sub-header {
   box-shadow: var(--shadow-btn);
 }
 .pink-btn:active { opacity: 0.72; }
+.section-reset-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: rgba(255,69,58,0.14); color: var(--red); border: 0.5px solid rgba(255,69,58,0.35);
+  padding: 4px 12px; border-radius: var(--r-sm);
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  font-family: inherit; transition: background 0.15s;
+}
+.section-reset-btn:hover { background: rgba(255,69,58,0.22); }
+.section-reset-btn:active { background: rgba(255,69,58,0.30); }
+.nodule-section-title .section-reset-btn {
+  position: static; transform: none;
+  background: rgba(255,69,58,0.18); border-color: rgba(255,69,58,0.45);
+}
 .blue-btn {
   background: var(--blue); color: #fff; border: none;
   padding: 10px 18px; border-radius: var(--r-md);
@@ -294,7 +390,8 @@ table.data-table th {
   border-bottom: 0.5px solid var(--sep);
 }
 table.data-table td.label-cell {
-  background: var(--bg1); font-weight: 600; width: 124px;
+  background: var(--bg1); font-weight: 600;
+  width: 168px; min-width: 168px; padding: 10px 14px;
   font-size: var(--font-sm); color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.3);
   line-height: 1.35;
@@ -335,81 +432,63 @@ table.data-table td.section-header {
 }
 .radio-group label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
 
-/* Multi-option groups: tokenized, equal button system for nodule option controls */
-.radio-group:not(:has(input[type=text])):has(> label:nth-child(3)) label {
-  flex-basis: 112px;
-  width: 112px;
-  min-width: 112px;
-}
+/* Multi-option groups: unified 2-column grid system for nodule option controls */
 .nodule-data-cell {
-  --nodule-option-col: 112px;
-  --nodule-option-gap: 3px;
-  --nodule-option-min-h: 58px;
+  --nodule-option-min-h: 56px;
   --nodule-option-pad-x: 12px;
-  --nodule-option-grid-max: 360px;
+  --nodule-option-gap: 3px;
 }
 .nodule-data-cell .radio-group,
 .nodule-data-cell .check-group {
-  width: fit-content;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--nodule-option-gap);
+  width: 100%;
   max-width: 100%;
-  align-items: center;
+  align-items: stretch;
 }
 .nodule-data-cell .radio-group label,
-.nodule-data-cell .check-group label,
-.nodule-data-cell .inline-check-label {
-  flex: 0 0 auto;
-  min-width: 96px;
-  max-width: 240px;
+.nodule-data-cell .check-group label {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  flex: none;
+  min-height: var(--nodule-option-min-h);
+  height: 100%;
   box-sizing: border-box;
   padding-left: var(--nodule-option-pad-x);
   padding-right: var(--nodule-option-pad-x);
   white-space: normal;
-  overflow-wrap: anywhere;
   word-break: keep-all;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(3)),
-.nodule-data-cell .check-group:has(> label:nth-child(3)) {
-  display: inline-grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--nodule-option-col), 1fr));
-  grid-auto-rows: minmax(var(--nodule-option-min-h), 1fr);
-  width: min(100%, var(--nodule-option-grid-max));
-  gap: var(--nodule-option-gap);
-  align-items: stretch;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))),
-.nodule-data-cell .check-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) {
-  display: inline-grid;
-  grid-template-columns: repeat(2, minmax(98px, 1fr));
-  grid-auto-rows: minmax(var(--nodule-option-min-h), 1fr);
-  width: min(100%, calc((var(--nodule-option-col) * 2) + var(--nodule-option-gap)));
-  gap: var(--nodule-option-gap);
-  align-items: stretch;
-}
-.nodule-data-cell .radio-group:has(> label:nth-child(3)) label,
-.nodule-data-cell .check-group:has(> label:nth-child(3)) label,
-.nodule-data-cell .radio-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) label,
-.nodule-data-cell .check-group:has(> label:nth-child(2)):not(:has(> label:nth-child(3))) label {
-  width: auto;
-  height: 100%;
-  min-width: 0;
-  max-width: none;
-  padding-left: var(--nodule-option-pad-x);
-  padding-right: var(--nodule-option-pad-x);
+  overflow-wrap: anywhere;
   justify-self: stretch;
   align-self: stretch;
 }
-.nodule-data-cell .radio-group:not(:has(> label:nth-child(4))) label {
-  flex-basis: clamp(98px, 32%, 132px);
+/* 1 option: single full-width column */
+.nodule-data-cell .radio-group:has(> label:only-child),
+.nodule-data-cell .check-group:has(> label:only-child) {
+  grid-template-columns: 1fr;
 }
-.nodule-data-cell .radio-group.isthmus-location-group,
-.nodule-data-cell .radio-group.isthmus-location-group:has(> label:nth-child(3)) {
+/* odd count: last item spans both columns */
+.nodule-data-cell .radio-group:has(> label:nth-child(3):last-child) > label:last-child,
+.nodule-data-cell .radio-group:has(> label:nth-child(5):last-child) > label:last-child,
+.nodule-data-cell .radio-group:has(> label:nth-child(7):last-child) > label:last-child,
+.nodule-data-cell .check-group:has(> label:nth-child(3):last-child) > label:last-child,
+.nodule-data-cell .check-group:has(> label:nth-child(5):last-child) > label:last-child,
+.nodule-data-cell .check-group:has(> label:nth-child(7):last-child) > label:last-child {
+  grid-column: 1 / -1;
+}
+/* isthmus location: horizontal single-row exception */
+.nodule-data-cell .radio-group.isthmus-location-group {
   display: inline-flex;
   width: fit-content;
   max-width: 100%;
 }
 .nodule-data-cell .radio-group.isthmus-location-group label {
-  flex: 0 0 auto;
+  width: auto;
   height: auto;
+  min-height: 0;
+  flex: 0 0 auto;
   min-width: 78px;
   white-space: nowrap;
 }
@@ -477,7 +556,8 @@ textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
 textarea:disabled { background: var(--fill4); color: var(--label4); }
 
 /* Center and size the compact clinical/dimension fields consistently */
-#clinIndCustom { width: 180px !important; }
+#clinIndText { width: 100%; }
+#clinIndText, #clinHistory, #postopClinIndText, #postopClinHistory { min-height: 64px; }
 input[id^="sizeRight"],
 input[id^="sizeIsthmus"],
 input[id^="sizeLeft"] {
@@ -489,7 +569,7 @@ input[id^="sizeLeft"] {
 .nodule-col { flex: 1; min-width: 0; }
 .nodule-col-header {
   background: var(--blue); color: #fff; text-align: center;
-  padding: 11px 14px; font-weight: 700; font-size: 14px;
+  padding: 11px 16px; font-weight: 700; font-size: 14px;
   border-radius: var(--r-lg) var(--r-lg) 0 0; letter-spacing: -0.2px;
 }
 .nodule-item {
@@ -538,18 +618,38 @@ input[id^="sizeLeft"] {
 .tirads-none { color: var(--label4); background: transparent; }
 
 /* ===== LYMPH NODE TABLE ===== */
-.ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); }
-table.ln-table { border-collapse: collapse; background: var(--bg1); font-size: var(--font-sm); }
+.ln-table-wrap { overflow-x: auto; border-radius: var(--r-lg); box-shadow: var(--shadow-card); margin-bottom: 12px; }
+table.ln-table {
+  border-collapse: collapse; background: var(--bg1); font-size: var(--font-base);
+  width: 100%; table-layout: fixed; min-width: 0;
+}
 table.ln-table th, table.ln-table td {
   border-bottom: 0.5px solid rgba(84,84,88,0.3);
-  padding: 10px 12px; text-align: center; vertical-align: middle;
+  padding: 7px 5px; text-align: center; vertical-align: middle;
+  overflow: hidden;
 }
 table.ln-table th { background: var(--bg2); color: var(--label1); font-weight: 700; border-bottom: 0.5px solid var(--sep); }
-table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: var(--font-xs); }
+table.ln-table th.sub-header { background: var(--bg1); color: var(--label3); font-weight: 600; font-size: 14px; white-space: normal; word-break: break-word; }
+/* Indeterminate columns (2,4,6,8): subtle blue tint */
+.ln-table td:nth-child(2),.ln-table td:nth-child(4),.ln-table td:nth-child(6),.ln-table td:nth-child(8),
+.ln-table thead tr:last-child th:nth-child(2),.ln-table thead tr:last-child th:nth-child(4),
+.ln-table thead tr:last-child th:nth-child(6),.ln-table thead tr:last-child th:nth-child(8) {
+  background: rgba(10,132,255,0.06);
+}
+/* Suspicious columns (3,5,7,9): subtle amber tint */
+.ln-table td:nth-child(3),.ln-table td:nth-child(5),.ln-table td:nth-child(7),.ln-table td:nth-child(9),
+.ln-table thead tr:last-child th:nth-child(3),.ln-table thead tr:last-child th:nth-child(5),
+.ln-table thead tr:last-child th:nth-child(7),.ln-table thead tr:last-child th:nth-child(9) {
+  background: rgba(255,159,10,0.07);
+}
+/* Required-cell keeps its own background (higher specificity wins) */
+.ln-table th.ln-indet { color: rgba(10,132,255,0.85); }
+.ln-table th.ln-susp  { color: rgba(255,159,10,0.90); }
 table.ln-table td.row-label {
   background: var(--bg1); font-weight: 600; text-align: left;
-  white-space: nowrap; color: var(--label2);
+  white-space: normal; word-break: keep-all; color: var(--label2);
   border-right: 0.5px solid rgba(84,84,88,0.2);
+  width: 88px;
 }
 table.ln-table td.required-cell { background: rgba(255,159,10,0.055); }
 
@@ -676,7 +776,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 /* ===== DYNAMICALLY-RENDERED CELLS (nodule / LN tables) ===== */
 /* These replace inline style.cssText so CSS variables work in light mode */
 .nodule-data-cell {
-  padding: 9px 12px;
+  padding: 10px 16px;
   border-bottom: 0.5px solid var(--sep);
   background: var(--bg1);
   color: var(--label1);
@@ -689,14 +789,15 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   color: var(--label3);
   font-weight: 700; text-align: left;
   font-size: var(--font-xs); letter-spacing: 0.45px; text-transform: uppercase;
-  padding: 9px 12px 7px;
+  padding: 10px 16px 8px;
   border-bottom: 0.5px solid var(--sep);
 }
 .nodule-table-el {
-  border-collapse: collapse; width: 100%;
+  border-collapse: collapse; width: 100%; table-layout: fixed;
   background: var(--bg1);
   border-radius: 0 0 16px 16px; overflow: hidden;
 }
+col.nodule-label-col { width: 136px; }
 .nodule-th-el {
   background: var(--bg1); color: var(--label1);
   padding: 0; border: none;
@@ -706,7 +807,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 12px 16px;
   gap: 10px;
 }
 .nodule-title-wrap {
@@ -739,28 +840,44 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   white-space: nowrap;
 }
 .nodule-reset-cell {
-  padding: 10px; text-align: center;
+  padding: 10px 16px; text-align: center;
   border-bottom: none; background: var(--bg1);
 }
 .ln-check-label {
-  display: flex; align-items: center; justify-content: center; gap: 5px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
   white-space: nowrap; cursor: pointer;
-  padding: 7px 11px; border-radius: 8px;
+  padding: 3px 8px; border-radius: 6px;
   transition: background 0.15s;
-  color: var(--label2); font-size: var(--font-sm); font-weight: 500; letter-spacing: -0.1px;
-  min-height: 40px; text-align: center;
+  background: var(--fill3);
+  color: var(--label2); font-size: var(--font-base); font-weight: 500; letter-spacing: 0;
+  min-height: 26px; text-align: center;
+  user-select: none; -webkit-user-select: none;
 }
+.ln-check-label:active { background: var(--fill4); }
+.ln-check-label:has(input:checked) { background: var(--blue-bg); color: var(--blue); font-weight: 700; }
+.ln-check-label:has(input:disabled) { opacity: 0.35; pointer-events: none; }
+/* Biopsy / Complications inline checks in LN table */
+table.ln-table .inline-check-label { background: var(--fill3); }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
   padding: 8px 12px; font-size: var(--font-xs);
-  letter-spacing: 0.5px; text-transform: uppercase;
 }
+.ln-measure-cell { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.ln-measure-row { display: flex; align-items: center; gap: 2px; width: 100%; min-width: 0; }
+.ln-meas-lbl { font-size: 14px; font-weight: 600; color: var(--label3); flex-shrink: 0; }
+.ln-size-input { flex: 1; min-width: 0; width: 0; font-size: var(--font-base); }
+.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: var(--font-base); max-width: 62px; }
+table.ln-table textarea { width: 100%; box-sizing: border-box; min-width: 0; font-size: var(--font-base); }
+table.ln-table td.td-top { vertical-align: top; }
+.ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; width: 100%; }
+.ln-check-label { min-width: calc(50% - 1px); flex: 1; }
+#tab-content-extra textarea { width: 100%; }
 
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
   width: 136px; font-weight: 600; font-size: var(--font-sm);
-  padding: 10px 12px; border-bottom: 0.5px solid rgba(84,84,88,0.25);
+  padding: 10px 14px; border-bottom: 0.5px solid rgba(84,84,88,0.25);
   border-right: 0.5px solid rgba(84,84,88,0.2);
   color: var(--label2); white-space: pre-line; vertical-align: middle;
   background: rgba(99, 99, 115, 0.12); line-height: 1.35;
@@ -770,7 +887,10 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
 /* ===== MOBILE ===== */
 @media (max-width: 680px) {
   #top-bar { height: auto; padding: 0 10px 8px; flex-wrap: wrap; gap: 0; }
-  .tab-btn { flex: 1; height: 44px; padding: 0 6px; font-size: 12px; border-bottom-width: 2px; min-width: 0; letter-spacing: -0.2px; }
+  .mode-btn { padding: 0 11px; height: 38px; font-size: 13px; gap: 5px; }
+  .mode-btn svg { width: 16px; height: 16px; }
+  .sec-nav-btn { padding: 0 8px; font-size: 11px; height: 30px; gap: 4px; }
+  .sec-nav-btn svg { width: 13px; height: 13px; }
   .top-spacer { flex-basis: 100%; height: 0; flex-shrink: 0; }
   .report-btn { flex: 1; margin: 6px 6px 0 0; padding: 10px 10px; font-size: var(--font-md); }
   .reset-all-btn { flex-shrink: 0; margin: 6px 0 0; padding: 10px 14px; font-size: var(--font-md); }
@@ -778,15 +898,18 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   #main { padding: 12px 12px; }
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: var(--font-md); min-height: 48px; }
-  table.data-table td.label-cell { width: 92px !important; font-size: var(--font-sm); padding: 10px 8px; }
+  table.data-table td.label-cell { width: 140px; min-width: 140px; font-size: 13px; padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: var(--font-sm); }
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
-  .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 8px !important; }
+  .nodule-label-cell { width: 108px !important; font-size: var(--font-sm) !important; padding: 10px 10px !important; }
+  col.nodule-label-col { width: 108px; }
+  .nodule-data-cell { padding: 10px 10px; }
+  .nodule-header-inner { padding: 12px 12px; }
+  .nodule-section-hdr { padding: 10px 10px 8px; }
   .nodule-section-title { font-size: var(--font-md); padding: 10px 14px; }
-  .radio-group { width: fit-content; max-width: 100%; }
-  .radio-group label { flex: 0 0 auto; min-width: 96px; }
+  .radio-group { max-width: 100%; }
   .radio-group label { padding: 10px 12px; min-height: 46px; font-size: var(--font-md); }
   input[type=text], select, textarea { font-size: var(--font-base) !important; }
   input[type=text] { padding: 10px 11px; min-height: 46px; }
@@ -811,9 +934,11 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   }
 }
 @media (max-width: 390px) {
-  .tab-btn { font-size: 10px; }
-  table.data-table td.label-cell { width: 76px !important; }
+  .mode-btn { font-size: 13px; padding: 0 10px; height: 36px; }
+  .sec-nav-btn { font-size: 10px; padding: 0 7px; height: 28px; }
+  
   .nodule-label-cell { width: 84px !important; }
+  col.nodule-label-col { width: 84px; }
 }
 
 /* ===== TWO-COLUMN LAYOUT ===== */
@@ -1174,7 +1299,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
 @media (min-width: 768px) and (max-width: 1023px) {
   #main { padding: 16px; }
   #bottom-section { margin: 0 16px 16px; }
-  table.data-table td.label-cell { width: 120px; }
+  
 }
 
 /* ===== MOBILE ALL (< 768px) ===== */
@@ -1188,7 +1313,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
     padding: env(safe-area-inset-top, 0px) max(10px, env(safe-area-inset-right, 10px)) 8px max(10px, env(safe-area-inset-left, 10px));
     flex-wrap: wrap; gap: 0;
   }
-  .tab-btn { flex: 1; height: 44px; padding: 0 6px; font-size: 12px; border-bottom-width: 2px; min-width: 0; letter-spacing: -0.2px; }
+  .mode-btn { padding: 0 13px; height: 38px; font-size: 14px; }
+  .sec-nav-btn { padding: 0 10px; font-size: 11px; height: 30px; }
   .top-spacer { flex-basis: 100%; height: 0; flex-shrink: 0; }
   .report-btn { flex: 1; margin: 6px 6px 0 0; padding: 10px 10px; font-size: 14px; min-height: 46px; }
   .reset-all-btn { flex-shrink: 0; margin: 6px 0 0; padding: 10px 14px; font-size: 14px; }
@@ -1200,17 +1326,20 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .action-bar { flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .pink-btn, .blue-btn { padding: 11px 16px; font-size: 14px; min-height: 48px; }
 
-  table.data-table td.label-cell { width: 88px !important; font-size: 12px; padding: 10px 8px; }
+  table.data-table td.label-cell { width: 130px; min-width: 130px; font-size: 12px; padding: 10px 10px; }
   table.data-table td { padding: 10px 10px; }
   table.data-table th { padding: 10px 10px; font-size: 13px; }
 
   .nodule-section { flex-direction: column; }
   .nodule-col { width: 100%; }
-  .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 8px !important; }
+  .nodule-label-cell { width: 100px !important; font-size: 12px !important; padding: 10px 10px !important; }
+  col.nodule-label-col { width: 100px; }
+  .nodule-data-cell { padding: 10px 10px; }
+  .nodule-header-inner { padding: 12px 12px; }
+  .nodule-section-hdr { padding: 10px 10px 8px; }
   .nodule-section-title { font-size: 14px; padding: 10px 14px; }
 
-  .radio-group { width: 100%; }
-  .radio-group label { flex: 1; padding: 10px 10px; min-height: 46px; font-size: 14px; }
+  .radio-group label { padding: 10px 10px; min-height: 46px; font-size: 14px; }
 
   input[type=text], select, textarea { font-size: 16px !important; }
   input[type=text] { padding: 10px 11px; min-height: 44px; }
@@ -1242,16 +1371,19 @@ body.light #right-panel.sheet-open #live-preview-pane {
 
 /* ===== MOBILE STANDARD (< 430px) ===== */
 @media (max-width: 429px) {
-  .tab-btn { font-size: 11px; }
-  table.data-table td.label-cell { width: 82px !important; }
+  .mode-btn { font-size: 13px; padding: 0 11px; height: 36px; }
+  .sec-nav-btn { font-size: 11px; padding: 0 8px; height: 28px; }
+  
   .nodule-label-cell { width: 90px !important; }
+  col.nodule-label-col { width: 90px; }
 }
 
 /* ===== MOBILE SMALL (< 375px) ===== */
 @media (max-width: 374px) {
   .tab-btn { font-size: 10px; padding: 0 4px; }
-  table.data-table td.label-cell { width: 76px !important; }
+  
   .nodule-label-cell { width: 84px !important; }
+  col.nodule-label-col { width: 84px; }
   #main { padding: 10px max(10px, env(safe-area-inset-left, 10px)); }
   #bottom-section { margin: 0 10px 10px; }
   .radio-group label { padding: 9px 8px; font-size: 13px; }
@@ -1291,7 +1423,8 @@ body.light #right-panel.sheet-open #live-preview-pane {
   }
   /* Suppress the line-break spacer used in portrait mobile wrap */
   #top-bar .top-spacer { flex: 1; flex-basis: auto !important; height: 0; }
-  .tab-btn { height: 40px; font-size: 11px; padding: 0 8px; border-bottom-width: 2px; }
+  .mode-btn { height: 34px; font-size: 13px; padding: 0 11px; }
+  .sec-nav-btn { height: 28px; font-size: 11px; padding: 0 8px; }
   .report-btn { margin: 0 0 0 6px; padding: 0 14px; height: 30px; font-size: 13px; min-height: 30px; border-radius: 15px; }
   .reset-all-btn { padding: 0 10px; height: 30px; font-size: 13px; }
   .theme-toggle-btn { width: 28px; height: 28px; margin-left: 4px; }
@@ -1305,7 +1438,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   /* Compact table rows */
   table.data-table th { padding: 8px 10px; font-size: 13px; }
   table.data-table td { padding: 8px 10px; }
-  table.data-table td.label-cell { padding: 8px 8px; }
+  table.data-table td.label-cell { width: 120px; min-width: 120px; font-size: 12px; padding: 8px 8px; }
 
   /* Compact controls — keep 40px min for thumb accuracy */
   .radio-group label { min-height: 40px; padding: 8px 12px; font-size: 13px; }
@@ -1427,7 +1560,6 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .radio-group label { min-width: 0; }
 
   /* Fix inline-width inputs — let them grow/shrink with available space */
-  #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
   #prevBxTarget   { width: 80px !important; min-width: 60px; }
   #prevBxFNAPathDx, #prevBxCNBPathDx { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
 }
@@ -1446,7 +1578,6 @@ body.light #right-panel.sheet-open #live-preview-pane {
   .radio-group label  { min-width: 0; }
 
   /* Fix inline inputs in landscape too */
-  #clinIndCustom  { width: auto !important; flex: 1 1 60px; min-width: 60px; max-width: 100%; }
   #prevBxTarget   { width: 80px !important; min-width: 60px; }
   #prevBxFNAPathDx, #prevBxCNBPathDx { width: auto !important; flex: 1 1 100px; min-width: 80px; max-width: 100%; }
 
@@ -1559,6 +1690,11 @@ body.light #thyroid-svg .lobe-bg { stroke: rgba(0,122,255,0.22); }
   pointer-events: none;
 }
 body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
+.postop-anatomy-line {
+  fill: none; stroke: rgba(255,255,255,0.18); stroke-width: 1;
+  stroke-linecap: round; stroke-dasharray: 2 4; pointer-events: none;
+}
+body.light .postop-anatomy-line { stroke: rgba(0,122,255,0.16); }
 #thyroid-svg .midline,
 .postop-diagram-svg .midline {
   fill: none;
@@ -1576,7 +1712,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   pointer-events: none;
   user-select: none;
 }
-#thyroid-svg .lobe-label {
+#thyroid-svg .lobe-label,
+.postop-diagram-svg .postop-lobe-label {
   fill: var(--label2);
   font-size: 11px;
   font-weight: 700;
@@ -1601,52 +1738,66 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   fill: rgba(10,132,255,0.24);
   stroke: rgba(10,132,255,0.48);
 }
+body.light .zone-path:hover { fill: rgba(0,122,255,0.12); stroke: rgba(0,122,255,0.30); }
+body.light .zone-path.zone-full { fill: rgba(255,149,0,0.10); }
+body.light .zone-path.zone-full:hover { fill: rgba(255,149,0,0.18); stroke: rgba(255,149,0,0.32); }
+body.light .zone-path.zone-drag-preview { fill: rgba(0,122,255,0.18); stroke: rgba(0,122,255,0.40); }
 .diagram-marker-dragging {
   opacity: 0.34;
   filter: drop-shadow(0 4px 10px rgba(10,132,255,0.42));
 }
-#thyroid-svg .diagram-drag-ghost {
+#thyroid-svg .diagram-drag-ghost,
+#postop-svg .diagram-drag-ghost {
   pointer-events: none;
   opacity: 0.95;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.34));
 }
-#thyroid-svg .diagram-drag-ghost ellipse {
+#thyroid-svg .diagram-drag-ghost ellipse,
+#postop-svg .diagram-drag-ghost ellipse {
   stroke-width: 2.4;
 }
-#thyroid-svg .diagram-delete-hit {
+#thyroid-svg .diagram-delete-hit,
+#postop-svg .diagram-delete-hit {
   cursor: pointer;
 }
-#thyroid-svg .diagram-span-handle {
+#thyroid-svg .diagram-span-handle,
+#postop-svg .diagram-span-handle {
   cursor: ns-resize;
 }
-#thyroid-svg .diagram-span-handle-stem {
+#thyroid-svg .diagram-span-handle-stem,
+#postop-svg .diagram-span-handle-stem {
   stroke: rgba(255,255,255,0.62);
   stroke-width: 1.2;
   stroke-linecap: round;
   pointer-events: none;
 }
-#thyroid-svg .diagram-span-handle-pill {
+#thyroid-svg .diagram-span-handle-pill,
+#postop-svg .diagram-span-handle-pill {
   fill: rgba(10,132,255,0.88);
   stroke: rgba(255,255,255,0.96);
   stroke-width: 1.4;
   filter: drop-shadow(0 3px 8px rgba(0,0,0,0.36));
 }
-#thyroid-svg .diagram-span-handle-grip {
+#thyroid-svg .diagram-span-handle-grip,
+#postop-svg .diagram-span-handle-grip {
   stroke: rgba(255,255,255,0.86);
   stroke-width: 1.15;
   stroke-linecap: round;
   pointer-events: none;
 }
-#thyroid-svg .diagram-span-handle:hover .diagram-span-handle-pill {
+#thyroid-svg .diagram-span-handle:hover .diagram-span-handle-pill,
+#postop-svg .diagram-span-handle:hover .diagram-span-handle-pill {
   fill: rgba(64,156,255,0.96);
 }
-#thyroid-svg .diagram-delete-circle {
+#thyroid-svg .diagram-delete-circle,
+#postop-svg .diagram-delete-circle {
   fill: rgba(255,69,58,0.95);
   stroke: rgba(255,255,255,0.92);
   stroke-width: 1.6;
   filter: drop-shadow(0 3px 7px rgba(0,0,0,0.34));
 }
-#thyroid-svg .diagram-delete-x {
+#thyroid-svg .diagram-delete-x,
+#postop-svg .diagram-delete-x {
   fill: #fff;
   font-size: 8px;
   font-weight: 800;
@@ -1685,7 +1836,8 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   text-align: center;
 }
 /* Nodule popup overlay */
-#nodule-popup-overlay {
+#nodule-popup-overlay,
+#postop-popup-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -1739,7 +1891,7 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 #postop-popup-body {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 12px 14px;
   -webkit-overflow-scrolling: touch;
 }
 #nodule-popup-body .nodule-item,
@@ -1792,18 +1944,11 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   }
   .nodule-data-cell .radio-group,
   .nodule-data-cell .check-group {
-    display: flex;
-    flex-wrap: wrap;
-    width: fit-content;
-    max-width: 100%;
-    align-items: center;
+    width: 100%;
   }
   .nodule-data-cell .radio-group label,
   .nodule-data-cell .check-group label,
   .nodule-data-cell .inline-check-label {
-    flex: 0 0 auto;
-    min-width: 96px;
-    max-width: 240px;
     white-space: normal !important;
     overflow-wrap: anywhere;
     word-break: keep-all;
@@ -1813,28 +1958,13 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
   .nodule-data-cell textarea {
     max-width: 100%;
   }
-  .nodule-data-cell .radio-group:has(> label:nth-child(3)),
-  .nodule-data-cell .check-group:has(> label:nth-child(3)) {
-    display: inline-grid;
-    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-    width: min(100%, 360px);
-    align-items: stretch;
-  }
-  .nodule-data-cell .radio-group:has(> label:nth-child(3)) label,
-  .nodule-data-cell .check-group:has(> label:nth-child(3)) label {
-    width: auto;
-    max-width: none;
-    min-width: 0;
-  }
 }
 
 @media (max-width: 390px) {
   .nodule-data-cell .radio-group label,
-  .nodule-data-cell .check-group label,
-  .nodule-data-cell .inline-check-label {
-    flex-basis: 100px;
-    padding-left: 9px !important;
-    padding-right: 9px !important;
+  .nodule-data-cell .check-group label {
+    padding-left: 8px;
+    padding-right: 8px;
   }
 }
 
@@ -1879,20 +2009,18 @@ body.light #thyroid-svg .anatomy-line { stroke: rgba(0,122,255,0.16); }
 .postop-diagram .postop-zone { cursor:pointer; transition:opacity .15s, stroke-width .15s, filter .15s; }
 .postop-diagram .postop-zone:hover { opacity:.92; stroke-width:2.6; filter: drop-shadow(0 3px 7px rgba(10,132,255,.22)); }
 .postop-zone.residual { fill:url(#postopLobeGradient); stroke:rgba(10,132,255,.55); }
-.postop-zone.opbed { fill:rgba(255,159,10,.14); stroke:rgba(255,159,10,.75); stroke-dasharray:5 4; }
+.postop-zone.opbed { fill:rgba(255,159,10,.14); stroke:rgba(255,159,10,.75); }
 .postop-zone.hidden-zone { opacity:.12; fill:var(--fill4); stroke:var(--sep); stroke-dasharray:3 5; cursor:default; pointer-events:none; }
-.postop-diagram-label { font-size:12px; font-weight:700; fill:var(--label1); pointer-events:none; }
-.postop-diagram-sub { font-size:8px; font-weight:650; fill:var(--label3); pointer-events:none; letter-spacing:-.15px; }
 .postop-diagram-marker text { pointer-events:none; }
 .postop-diagram-marker .marker-body { stroke:#fff; stroke-width:2.2; }
-.postop-diagram-marker.opbed .marker-body { stroke:#FF9F0A; stroke-width:2.4; stroke-dasharray:4 3; fill:#FFF4E0; }
-body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
+.postop-diagram-marker.opbed .marker-body { stroke:#FF9F0A; stroke-width:2.4; fill:#fff; }
+body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
 .postop-diagram-hint { margin-top:8px; color:var(--label3); font-size:12px; text-align:center; }
 #postopOpBedSection { grid-template-columns: 1fr; }
 #postopOpBedSection .nodule-col { min-width: 0; }
 #postopOpBedSection .nodule-header-inner { align-items: center; gap: 10px; }
 #postopOpBedSection .postop-impression-pill { white-space: normal; text-align: center; }
-#postopOpBedSection .radio-group { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+#postopOpBedSection .nodule-data-cell .radio-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #postopOpBedSection .nodule-data-cell input[type="text"] { max-width: 100%; }
 .postop-section-empty { color:var(--label2); font-size:13px; padding:10px 12px; }
 .postop-custom-structures { display:none; margin-top:8px; }
@@ -1908,13 +2036,54 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
 
 <!-- TOP BAR -->
 <div id="top-bar">
-  <button class="tab-btn active" onclick="switchTab(&#39;thyroid&#39;)" id="tab-thyroid">Thyroid</button>
-  <button class="tab-btn" onclick="switchTab(&#39;postop&#39;)" id="tab-postop">Postop</button>
-  <button class="tab-btn" onclick="switchTab(&#39;lymph&#39;)" id="tab-lymph">Cervical Lymph Node</button>
-  <button class="tab-btn" onclick="switchTab(&#39;extra&#39;)" id="tab-extra">Extrathyroidal Lesion</button>
+  <div class="mode-seg" role="group" aria-label="Mode">
+    <button class="mode-btn active" onclick="selectMode('thyroid')" id="tab-thyroid">
+      <!-- Thyroid gland (two lobes) with nodule dot -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="8.5" cy="13" rx="5.5" ry="7"/>
+        <ellipse cx="15.5" cy="13" rx="5.5" ry="7"/>
+        <circle cx="9" cy="10.5" r="2.2" fill="currentColor" stroke="none"/>
+      </svg>
+      Thyroid Nodule
+    </button>
+    <button class="mode-btn" onclick="selectMode('postop')" id="tab-postop">
+      <!-- Bandage / post-surgical dressing -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="8" rx="4"/>
+        <line x1="10" y1="8" x2="10" y2="16"/>
+        <line x1="14" y1="8" x2="14" y2="16"/>
+        <line x1="12" y1="11" x2="12" y2="13"/>
+        <line x1="11" y1="12" x2="13" y2="12"/>
+      </svg>
+      Postop
+    </button>
+  </div>
+  <div class="nav-sep"></div>
+  <button class="sec-nav-btn" onclick="switchTab('lymph')" id="tab-lymph">
+    <!-- Three lymph nodes connected (cervical chain) -->
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+      <circle cx="12" cy="4" r="2.5"/>
+      <circle cx="5.5" cy="17.5" r="2.5"/>
+      <circle cx="18.5" cy="17.5" r="2.5"/>
+      <line x1="10.4" y1="6.3" x2="7.2" y2="15.2"/>
+      <line x1="13.6" y1="6.3" x2="16.8" y2="15.2"/>
+      <line x1="8" y1="17.5" x2="16" y2="17.5"/>
+    </svg>
+    Lymph Node
+  </button>
+  <button class="sec-nav-btn" onclick="switchTab('extra')" id="tab-extra">
+    <!-- Thyroid boundary box with external lesion marker -->
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="7" width="14" height="14" rx="2.5"/>
+      <circle cx="19.5" cy="4.5" r="3" fill="currentColor" stroke="none"/>
+      <line x1="16" y1="7" x2="17.4" y2="6.1" stroke-width="1.5"/>
+    </svg>
+    Extrathyroidal Lesion
+  </button>
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
+  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.52.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
   <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
 
@@ -1925,8 +2094,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
   <!-- TAB 1: THYROID -->
   <div class="tab-content active" id="tab-content-thyroid">
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetThyroid()">갑상선 초기화</button>
-      <div class="radio-group" style="display:inline-flex;"><label><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()"> Normal Thyroid</label></div>
+      <label class="action-quick-btn"><input type="checkbox" id="normalThyroid" onchange="onNormalThyroidChange()" style="display:none;"> Normal Thyroid</label>
     </div>
 
     <!-- Section A: Clinical Information -->
@@ -1937,23 +2105,27 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
         <tr>
           <td class="label-cell">Clinical Indication</td>
           <td>
-            <div class="radio-group">
-              <label><input type="radio" name="clinInd" value="Diagnostic workup" onchange="onClinIndChange()"> Diagnostic workup</label>
-              <label><input type="radio" name="clinInd" value="Thyroid nodule" onchange="onClinIndChange()" checked=""> Thyroid nodule</label>
-              <label><input type="radio" name="clinInd" value="custom" onchange="onClinIndChange()"> <input type="text" id="clinIndCustom" placeholder="custom" style="width:160px" oninput="onClinIndCustomChange()"></label>
-            </div>
+            <div class="radio-group" style="display:inline-flex;margin-bottom:6px;"><label><input type="checkbox" id="clinIndDefault" onchange="state.clinIndDefault=this.checked;saveState()" checked> Thyroid nodule</label></div>
+            <textarea id="clinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';state.clinIndText=this.value;saveState()"></textarea>
           </td>
+        </tr>
+        <tr>
+          <td class="label-cell">Clinical History</td>
+          <td><textarea id="clinHistory" rows="2" style="width:100%;resize:none;overflow-y:hidden;" placeholder="Brief clinical history (optional)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';state.clinHistory=this.value;saveState()"></textarea></td>
         </tr>
         <tr>
           <td class="label-cell">US Comparison</td>
           <td>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <span>Date:</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <select id="compYear" class="date-select" onchange="state.compYear=this.value;saveState()"><option value="">Year</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option><option value="2010">2010</option><option value="2009">2009</option><option value="2008">2008</option><option value="2007">2007</option><option value="2006">2006</option></select>
               <span>.</span>
               <select id="compMonth" class="date-select" onchange="state.compMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
               <span>.</span>
               <select id="compDay" class="date-select" onchange="state.compDay=this.value;saveState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+              <div class="radio-group" style="display:inline-flex;">
+                <label><input type="radio" name="compType" value="US" onchange="state.compType=this.value;saveState()" checked> US</label>
+                <label><input type="radio" name="compType" value="Outside US" onchange="state.compType=this.value;saveState()"> Outside US</label>
+              </div>
             </div>
           </td>
         </tr>
@@ -1964,7 +2136,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
     <!-- Section B: Thyroid Parenchyma -->
     <div class="table-card">
     <table class="data-table" id="parenchymaTable">
-      <thead><tr><th colspan="2">Thyroid Parenchyma</th></tr></thead>
+      <thead><tr><th colspan="2" style="position:relative;">Thyroid Parenchyma<button class="section-reset-btn" onclick="resetThyroid()">갑상선 초기화</button></th></tr></thead>
       <tbody>
         <tr>
           <td class="label-cell">Thyroid Size</td>
@@ -2108,11 +2280,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#3a2608; }
     <div class="nodule-section" id="noduleSection">
       <div class="nodule-col" id="col-right">
         <div class="nodule-col-header">Right Lobe</div>
-        <div id="nodules-right"><div class="preset-strip"><span class="preset-strip-label">Quick add:</span><button class="preset-chip">Spongiform</button><button class="preset-chip">PTC-like</button><button class="preset-chip">Follicular neoplasm</button><button class="preset-chip">Pure cyst</button></div><div class="nodule-item"><table class="nodule-table-el"><thead><tr><th colspan="2" class="nodule-th-el"><div style="display: flex; align-items: flex-start; justify-content: space-between; padding: 11px 14px; gap: 8px;"><div style="display: flex; flex-direction: column; gap: 3px; min-width: 0px;"><div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: -0.2px;">Nodule R1 &nbsp;<span class="tirads-display tirads-5">[K-TIRADS 5, High suspicion]</span></div><div class="tirads-risk-info"><span class="tirads-5-text">&gt;60% malignancy</span> · Biopsy ≥ 10mm</div></div><button class="del-nodule-btn">✕ 삭제</button></div></th></tr></thead><tbody><tr><td class="nodule-label-cell required">Location *</td><td class="nodule-data-cell required"><div class="radio-group"><label><input type="checkbox"> Upper</label><label><input type="checkbox"> Middle</label><label><input type="checkbox"> Lower</label></div></td></tr><tr><td class="nodule-label-cell required">Diameter *</td><td class="nodule-data-cell required"><div style="display: flex; flex-direction: column; gap: 4px;"><div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">AP:<input type="text" inputmode="decimal" placeholder="AP" style="width: 52px;"> × T:<input type="text" inputmode="decimal" placeholder="T" style="width: 52px;"> × L:<input type="text" inputmode="decimal" placeholder="L" style="width: 52px;"><select><option>mm</option><option>cm</option></select></div><div class="size-auto">Max: 34 mm  Vol: 4.9 mL</div></div></td></tr><tr><td class="nodule-label-cell">Composition</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="radio" name="comp_right_0" value="Solid"> Solid</label><label><input type="radio" name="comp_right_0" value="P.Solid"> P.Solid</label><label><input type="radio" name="comp_right_0" value="P.Cystic"> P.Cystic</label><label><input type="radio" name="comp_right_0" value="Cystic"> Cystic</label></div></td></tr><tr><td class="nodule-label-cell">Echogenicity</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="radio" name="echo_right_0" value="Marked hypo"> Marked hypo</label><label><input type="radio" name="echo_right_0" value="Mild hypo"> Mild hypo</label><label><input type="radio" name="echo_right_0" value="Iso"> Iso</label><label><input type="radio" name="echo_right_0" value="Hyper"> Hyper</label></div></td></tr><tr><td class="nodule-label-cell">Size Change</td><td class="nodule-data-cell"><div style="display: flex; flex-direction: column; gap: 4px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> Initial</label><label class="inline-check-label"><input type="checkbox"> Follow-up</label></div><div class="radio-group"><label><input type="radio" name="sc_right_0" value="New"> New</label><label><input type="radio" name="sc_right_0" value="Increased"> Increased</label><label><input type="radio" name="sc_right_0" value="Decreased"> Decreased</label><label><input type="radio" name="sc_right_0" value="Stable"> Stable</label></div></div></td></tr><tr><td colspan="2" class="nodule-section-hdr collapsible">Biopsy<span class="section-caret">▲</span></td></tr><tr><td class="nodule-label-cell">Biopsy</td><td class="nodule-data-cell"><div style="display: flex; flex-direction: column; gap: 4px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> Yes</label></div><div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;"><span style="font-size: 12px; color: var(--label3);">Date:</span><select class="date-select"><option value="">Year</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option><option value="2010">2010</option><option value="2009">2009</option><option value="2008">2008</option><option value="2007">2007</option><option value="2006">2006</option><option value="2005">2005</option><option value="2004">2004</option><option value="2003">2003</option><option value="2002">2002</option><option value="2001">2001</option><option value="2000">2000</option></select> . <select class="date-select"><option value="">MM</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select> . <select class="date-select"><option value="">DD</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><div class="radio-group" style="display: inline-flex;"><label><input type="checkbox"> FNA</label></div><input type="text" inputmode="numeric" placeholder="gauge" style="width: 60px;"><span style="font-size: 13px; color: var(--label2); font-weight: 500;">G</span></div><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-left: 2px;"><span style="font-size: 12px; color: var(--label3);">Bethesda:</span><select style="flex: 1 1 0%; min-width: 160px;"><option value="">— Select —</option><option value="I (Nondiagnostic)">I (Nondiagnostic)</option><option value="II (Benign)">II (Benign)</option><option value="III (AUS)">III (AUS)</option><option value="IV (Follicular neoplasm)">IV (Follicular neoplasm)</option><option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option><option value="VI (Malignant)">VI (Malignant)</option></select></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><div class="radio-group" style="display: inline-flex;"><label><input type="checkbox"> CNB</label></div><input type="text" inputmode="decimal" placeholder="size" style="width: 60px;"><span style="font-size: 13px; color: var(--label2); font-weight: 500;">cm</span></div><div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding-left: 2px;"><span style="font-size: 12px; color: var(--label3);">Result:</span><select style="flex: 1 1 0%; min-width: 160px;"><option value="">— Select —</option><option value="I (Nondiagnostic or unsatisfactory)">I (Nondiagnostic or unsatisfactory)</option><option value="II (Benign lesion)">II (Benign lesion)</option><option value="III (Indeterminate lesion)">III (Indeterminate lesion)</option><option value="IV (Follicular neoplasm or suspicious for follicular neoplasm)">IV (Follicular neoplasm or suspicious for follicular neoplasm)</option><option value="V (Suspicious for malignancy)">V (Suspicious for malignancy)</option><option value="VI (Malignant)">VI (Malignant)</option></select></div><div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-size: 11px; color: var(--label3); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;">Complications</span><div class="radio-group"><label><input type="checkbox"> No</label><label><input type="checkbox"> Yes</label></div></div></div></td></tr><tr><td class="nodule-label-cell">Orientation</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="radio" name="or_right_0" value="Parallel"> Parallel</label><label><input type="radio" name="or_right_0" value="Nonparallel (taller-than-wide)"> Nonparallel (taller-than-wide)</label></div></td></tr><tr><td class="nodule-label-cell">Margin</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="radio" name="margin_right_0" value="Smooth"> Smooth</label><label><input type="radio" name="margin_right_0" value="Ill-defined"> Ill-defined</label><label><input type="radio" name="margin_right_0" value="Irregular (spiculated/microlobulated)"> Irregular (spiculated/microlobulated)</label></div></td></tr><tr><td class="nodule-label-cell">Echogenic foci
-(calcification)</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="checkbox"> Punctate echogenic foci (microcalcification)</label><label><input type="checkbox"> Rim</label><label><input type="checkbox"> Macro</label><label><input type="checkbox"> Entirely calcified</label></div></td></tr><tr><td class="nodule-label-cell">Vascularity</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="checkbox"> None</label><label><input type="checkbox"> Peripheral</label><label><input type="checkbox"> Mild intranodular</label><label><input type="checkbox"> Marked intranodular</label></div></td></tr><tr><td class="nodule-label-cell">Spongiform</td><td class="nodule-data-cell"><div class="radio-group" style="opacity: 0.38;"><label><input type="checkbox" disabled=""> Yes</label></div></td></tr><tr><td class="nodule-label-cell">Intracystic echogenic
-foci with comet tail
-artifact</td><td class="nodule-data-cell"><div class="radio-group" style="opacity: 0.38;"><label><input type="checkbox" disabled=""> Yes</label></div></td></tr><tr><td class="nodule-label-cell">Diffuse lesion</td><td class="nodule-data-cell"><div class="radio-group"><label><input type="radio" name="diff_right_0" value="extensive"> Extensive parenchymal PEF</label><label><input type="radio" name="diff_right_0" value="infiltrative"> Diffuse infiltrative lesion</label></div></td></tr><tr><td class="nodule-label-cell">Extrathyroidal
-extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex-direction: column; gap: 4px;"><div class="radio-group"><label class="inline-check-label"><input type="radio" name="ete_right_0" value="none"> No ETE</label><label class="inline-check-label"><input type="radio" name="ete_right_0" value="minor"> Minor ETE</label><label class="inline-check-label"><input type="radio" name="ete_right_0" value="gross"> Gross ETE</label></div></div></td></tr><tr><td class="nodule-label-cell">Comment</td><td class="nodule-data-cell"><textarea rows="4" style="width: 100%;"></textarea></td></tr><tr><td colspan="2" class="nodule-section-hdr">Note</td></tr><tr><td class="nodule-label-cell">Recommendation</td><td class="nodule-data-cell"><textarea rows="4" style="width: 100%;"></textarea></td></tr><tr><td colspan="2" class="nodule-reset-cell"><button class="pink-btn">Reset this nodule</button></td></tr></tbody></table></div></div>
+        <div id="nodules-right"><div class="preset-strip"><span class="preset-strip-label">Quick add:</span><button class="preset-chip">Spongiform</button><button class="preset-chip">PTC-like</button><button class="preset-chip">Follicular neoplasm</button><button class="preset-chip">Pure cyst</button></div></div>
         <button class="add-nodule-btn" id="addRight" onclick="addNodule(&#39;right&#39;)">+ Add Nodule</button>
       </div>
       <div class="nodule-col" id="col-isthmus">
@@ -2131,30 +2299,60 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
 
   <!-- TAB 2: POSTOP -->
   <div class="tab-content" id="tab-content-postop">
+
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetPostop()">Postop 초기화</button>
-      <button class="pink-btn" onclick="resetPostopOpBeds()">Op bed 병변 초기화</button>
-      <button class="pink-btn" onclick="resetPostopResidualNodules()">Residual nodule 초기화</button>
+      <button class="action-quick-btn" onclick="generateNormalPostopReport()">Normal Postop</button>
     </div>
 
     <div class="table-card">
       <table class="data-table">
-        <thead><tr><th colspan="2">Operation Status</th></tr></thead>
+        <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Clinical Indication</td>
+            <td style="width:100%">
+              <div class="radio-group" style="display:inline-flex;margin-bottom:6px;"><label><input type="checkbox" id="postopClinIndDefault" onchange="ensurePostopState().clinIndDefault=this.checked;saveState()" checked> Postoperative surveillance</label></div>
+              <textarea id="postopClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinIndText=this.value;saveState()"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Clinical History</td>
+            <td style="width:100%"><textarea id="postopClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. PTC s/p total thyroidectomy (2020), RAI therapy..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';ensurePostopState().clinHistory=this.value;saveState()"></textarea></td>
+          </tr>
+          <tr>
+            <td class="label-cell">US Comparison</td>
+            <td>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <select id="postopCompYear" class="date-select" onchange="ensurePostopState().compYear=this.value;saveState()"><option value="">Year</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option><option value="2010">2010</option><option value="2009">2009</option><option value="2008">2008</option><option value="2007">2007</option><option value="2006">2006</option></select>
+                <span>.</span>
+                <select id="postopCompMonth" class="date-select" onchange="ensurePostopState().compMonth=this.value;saveState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+                <span>.</span>
+                <select id="postopCompDay" class="date-select" onchange="ensurePostopState().compDay=this.value;saveState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+                <div class="radio-group" style="display:inline-flex;">
+                  <label><input type="radio" name="postopCompType" value="US" onchange="ensurePostopState().compType=this.value;saveState()" checked> US</label>
+                  <label><input type="radio" name="postopCompType" value="Outside US" onchange="ensurePostopState().compType=this.value;saveState()"> Outside US</label>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th colspan="2" style="position:relative;">Operation Status<button class="section-reset-btn" onclick="resetPostop()">Postop 초기화</button></th></tr></thead>
         <tbody>
           <tr>
             <td class="label-cell required">Operation Type</td>
             <td>
-              <div class="radio-group">
-                <label><input type="radio" name="postopOperationType" value="rightLobectomy" onchange="onPostopOperationChange()"> Right lobectomy</label>
-                <label><input type="radio" name="postopOperationType" value="leftLobectomy" onchange="onPostopOperationChange()"> Left lobectomy</label>
-                <label><input type="radio" name="postopOperationType" value="totalThyroidectomy" onchange="onPostopOperationChange()"> Total thyroidectomy</label>
-                <label><input type="radio" name="postopOperationType" value="isthmusectomy" onchange="onPostopOperationChange()"> Isthmusectomy</label>
-                <label><input type="radio" name="postopOperationType" value="other" onchange="onPostopOperationChange()"> Other / Custom</label>
-                <input type="text" id="postopCustomOperationName" placeholder="custom operation" style="width:190px" oninput="state.postop.customOperationName=this.value;saveState();renderPostop();">
-              </div>
-              <div class="postop-hybrid-row" id="postopIsthmusectomyHybridRow">
-                <label class="inline-check-label"><input type="checkbox" id="postopWithIsthmusectomy" onchange="onPostopWithIsthmusectomyChange(this)"> with Isthmusectomy</label>
-                <span class="postop-hybrid-note">Right/Left lobectomy와 협부절제 동반 여부</span>
+              <div class="radio-group" id="postopOperationTypeGroup">
+                <label><input type="checkbox" name="postopOperationType" value="rightLobectomy" onchange="onPostopOperationChange(this)"> Right lobectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="leftLobectomy" onchange="onPostopOperationChange(this)"> Left lobectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="totalThyroidectomy" onchange="onPostopOperationChange(this)"> Total thyroidectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="isthmusectomy" onchange="onPostopOperationChange(this)"> Isthmusectomy</label>
+                <label><input type="checkbox" name="postopOperationType" value="other" onchange="onPostopOperationChange(this)"> Other / Custom</label>
+                <input type="text" id="postopCustomOperationName" placeholder="custom operation" oninput="state.postop.customOperationName=this.value;saveState();renderPostop();">
               </div>
               <div class="postop-custom-structures" id="postopCustomStructures">
                 <div class="check-group">
@@ -2176,7 +2374,13 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
     <div class="nodule-section-title">Postoperative Diagram / Sections</div>
     <div class="table-card"><div class="postop-diagram" id="postopDiagram"></div></div>
 
-    <div class="nodule-section-title">Postop Lesions</div>
+    <div class="nodule-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <span>Postop Lesions</span>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="section-reset-btn" onclick="resetPostopOpBeds()">Op bed 초기화</button>
+        <button class="section-reset-btn" onclick="resetPostopResidualNodules()">Residual 초기화</button>
+      </div>
+    </div>
     <div class="nodule-section" id="postopResidualNoduleSection">
       <div class="nodule-col" id="postop-col-right"><div class="nodule-col-header">Right Lobe</div><div id="postop-nodules-right"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('right')">+ Add Lesion</button></div>
       <div class="nodule-col" id="postop-col-isthmus"><div class="nodule-col-header">Isthmus</div><div id="postop-nodules-isthmus"></div><button class="add-nodule-btn" onclick="addPostopResidualNodule('isthmus')">+ Add Lesion</button></div>
@@ -2195,15 +2399,15 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
 
   <!-- TAB 3: CERVICAL LYMPH NODE -->
   <div class="tab-content" id="tab-content-lymph">
-    <div class="action-bar">
-      <button class="pink-btn" onclick="resetLymph()">경부 림프 초기화</button>
-      <div class="radio-group" style="display:inline-flex;"><label><input type="checkbox" id="normalLymph" onchange="saveState()"> Normal Lymph Node</label></div>
+    <div class="action-bar" style="justify-content:space-between;">
+      <label class="action-quick-btn"><input type="checkbox" id="normalLymph" onchange="saveState()" style="display:none;"> Normal Lymph Node</label>
+      <button class="section-reset-btn" style="position:static;transform:none;" onclick="resetLymph()">경부 림프 초기화</button>
     </div>
     <div class="ln-table-wrap">
       <table class="ln-table" id="lnTable">
         <thead>
           <tr>
-            <th rowspan="2" style="min-width:140px;">Location</th>
+            <th rowspan="2" style="width:88px;">Location</th>
             <th colspan="4">Lateral Neck</th>
             <th colspan="4">Central Neck</th>
           </tr>
@@ -2215,14 +2419,14 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
           </tr>
           <tr>
             <th class="sub-header">Imaging Diagnosis</th>
-            <th class="sub-header">indeterminate</th>
-            <th class="sub-header">suspicious</th>
-            <th class="sub-header">indeterminate</th>
-            <th class="sub-header">suspicious</th>
-            <th class="sub-header">indeterminate</th>
-            <th class="sub-header">suspicious</th>
-            <th class="sub-header">indeterminate</th>
-            <th class="sub-header">suspicious</th>
+            <th class="sub-header ln-indet">indeterminate</th>
+            <th class="sub-header ln-susp">suspicious</th>
+            <th class="sub-header ln-indet">indeterminate</th>
+            <th class="sub-header ln-susp">suspicious</th>
+            <th class="sub-header ln-indet">indeterminate</th>
+            <th class="sub-header ln-susp">suspicious</th>
+            <th class="sub-header ln-indet">indeterminate</th>
+            <th class="sub-header ln-susp">suspicious</th>
           </tr>
         </thead>
         <tbody id="lnTableBody"><tr><td class="row-label">Neck Level</td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 1</label><label class="ln-check-label"><input type="checkbox"> 2</label><label class="ln-check-label"><input type="checkbox"> 3</label><label class="ln-check-label"><input type="checkbox"> 4</label><label class="ln-check-label"><input type="checkbox"> 5</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 1</label><label class="ln-check-label"><input type="checkbox"> 2</label><label class="ln-check-label"><input type="checkbox"> 3</label><label class="ln-check-label"><input type="checkbox"> 4</label><label class="ln-check-label"><input type="checkbox"> 5</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 1</label><label class="ln-check-label"><input type="checkbox"> 2</label><label class="ln-check-label"><input type="checkbox"> 3</label><label class="ln-check-label"><input type="checkbox"> 4</label><label class="ln-check-label"><input type="checkbox"> 5</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 1</label><label class="ln-check-label"><input type="checkbox"> 2</label><label class="ln-check-label"><input type="checkbox"> 3</label><label class="ln-check-label"><input type="checkbox"> 4</label><label class="ln-check-label"><input type="checkbox"> 5</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 6</label><label class="ln-check-label"><input type="checkbox"> 7</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 6</label><label class="ln-check-label"><input type="checkbox"> 7</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 6</label><label class="ln-check-label"><input type="checkbox"> 7</label></td><td style="vertical-align: top;"><label class="ln-check-label"><input type="checkbox"> 6</label><label class="ln-check-label"><input type="checkbox"> 7</label></td></tr><tr><td class="row-label required-cell">Largest LN diameter</td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td><td class="required-cell"><div style="display: flex; flex-direction: column; gap: 3px;"><div style="display: flex; align-items: center; gap: 3px;">LD:<input type="text" placeholder="LD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div><div style="display: flex; align-items: center; gap: 3px;">SD:<input type="text" placeholder="SD" style="width: 50px;"><select><option>cm</option><option>mm</option></select></div></div></td></tr><tr><td class="row-label">Comment</td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td><td><textarea rows="2" style="width: 100%;"></textarea></td></tr><tr><td colspan="9" class="ln-section-hdr">--- Biopsy ---</td></tr><tr><td class="row-label">Biopsy</td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td><td><label class="inline-check-label"><input type="checkbox"> Yes</label></td></tr><tr><td class="row-label">FNA</td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td></tr><tr><td class="row-label">CNB</td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 1</label><label class="ln-check-label"><input type="checkbox" disabled=""> 2</label><label class="ln-check-label"><input type="checkbox" disabled=""> 3</label><label class="ln-check-label"><input type="checkbox" disabled=""> 4</label><label class="ln-check-label"><input type="checkbox" disabled=""> 5</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td><td><label class="ln-check-label"><input type="checkbox" disabled=""> 6</label><label class="ln-check-label"><input type="checkbox" disabled=""> 7</label></td></tr><tr><td class="row-label">Complications</td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td><td><div style="display: flex; flex-direction: column; gap: 3px;"><div class="check-group"><label class="inline-check-label"><input type="checkbox"> No</label><label class="inline-check-label"><input type="checkbox"> Yes</label></div></div></td></tr></tbody>
@@ -2239,7 +2443,7 @@ extension (ETE)</td><td class="nodule-data-cell"><div style="display: flex; flex
     <table class="data-table">
       <thead><tr><th>Extrathyroidal Lesion</th></tr></thead>
       <tbody>
-        <tr><td><textarea id="extraLesion" rows="8" style="width:100%" oninput="onExtraLesionInput()"></textarea></td></tr>
+        <tr><td><textarea id="extraLesion" rows="8" oninput="onExtraLesionInput()"></textarea></td></tr>
       </tbody>
     </table>
     </div>
@@ -2381,6 +2585,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
+const APP_VERSION = 'ver0.80';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -2392,11 +2597,13 @@ function hasValue(v) { return v !== null && v !== undefined && String(v).trim() 
 // ==================== STATE ====================
 const defaultState = {
   activeTab: 'thyroid',
+  reportMode: 'thyroid',
   normalThyroid: false,
-  clinInd: 'Thyroid nodule',
-  clinIndCustom: '',
+  clinIndDefault: true,
+  clinIndText: '',
+  clinHistory: '',
   prevBiopsies: [],
-  compYear: '', compMonth: '', compDay: '',
+  compYear: '', compMonth: '', compDay: '', compType: 'US',
   thySize: 'Normal',
   sizeRight: false, sizeRightAP: '', sizeRightT: '', sizeRightL: '', sizeRightUnit: 'cm',
   sizeIsthmus: false, sizeIsthmusAP: '', sizeIsthmusL: '', sizeIsthmusUnit: 'cm',
@@ -2453,7 +2660,12 @@ function defaultNodule() {
 
 function defaultPostop() {
   return {
+    clinIndDefault: true,
+    clinIndText: '',
+    clinHistory: '',
+    compYear: '', compMonth: '', compDay: '', compType: 'US',
     operationType: '',
+    operationTypes: [],
     withIsthmusectomy: false,
     customOperationName: '',
     presentStructures: { rightLobe:false, leftLobe:false, isthmus:false, rightOpBed:false, leftOpBed:false, centralOpBed:false, isthmusOpBed:false },
@@ -2557,6 +2769,12 @@ function deepMerge(target, source) {
 }
 
 // ==================== TAB SWITCHING ====================
+function selectMode(mode) {
+  // mode = 'thyroid' | 'postop': sets report mode AND navigates to that tab
+  state.reportMode = mode;
+  switchTab(mode);
+}
+
 function switchTab(tab) {
   const changed = state.activeTab !== tab;
   state.activeTab = tab;
@@ -2565,12 +2783,21 @@ function switchTab(tab) {
     if (typeof closeNodulePopup === 'function') closeNodulePopup();
     if (typeof closePostopPopup === 'function') closePostopPopup();
   }
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const tabBtn = document.getElementById('tab-' + tab);
   const tabContent = document.getElementById('tab-content-' + tab);
-  if (tabBtn) tabBtn.classList.add('active');
   if (tabContent) tabContent.classList.add('active');
+
+  // Mode buttons (Thyroid/Postop): highlight based on reportMode, not activeTab
+  const rm = state.reportMode || 'thyroid';
+  ['thyroid','postop'].forEach(m => {
+    const btn = document.getElementById('tab-' + m);
+    if (btn) btn.classList.toggle('active', rm === m);
+  });
+  // Section nav buttons (LN/Extra): highlight when that tab is active
+  ['lymph','extra'].forEach(s => {
+    const btn = document.getElementById('tab-' + s);
+    if (btn) btn.classList.toggle('active', tab === s);
+  });
 }
 
 // ==================== RENDER ====================
@@ -2582,9 +2809,15 @@ function renderAll() {
   document.getElementById('normalThyroid').checked = state.normalThyroid;
 
   // Clinical info
-  const cinds = document.querySelectorAll('input[name="clinInd"]');
-  cinds.forEach(r => r.checked = (r.value === state.clinInd));
-  document.getElementById('clinIndCustom').value = state.clinIndCustom;
+  // Migrate old clinInd/clinIndCustom → clinIndText
+  if (state.clinIndText === undefined) {
+    state.clinIndText = (state.clinInd === 'custom') ? (state.clinIndCustom || '') : (state.clinInd === 'Diagnostic workup' ? 'Diagnostic workup' : '');
+    delete state.clinInd; delete state.clinIndCustom;
+  }
+  const cidEl = document.getElementById('clinIndDefault'); if (cidEl) cidEl.checked = state.clinIndDefault !== false;
+  const clinIndEl = document.getElementById('clinIndText'); if (clinIndEl) { clinIndEl.value = state.clinIndText || ''; clinIndEl.style.height='auto'; clinIndEl.style.height=clinIndEl.scrollHeight+'px'; }
+  const clinHisEl = document.getElementById('clinHistory'); if (clinHisEl) { clinHisEl.value = state.clinHistory || ''; clinHisEl.style.height='auto'; clinHisEl.style.height=clinHisEl.scrollHeight+'px'; }
+  document.querySelectorAll('input[name="compType"]').forEach(r => r.checked = (r.value === (state.compType || 'US')));
   // Migrate old single-biopsy format to new array format
   if (!state.prevBiopsies || !Array.isArray(state.prevBiopsies)) state.prevBiopsies = [];
   if (state.prevBiopsies.length === 0 && (state.prevBxFNA || state.prevBxCNB)) {
@@ -2662,7 +2895,7 @@ function onNormalThyroidChange() {
 
 function applyNormalThyroidDisable() {
   const dis = state.normalThyroid;
-  ['clinicalTable', 'parenchymaTable'].forEach(id => {
+  ['parenchymaTable'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.querySelectorAll('input,select,textarea,button').forEach(i => {
@@ -2677,7 +2910,10 @@ function applyNormalThyroidDisable() {
   } else {
     // Restore visual state from saved state when re-enabling
     document.querySelectorAll('input[name="thySize"]').forEach(r => r.checked = (r.value === state.thySize));
-    document.querySelectorAll('input[name="clinInd"]').forEach(r => r.checked = (r.value === state.clinInd));
+    const _cid = document.getElementById('clinIndDefault'); if (_cid) _cid.checked = state.clinIndDefault !== false;
+    const _ci = document.getElementById('clinIndText'); if (_ci) { _ci.value = state.clinIndText || ''; _ci.style.height='auto'; _ci.style.height=_ci.scrollHeight+'px'; }
+    const _ch = document.getElementById('clinHistory'); if (_ch) _ch.value = state.clinHistory || '';
+    document.querySelectorAll('input[name="compType"]').forEach(r => r.checked = (r.value === (state.compType || 'US')));
     document.querySelectorAll('input[name="echotexture"]').forEach(r => r.checked = (r.value === state.echotexture));
     document.querySelectorAll('input[name="parVasc"]').forEach(r => r.checked = (r.value === state.parVasc));
     const dd = document.getElementById('diffuseDis'); if (dd) dd.checked = state.diffuseDis;
@@ -2693,20 +2929,6 @@ function onDiffuseDisChange() {
   saveState();
 }
 
-function onClinIndChange() {
-  const sel = document.querySelector('input[name="clinInd"]:checked');
-  state.clinInd = sel ? sel.value : '';
-  saveState();
-}
-
-function onClinIndCustomChange() {
-  state.clinIndCustom = document.getElementById('clinIndCustom').value;
-  // auto-select custom radio
-  const customRadio = document.querySelector('input[name="clinInd"][value="custom"]');
-  if (customRadio) customRadio.checked = true;
-  state.clinInd = 'custom';
-  saveState();
-}
 
 
 function toggleSizeInputs(noSave) { if (!noSave) saveState(); } // checkboxes removed; kept for compat
@@ -2928,6 +3150,14 @@ function removeNodule(lobe, idx, opts = {}) {
   return removed;
 }
 
+function makeNoduleColgroup() {
+  const cg = document.createElement('colgroup');
+  const c1 = document.createElement('col'); c1.className = 'nodule-label-col';
+  cg.appendChild(c1);
+  cg.appendChild(document.createElement('col'));
+  return cg;
+}
+
 function buildNoduleTable(lobe, idx, nod) {
   const wrap = document.createElement('div');
   wrap.className = 'nodule-item';
@@ -2963,6 +3193,7 @@ function buildNoduleTable(lobe, idx, nod) {
 
   const tbl = document.createElement('table');
   tbl.className = 'nodule-table-el';
+  tbl.appendChild(makeNoduleColgroup());
 
   // Header row
   const thead = document.createElement('thead');
@@ -3525,7 +3756,7 @@ function buildNoduleTable(lobe, idx, nod) {
   cometLbl.appendChild(cometChk); cometLbl.append(' Yes');
   cometDiv.appendChild(cometLbl);
   if (cometDisabled) cometDiv.style.opacity = '0.38';
-  tbody.appendChild(row('Intracystic echogenic\nfoci with comet tail\nartifact', cometDiv, false));
+  tbody.appendChild(row('Comet tail\nartifact\n(intracystic)', cometDiv, false));
 
   // --- Diffuse Lesion ---
   const diffDiv = document.createElement('div');
@@ -3601,7 +3832,7 @@ function buildNoduleTable(lobe, idx, nod) {
     eteDiv.appendChild(eteRow2);
   }
 
-  tbody.appendChild(row('Extrathyroidal\nextension (ETE)', eteDiv, false));
+  tbody.appendChild(row('Extrathyroidal\nExt. (ETE)', eteDiv, false));
 
   // --- Comment ---
   const commentTA = document.createElement('textarea');
@@ -3797,8 +4028,13 @@ function ensurePostopState() {
 }
 function getPostopAnatomyMap() {
   const po = ensurePostopState();
-  const op = po.operationType;
-  const withIsthmus = !!po.withIsthmusectomy && ['rightLobectomy','leftLobectomy'].includes(op);
+  const types = po.operationTypes && po.operationTypes.length ? po.operationTypes : (po.operationType ? [po.operationType, ...(po.withIsthmusectomy ? ['isthmusectomy'] : [])] : []);
+  const hasRight = types.includes('rightLobectomy');
+  const hasLeft = types.includes('leftLobectomy');
+  const hasTotal = types.includes('totalThyroidectomy');
+  const hasIsthmusectomy = types.includes('isthmusectomy');
+  const op = hasTotal ? 'totalThyroidectomy' : hasRight && hasLeft ? 'totalThyroidectomy' : hasRight ? 'rightLobectomy' : hasLeft ? 'leftLobectomy' : types.find(v => v !== 'isthmusectomy') || po.operationType || '';
+  const withIsthmus = hasIsthmusectomy && (hasRight || hasLeft);
   const map = {
     right: { structureKey:'rightLobe', kind:'residual', label:'Right Lobe', shortLabel:'Right', site:'right', lobe:'right' },
     isthmus: { structureKey:'isthmus', kind:'residual', label:'Isthmus', shortLabel:'Isthmus', site:'isthmus', lobe:'isthmus' },
@@ -3848,16 +4084,37 @@ function getPostopLabelFor(kind, key) {
   }
   return key;
 }
-function onPostopOperationChange() {
+function onPostopOperationChange(changedEl) {
+  const allChk = [...document.querySelectorAll('input[name="postopOperationType"]')];
+  const vals = {};
+  allChk.forEach(c => { vals[c.value] = c.checked; });
+
+  // Isthmusectomy is only compatible with right-only or left-only lobectomy.
+  // Cannot coexist with totalThyroidectomy, other, or both right+left lobectomy
+  // (right+left+isthmusectomy = total thyroidectomy).
+  const changedVal = changedEl ? changedEl.value : null;
+  if (changedVal === 'totalThyroidectomy' && vals['totalThyroidectomy']) {
+    // total excludes all partial operations
+    vals['rightLobectomy'] = false;
+    vals['leftLobectomy'] = false;
+    vals['isthmusectomy'] = false;
+  } else if (changedVal === 'other' && vals['other']) {
+    vals['isthmusectomy'] = false;
+  } else if (['rightLobectomy', 'leftLobectomy', 'isthmusectomy'].includes(changedVal) && vals[changedVal]) {
+    // any partial operation excludes total
+    vals['totalThyroidectomy'] = false;
+    // right + left + isthmusectomy = total → uncheck isthmusectomy
+    if (vals['isthmusectomy'] && vals['rightLobectomy'] && vals['leftLobectomy']) {
+      vals['isthmusectomy'] = false;
+    }
+  }
+  allChk.forEach(c => { c.checked = vals[c.value]; });
+
+  const checked = allChk.filter(c => c.checked).map(c => c.value);
   const po = ensurePostopState();
-  const sel = document.querySelector('input[name="postopOperationType"]:checked');
-  po.operationType = sel ? sel.value : '';
-  if (!['rightLobectomy','leftLobectomy'].includes(po.operationType)) po.withIsthmusectomy = false;
-  saveState(); renderPostop();
-}
-function onPostopWithIsthmusectomyChange(chk) {
-  const po = ensurePostopState();
-  po.withIsthmusectomy = !!chk.checked && ['rightLobectomy','leftLobectomy'].includes(po.operationType);
+  po.operationTypes = checked;
+  po.operationType = checked.find(v => v !== 'isthmusectomy' && v !== 'other') || checked[0] || '';
+  po.withIsthmusectomy = checked.includes('isthmusectomy') && checked.some(v => ['rightLobectomy','leftLobectomy'].includes(v));
   saveState(); renderPostop();
 }
 function onPostopStructureToggle(chk) {
@@ -3867,20 +4124,25 @@ function onPostopStructureToggle(chk) {
 }
 function postopHasData() {
   const po = ensurePostopState();
-  return !!(po.operationType || po.withIsthmusectomy || po.customOperationName || ['right','left','central','isthmus'].some(k => po.opBedLesions[k].length) || ['right','left','isthmus'].some(k => po.residualThyroidNodules[k].length));
+  const hasOp = (po.operationTypes && po.operationTypes.length) || po.operationType;
+  return !!(hasOp || po.customOperationName || ['right','left','central','isthmus'].some(k => po.opBedLesions[k].length) || ['right','left','isthmus'].some(k => po.residualThyroidNodules[k].length));
 }
 function setVisible(id, show) { const el=document.getElementById(id); if(el) el.style.display = show ? '' : 'none'; }
 function setText(id, txt) { const el=document.querySelector('#'+id+' .nodule-col-header'); if(el) el.textContent = txt; }
 function renderPostop() {
   const po = ensurePostopState();
-  document.querySelectorAll('input[name="postopOperationType"]').forEach(r => r.checked = (r.value === po.operationType));
-  const hybrid = document.getElementById('postopWithIsthmusectomy');
-  const hybridRow = document.getElementById('postopIsthmusectomyHybridRow');
-  const hybridEnabled = ['rightLobectomy','leftLobectomy'].includes(po.operationType);
-  if (hybrid) { hybrid.checked = !!po.withIsthmusectomy && hybridEnabled; hybrid.disabled = !hybridEnabled; }
-  if (hybridRow) hybridRow.classList.toggle('disabled', !hybridEnabled);
+  // Clinical info fields
+  const pcid = document.getElementById('postopClinIndDefault'); if (pcid) pcid.checked = po.clinIndDefault !== false;
+  const pci = document.getElementById('postopClinIndText'); if (pci) { pci.value = po.clinIndText || ''; pci.style.height='auto'; pci.style.height=pci.scrollHeight+'px'; }
+  const pch = document.getElementById('postopClinHistory'); if (pch) { pch.value = po.clinHistory || ''; pch.style.height='auto'; pch.style.height=pch.scrollHeight+'px'; }
+  const pcy = document.getElementById('postopCompYear'); if (pcy) pcy.value = po.compYear || '';
+  const pcm = document.getElementById('postopCompMonth'); if (pcm) pcm.value = po.compMonth || '';
+  const pcd = document.getElementById('postopCompDay'); if (pcd) pcd.value = po.compDay || '';
+  document.querySelectorAll('input[name="postopCompType"]').forEach(r => r.checked = (r.value === (po.compType || 'US')));
+  const opTypes = po.operationTypes || (po.operationType ? [po.operationType, ...(po.withIsthmusectomy ? ['isthmusectomy'] : [])] : []);
+  document.querySelectorAll('input[name="postopOperationType"]').forEach(chk => { chk.checked = opTypes.includes(chk.value); });
   const custom = document.getElementById('postopCustomOperationName'); if (custom) custom.value = po.customOperationName || '';
-  const customWrap = document.getElementById('postopCustomStructures'); if (customWrap) customWrap.classList.toggle('show', po.operationType === 'other');
+  const customWrap = document.getElementById('postopCustomStructures'); if (customWrap) customWrap.classList.toggle('show', opTypes.includes('other'));
   document.querySelectorAll('[data-postop-structure]').forEach(chk => chk.checked = !!po.presentStructures[chk.dataset.postopStructure]);
   const present = getPostopPresentStructures();
   const map = getPostopAnatomyMap();
@@ -3935,7 +4197,7 @@ function renderPostopDiagram(present) {
     p.setAttribute('class', 'postop-zone ' + z.type);
     if (z.clip) p.setAttribute('clip-path', 'url(#'+z.clip+')');
     const title = document.createElementNS('http://www.w3.org/2000/svg','title'); title.textContent = z.title; p.appendChild(title);
-    p.addEventListener('click', () => postopDiagramZoneClick(z));
+    p.addEventListener('click', (evt) => postopDiagramZoneClick(z, evt, svg));
     svg.appendChild(p);
   });
   addPostopDiagramLabels(svg, present);
@@ -3957,27 +4219,61 @@ function addSvgText(svg, cls, x, y, txt, anchor='middle') {
 }
 function addPostopDiagramLabels(svg, present) {
   const map = getPostopAnatomyMap();
-  const labelAt = (m, x, y, residualSub='lobe') => {
-    if (m.kind === 'residual') {
-      const words = (m.shortLabel || m.label).split(' ');
-      addSvgText(svg,'postop-diagram-label',x,y,words.slice(0,2).join(' '));
-      addSvgText(svg,'postop-diagram-sub',x,y+15,residualSub);
-      return;
-    }
-    const side = m.site === 'right' ? 'Right' : m.site === 'left' ? 'Left' : (m.shortLabel || m.label);
-    addSvgText(svg,'postop-diagram-label',x,y,side);
-    addSvgText(svg,'postop-diagram-sub',x,y+15,m.label.replace(side,'').trim() || 'Op. Bed');
-  };
-  if (map.right.kind === 'residual') { labelAt(map.right,82,62,'lobe'); addSvgText(svg,'zone-label',82,105,'Middle'); addSvgText(svg,'zone-label',82,146,'Lower'); }
-  else if (map.right.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',82,84,'Right'); addSvgText(svg,'postop-diagram-sub',82,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',82,114,'Site'); }
-  if (map.left.kind === 'residual') { labelAt(map.left,218,62,'lobe'); addSvgText(svg,'zone-label',218,105,'Middle'); addSvgText(svg,'zone-label',218,146,'Lower'); }
-  else if (map.left.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',218,84,'Left'); addSvgText(svg,'postop-diagram-sub',218,100,'Thyroidectomy'); addSvgText(svg,'postop-diagram-sub',218,114,'Site'); }
-  if (map.isthmus.kind === 'residual') { addSvgText(svg,'postop-diagram-label',150,106,map.isthmus.label); addSvgText(svg,'postop-diagram-sub',150,121,''); }
-  else if (map.isthmus.kind === 'opbed') {
-    if (map.isthmus.site === 'central') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
-    else { addSvgText(svg,'postop-diagram-label',150,106,'Isthmus'); addSvgText(svg,'postop-diagram-sub',150,121,'Site'); }
+  const ns = 'http://www.w3.org/2000/svg';
+  function addSepLine(x1, x2, y) {
+    const l = document.createElementNS(ns, 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y);
+    l.setAttribute('class', 'postop-anatomy-line');
+    svg.appendChild(l);
   }
-  if (map.central && map.central.kind === 'opbed') { addSvgText(svg,'postop-diagram-label',150,98,'Central / Isthmus'); addSvgText(svg,'postop-diagram-sub',150,114,'Bed'); }
+
+  // Right lobe slot
+  if (map.right.kind === 'residual') {
+    addSvgText(svg,'zone-label',82,64,'Upper');
+    addSvgText(svg,'zone-label',82,105,'Middle');
+    addSvgText(svg,'zone-label',82,146,'Lower');
+    addSvgText(svg,'postop-lobe-label',82,184,'Right');
+    addSepLine(41, 117, 83);
+    addSepLine(41, 117, 123);
+  } else if (map.right.kind === 'opbed') {
+    addSvgText(svg,'zone-label',82,102,'Thyroidectomy');
+    addSvgText(svg,'zone-label',82,114,'Site');
+    addSvgText(svg,'postop-lobe-label',82,184,'Right');
+  }
+
+  // Left lobe slot
+  if (map.left.kind === 'residual') {
+    addSvgText(svg,'zone-label',218,64,'Upper');
+    addSvgText(svg,'zone-label',218,105,'Middle');
+    addSvgText(svg,'zone-label',218,146,'Lower');
+    addSvgText(svg,'postop-lobe-label',218,184,'Left');
+    addSepLine(183, 259, 83);
+    addSepLine(183, 259, 123);
+  } else if (map.left.kind === 'opbed') {
+    addSvgText(svg,'zone-label',218,102,'Thyroidectomy');
+    addSvgText(svg,'zone-label',218,114,'Site');
+    addSvgText(svg,'postop-lobe-label',218,184,'Left');
+  }
+
+  // Isthmus slot
+  if (map.isthmus.kind === 'residual') {
+    addSvgText(svg,'zone-label',150,106,'Isthmus');
+  } else if (map.isthmus.kind === 'opbed') {
+    if (map.isthmus.site === 'central') {
+      addSvgText(svg,'zone-label',150,101,'Central /');
+      addSvgText(svg,'zone-label',150,113,'Isthmus Bed');
+    } else {
+      addSvgText(svg,'zone-label',150,101,'Isthmus');
+      addSvgText(svg,'zone-label',150,113,'Site');
+    }
+  }
+
+  // Central op bed (large oval, rendered separately)
+  if (map.central && map.central.kind === 'opbed') {
+    addSvgText(svg,'zone-label',150,101,'Central /');
+    addSvgText(svg,'zone-label',150,113,'Isthmus Bed');
+  }
 }
 function postopDiagramPointForResidual(lobe, idx, nod) {
   const base = lobe === 'right' ? {x:82,y:104} : lobe === 'left' ? {x:218,y:104} : {x:150,y:102};
@@ -4010,9 +4306,10 @@ function postopOpBedMarkerShape(les, isActive) {
     .filter(v => Number.isFinite(v) && v > 0);
   const max = vals.length ? Math.max(...vals) : 0;
   const scale = max ? Math.max(0.82, Math.min(1.8, max / 18)) : 1;
+  const baseRy = (les.diagramRy != null) ? les.diagramRy : (11 * scale);
   return {
     rx: (15 * scale) + (isActive ? 2 : 0),
-    ry: (11 * scale) + (isActive ? 2 : 0)
+    ry: baseRy + (isActive ? 2 : 0)
   };
 }
 function postopHasDiagramPoint(item) {
@@ -4037,6 +4334,50 @@ function postopSetDiagramPoint(item, svgPt, site) {
   item.diagramX = Math.round(pt.x * 10) / 10;
   item.diagramY = Math.round(pt.y * 10) / 10;
 }
+function getPostopDiagramSvgPoint(clientX, clientY) {
+  const svg = document.getElementById('postop-svg');
+  if (!svg || !svg.createSVGPoint) return null;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  try {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    return pt.matrixTransform(ctm.inverse());
+  } catch(e) { return null; }
+}
+function getPostopDiagramZoneFromSvgPosition(clientX, clientY) {
+  const svg = document.getElementById('postop-svg');
+  if (!svg || !svg.createSVGPoint) return null;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  let svgPt;
+  try { const pt = svg.createSVGPoint(); pt.x = clientX; pt.y = clientY; svgPt = pt.matrixTransform(ctm.inverse()); } catch(e) { return null; }
+  const { x, y } = svgPt;
+  const map = getPostopAnatomyMap();
+  // Right lobe slot (x ≤ 140)
+  if (x >= 30 && x <= 140 && y >= 30 && y <= 180) {
+    const m = map.right;
+    if (m.kind === 'residual') { const location = y < 84 ? 'upper' : y < 132 ? 'middle' : 'lower'; return { type: 'residual', lobe: m.lobe, location }; }
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Left lobe slot (x ≥ 160)
+  if (x >= 160 && x <= 270 && y >= 30 && y <= 180) {
+    const m = map.left;
+    if (m.kind === 'residual') { const location = y < 84 ? 'upper' : y < 132 ? 'middle' : 'lower'; return { type: 'residual', lobe: m.lobe, location }; }
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Isthmus slot (center narrow band)
+  if (x >= 113 && x <= 187 && y >= 84 && y <= 118) {
+    const m = map.isthmus;
+    if (m.kind === 'residual') return { type: 'residual', lobe: 'isthmus', location: 'middle' };
+    if (m.kind === 'opbed') return { type: 'opbed', site: m.site };
+  }
+  // Central op bed (large oval)
+  if (map.central && map.central.kind === 'opbed' && x >= 90 && x <= 210 && y >= 56 && y <= 154) {
+    return { type: 'opbed', site: map.central.site };
+  }
+  return null;
+}
 function postopSiteForResidualMove(targetZone, drag) {
   return (targetZone && targetZone.type === 'residual' && targetZone.lobe) ? targetZone.lobe : drag.lobe;
 }
@@ -4047,7 +4388,18 @@ function postopSiteForOpBedMove(targetZone, drag) {
 function postopLocationRange(startLoc, endLoc) { return diagramLocationRange(startLoc, endLoc); }
 function postopLocationsForMovedMarker(nod, targetZone) { return diagramLocationsForMovedMarker(nod, targetZone); }
 function postopLocationsForSpanHandle(nod, targetZone, drag) { return diagramLocationsForSpanHandle(nod, targetZone, drag); }
+function postopResidualAnchorPointForSpanHandle(lobe, locations, handle, svgPt) {
+  const pt = svgPt ? { x: svgPt.x, y: svgPt.y } : null;
+  if (!pt) return null;
+  if (lobe === 'isthmus') { pt.y = 100; return pt; }
+  const centers = { upper: 62, middle: 102, lower: 143 };
+  const sorted = (locations || []).slice().sort((a, b) => diagramLocationIndex(a) - diagramLocationIndex(b));
+  const anchorLoc = handle === 'upper' ? sorted[sorted.length - 1] : sorted[0];
+  if (anchorLoc && centers[anchorLoc] !== undefined) pt.y = centers[anchorLoc];
+  return pt;
+}
 function renderPostopDiagramMarkers(svg) {
+  svg.querySelectorAll('.diagram-marker-group, #postop-drag-ghost').forEach(el => el.remove());
   const po = ensurePostopState();
   const ns = 'http://www.w3.org/2000/svg';
   const addResidualMarker = (lobe, idx, nod) => {
@@ -4064,6 +4416,7 @@ function renderPostopDiagramMarkers(svg) {
     }
     const isActive = activePostopPopup && activePostopPopup.kind === 'residual' && activePostopPopup.slot === lobe && activePostopPopup.idx === idx;
     const shape = postopResidualDiagramShape(nod, lobe, isActive);
+    if (nod.diagramRy != null) shape.ry = nod.diagramRy + (isActive ? 2 : 0);
     const tirads = getKTIRADS(nod, state.normalThyroid);
     let fill = '#0A84FF';
     if (tirads.includes('5')) fill = '#FF453A';
@@ -4162,10 +4515,9 @@ function renderPostopDiagramMarkers(svg) {
     const markerShape = document.createElementNS(ns, 'ellipse');
     markerShape.setAttribute('cx', cx); markerShape.setAttribute('cy', cy);
     markerShape.setAttribute('rx', shape.rx); markerShape.setAttribute('ry', shape.ry);
-    markerShape.setAttribute('fill', '#FFF4E0');
+    markerShape.setAttribute('fill', document.body.classList.contains('light') ? '#fff' : '#1c1109');
     markerShape.setAttribute('stroke', '#FF9F0A');
     markerShape.setAttribute('stroke-width', isActive ? '2.5' : '2.0');
-    markerShape.setAttribute('stroke-dasharray', '4 3');
     grp.appendChild(markerShape);
     const txt = document.createElementNS(ns, 'text');
     txt.setAttribute('x', cx); txt.setAttribute('y', cy + 4);
@@ -4176,6 +4528,33 @@ function renderPostopDiagramMarkers(svg) {
     txt.style.pointerEvents = 'none';
     txt.textContent = 'OB';
     grp.appendChild(txt);
+    const ry = shape.ry;
+    [{ handle: 'upper', y: Math.max(24, cy - ry - 7), lineY: cy - ry }, { handle: 'lower', y: Math.min(180, cy + ry + 7), lineY: cy + ry }].forEach(h => {
+      const handleG = document.createElementNS(ns, 'g');
+      handleG.classList.add('diagram-span-handle');
+      handleG.setAttribute('role', 'button');
+      handleG.setAttribute('aria-label', `${h.handle === 'upper' ? 'Upper' : 'Lower'} size handle for ${postopOpBedLabel(site, idx)}`);
+      handleG.addEventListener('pointerdown', (event) => postopOpBedSpanHandlePointerDown(event, site, idx, h.handle));
+      const handleStem = document.createElementNS(ns, 'line');
+      handleStem.setAttribute('x1', cx); handleStem.setAttribute('y1', h.lineY);
+      handleStem.setAttribute('x2', cx); handleStem.setAttribute('y2', h.y);
+      handleStem.setAttribute('class', 'diagram-span-handle-stem');
+      handleG.appendChild(handleStem);
+      const handlePill = document.createElementNS(ns, 'rect');
+      handlePill.setAttribute('x', cx - 8.5); handlePill.setAttribute('y', h.y - 4.2);
+      handlePill.setAttribute('width', 17); handlePill.setAttribute('height', 8.4);
+      handlePill.setAttribute('rx', 4.2); handlePill.setAttribute('class', 'diagram-span-handle-pill');
+      handlePill.setAttribute('fill', 'rgba(255,159,10,0.88)');
+      handleG.appendChild(handlePill);
+      [-2.6, 2.6].forEach(dx => {
+        const grip = document.createElementNS(ns, 'line');
+        grip.setAttribute('x1', cx + dx); grip.setAttribute('y1', h.y - 2.2);
+        grip.setAttribute('x2', cx + dx); grip.setAttribute('y2', h.y + 2.2);
+        grip.setAttribute('class', 'diagram-span-handle-grip');
+        handleG.appendChild(grip);
+      });
+      grp.appendChild(handleG);
+    });
     const del = document.createElementNS(ns, 'g');
     const delX = Math.min(274, Math.max(26, cx + 12));
     const delY = Math.min(180, Math.max(24, cy - 12));
@@ -4201,8 +4580,68 @@ function renderPostopDiagramMarkers(svg) {
   };
   ['right','isthmus','left'].forEach(lobe => (po.residualThyroidNodules[lobe] || []).forEach((nod, idx) => addResidualMarker(lobe, idx, nod)));
   ['right','isthmus','left','central'].forEach(site => (po.opBedLesions[site] || []).forEach((les, idx) => addOpBedMarker(site, idx, les)));
+  const ghostG = document.createElementNS(ns, 'g');
+  ghostG.setAttribute('id', 'postop-drag-ghost');
+  ghostG.setAttribute('class', 'diagram-drag-ghost');
+  svg.appendChild(ghostG);
 }
 
+
+function clearPostopDraggingClass() {
+  const svg = document.getElementById('postop-svg');
+  if (svg) svg.querySelectorAll('.diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
+}
+function clearPostopDragGhost() {
+  const g = document.getElementById('postop-drag-ghost');
+  if (g) g.innerHTML = '';
+}
+function updatePostopDragGhost(clientX, clientY) {
+  if (!postopDiagramMarkerDrag) return;
+  const ghost = document.getElementById('postop-drag-ghost');
+  const svgPt = getPostopDiagramSvgPoint(clientX, clientY);
+  if (!ghost || !svgPt) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const po = ensurePostopState();
+  ghost.innerHTML = '';
+  let cx = svgPt.x, cy = svgPt.y, rx = 14, ry = 10;
+  let fill = '#0A84FF', stroke = '#fff', strokeDash = null, labelFill = '#fff', label = '';
+  if (postopDiagramMarkerDrag.kind === 'residual') {
+    const { lobe, idx } = postopDiagramMarkerDrag;
+    const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
+    if (!nod) return;
+    const pt = postopClampDiagramPointToSite(svgPt, lobe);
+    if (pt) { cx = pt.x; cy = pt.y; }
+    const shape = postopResidualDiagramShape(nod, lobe, true);
+    rx = shape.rx; ry = (nod.diagramRy != null) ? nod.diagramRy + 2 : shape.ry;
+    const tirads = getKTIRADS(nod, state.normalThyroid);
+    if (tirads.includes('5')) fill = '#FF453A';
+    else if (tirads.includes('4')) fill = '#FF9F0A';
+    else if (tirads.includes('3')) fill = '#30D158';
+    label = (LOBE_LABELS[lobe] || lobe) + (idx + 1);
+  } else if (postopDiagramMarkerDrag.kind === 'opbed') {
+    const { site, idx } = postopDiagramMarkerDrag;
+    const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
+    if (!les) return;
+    const pt = postopClampDiagramPointToSite(svgPt, site);
+    if (pt) { cx = pt.x; cy = pt.y; }
+    const shape = postopOpBedMarkerShape(les, true);
+    rx = shape.rx; ry = shape.ry;
+    fill = document.body.classList.contains('light') ? '#fff' : '#1c1109';
+    stroke = '#FF9F0A'; strokeDash = null; labelFill = '#FF9F0A';
+    label = postopOpBedLabel(site, idx);
+  }
+  const el = document.createElementNS(ns, 'ellipse');
+  el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+  el.setAttribute('rx', rx); el.setAttribute('ry', ry);
+  el.setAttribute('fill', fill); el.setAttribute('stroke', stroke); el.setAttribute('stroke-width', '2.4');
+  if (strokeDash) el.setAttribute('stroke-dasharray', strokeDash);
+  ghost.appendChild(el);
+  const txt = document.createElementNS(ns, 'text');
+  txt.setAttribute('x', cx); txt.setAttribute('y', cy + 4);
+  txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('font-size', '9'); txt.setAttribute('font-weight', '700');
+  txt.setAttribute('fill', labelFill); txt.style.pointerEvents = 'none'; txt.textContent = label;
+  ghost.appendChild(txt);
+}
 
 function postopResidualMarkerPointerDown(event, lobe, idx) {
   event.preventDefault();
@@ -4211,6 +4650,9 @@ function postopResidualMarkerPointerDown(event, lobe, idx) {
   const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
   if (!nod) return;
   postopDiagramMarkerDrag = { kind: 'residual', lobe, idx, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
+  updatePostopDragGhost(event.clientX, event.clientY);
   document.addEventListener('pointermove', postopResidualMarkerPointerMove, { passive: false });
   document.addEventListener('pointerup', postopResidualMarkerPointerUp, { once: true });
   document.addEventListener('pointercancel', postopResidualMarkerPointerCancel, { once: true });
@@ -4221,39 +4663,44 @@ function postopResidualMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'residual') return;
-  postopDiagramMarkerDrag.lastZone = zone;
+  updatePostopDragGhost(event.clientX, event.clientY);
+  const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
+  if (zone && zone.type === 'residual') postopDiagramMarkerDrag.lastZone = zone;
+}
+function postopResidualMarkerPointerUp(event) {
+  document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
+  const drag = postopDiagramMarkerDrag;
+  postopDiagramMarkerDrag = null;
+  if (!drag) return;
+  if (!drag.moved) { openPostopPopup('residual', drag.lobe, drag.idx); return; }
+  const zone = (event && getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY)) || drag.lastZone;
+  if (!zone || zone.type !== 'residual') { renderPostop(); return; }
   const po = ensurePostopState();
-  const nod = po.residualThyroidNodules[postopDiagramMarkerDrag.lobe] && po.residualThyroidNodules[postopDiagramMarkerDrag.lobe][postopDiagramMarkerDrag.idx];
-  if (!nod) return;
-  const targetLobe = postopSiteForResidualMove(zone, postopDiagramMarkerDrag);
+  const targetLobe = postopSiteForResidualMove(zone, drag);
+  const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
+  if (!nod) { renderPostop(); return; }
   const locations = postopLocationsForMovedMarker(nod, { lobe: targetLobe, location: zone.location });
   nod.locationUpper = locations.includes('upper');
   nod.locationMiddle = locations.includes('middle');
   nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getDiagramSvgPoint(event.clientX, event.clientY), targetLobe);
-  if (targetLobe !== postopDiagramMarkerDrag.lobe) {
-    po.residualThyroidNodules[postopDiagramMarkerDrag.lobe].splice(postopDiagramMarkerDrag.idx, 1);
+  postopSetDiagramPoint(nod, event ? getPostopDiagramSvgPoint(event.clientX, event.clientY) : null, targetLobe);
+  if (targetLobe !== drag.lobe) {
+    po.residualThyroidNodules[drag.lobe].splice(drag.idx, 1);
     if (!po.residualThyroidNodules[targetLobe]) po.residualThyroidNodules[targetLobe] = [];
     po.residualThyroidNodules[targetLobe].push(nod);
-    postopDiagramMarkerDrag.lobe = targetLobe;
-    postopDiagramMarkerDrag.idx = po.residualThyroidNodules[targetLobe].length - 1;
   }
   saveState();
   renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramMarkerDrag.lobe);
-}
-function postopResidualMarkerPointerUp() {
-  document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
-  const drag = postopDiagramMarkerDrag;
-  postopDiagramMarkerDrag = null;
-  if (!drag) return;
-  if (!drag.moved) openPostopPopup('residual', drag.lobe, drag.idx);
+  refreshPostopPopupIfOpen(targetLobe);
 }
 function postopResidualMarkerPointerCancel() {
   document.removeEventListener('pointermove', postopResidualMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
   postopDiagramMarkerDrag = null;
+  renderPostop();
 }
 function postopResidualSpanHandlePointerDown(event, lobe, idx, handle) {
   event.preventDefault();
@@ -4261,7 +4708,21 @@ function postopResidualSpanHandlePointerDown(event, lobe, idx, handle) {
   const po = ensurePostopState();
   const nod = po.residualThyroidNodules[lobe] && po.residualThyroidNodules[lobe][idx];
   if (!nod || lobe === 'isthmus') return;
-  postopDiagramSpanHandleDrag = { kind: 'residual', lobe, idx, handle, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  let cx = lobe === 'right' ? 82 : lobe === 'left' ? 218 : 150;
+  const zcs = [];
+  if (nod.locationUpper) zcs.push(62); if (nod.locationMiddle) zcs.push(102); if (nod.locationLower) zcs.push(143);
+  let cy = zcs.length ? zcs.reduce((s,y)=>s+y,0)/zcs.length : 102;
+  if (postopHasDiagramPoint(nod)) {
+    const pt = postopClampDiagramPointToSite({ x: Number(nod.diagramX), y: Number(nod.diagramY) }, lobe);
+    if (pt) { cx = pt.x; cy = pt.y; }
+  }
+  const baseRy = (nod.diagramRy != null) ? nod.diagramRy : postopResidualDiagramShape(nod, lobe, false).ry;
+  const fixedEdge = handle === 'upper' ? cy + baseRy : cy - baseRy;
+  postopDiagramSpanHandleDrag = {
+    kind: 'residual', lobe, idx, handle, cx, fixedEdge, moved: false,
+    origDiagramX: nod.diagramX, origDiagramY: nod.diagramY, origDiagramRy: nod.diagramRy,
+    origU: nod.locationUpper, origM: nod.locationMiddle, origL: nod.locationLower
+  };
   document.addEventListener('pointermove', postopResidualSpanHandlePointerMove, { passive: false });
   document.addEventListener('pointerup', postopResidualSpanHandlePointerUp, { once: true });
   document.addEventListener('pointercancel', postopResidualSpanHandlePointerCancel, { once: true });
@@ -4269,34 +4730,64 @@ function postopResidualSpanHandlePointerDown(event, lobe, idx, handle) {
 function postopResidualSpanHandlePointerMove(event) {
   if (!postopDiagramSpanHandleDrag || postopDiagramSpanHandleDrag.kind !== 'residual') return;
   event.preventDefault();
-  const dx = event.clientX - postopDiagramSpanHandleDrag.startX;
-  const dy = event.clientY - postopDiagramSpanHandleDrag.startY;
-  if (Math.hypot(dx, dy) > 4) postopDiagramSpanHandleDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'residual' || zone.lobe !== postopDiagramSpanHandleDrag.lobe) return;
-  postopDiagramSpanHandleDrag.lastZone = zone;
+  const drag = postopDiagramSpanHandleDrag;
+  const svgPt = getPostopDiagramSvgPoint(event.clientX, event.clientY);
+  if (!svgPt) return;
+  drag.moved = true;
   const po = ensurePostopState();
-  const nod = po.residualThyroidNodules[postopDiagramSpanHandleDrag.lobe] && po.residualThyroidNodules[postopDiagramSpanHandleDrag.lobe][postopDiagramSpanHandleDrag.idx];
+  const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
   if (!nod) return;
-  const locations = postopLocationsForSpanHandle(nod, zone, postopDiagramSpanHandleDrag);
-  nod.locationUpper = locations.includes('upper');
-  nod.locationMiddle = locations.includes('middle');
-  nod.locationLower = locations.includes('lower');
-  postopSetDiagramPoint(nod, getDiagramSvgPoint(event.clientX, event.clientY), postopDiagramSpanHandleDrag.lobe);
-  saveState();
-  renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramSpanHandleDrag.lobe);
+  const MIN_RY = 8;
+  let newRy, newCy;
+  if (drag.handle === 'upper') {
+    const top = Math.max(36, Math.min(drag.fixedEdge - 2 * MIN_RY, svgPt.y));
+    newRy = (drag.fixedEdge - top) / 2;
+    newCy = (drag.fixedEdge + top) / 2;
+  } else {
+    const bot = Math.min(170, Math.max(drag.fixedEdge + 2 * MIN_RY, svgPt.y));
+    newRy = (bot - drag.fixedEdge) / 2;
+    newCy = (drag.fixedEdge + bot) / 2;
+  }
+  nod.diagramX = Math.round(drag.cx * 10) / 10;
+  nod.diagramY = Math.round(newCy * 10) / 10;
+  nod.diagramRy = Math.round(newRy * 10) / 10;
+  const svg = document.getElementById('postop-svg');
+  if (svg) renderPostopDiagramMarkers(svg);
 }
 function postopResidualSpanHandlePointerUp() {
   document.removeEventListener('pointermove', postopResidualSpanHandlePointerMove);
+  clearPostopDraggingClass();
   const drag = postopDiagramSpanHandleDrag;
   postopDiagramSpanHandleDrag = null;
-  if (!drag) return;
-  if (!drag.moved) renderPostop();
+  if (!drag || !drag.moved) { renderPostop(); return; }
+  const po = ensurePostopState();
+  const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
+  if (!nod) { renderPostop(); return; }
+  if (nod.diagramRy != null && drag.lobe !== 'isthmus') {
+    const zones = zonesFromEllipse(nod.diagramY, nod.diagramRy);
+    nod.locationUpper = zones.includes('upper');
+    nod.locationMiddle = zones.includes('middle');
+    nod.locationLower = zones.includes('lower');
+  }
+  saveState();
+  renderPostop();
+  refreshPostopPopupIfOpen(drag.lobe);
 }
 function postopResidualSpanHandlePointerCancel() {
   document.removeEventListener('pointermove', postopResidualSpanHandlePointerMove);
+  clearPostopDraggingClass();
+  const drag = postopDiagramSpanHandleDrag;
   postopDiagramSpanHandleDrag = null;
+  if (drag) {
+    const po = ensurePostopState();
+    const nod = po.residualThyroidNodules[drag.lobe] && po.residualThyroidNodules[drag.lobe][drag.idx];
+    if (nod) {
+      nod.diagramX = drag.origDiagramX; nod.diagramY = drag.origDiagramY;
+      nod.diagramRy = drag.origDiagramRy;
+      nod.locationUpper = drag.origU; nod.locationMiddle = drag.origM; nod.locationLower = drag.origL;
+    }
+  }
+  renderPostop();
 }
 function postopOpBedMarkerPointerDown(event, site, idx) {
   event.preventDefault();
@@ -4305,6 +4796,9 @@ function postopOpBedMarkerPointerDown(event, site, idx) {
   const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
   if (!les) return;
   postopDiagramMarkerDrag = { kind: 'opbed', site, idx, startX: event.clientX, startY: event.clientY, moved: false, lastZone: null };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
+  updatePostopDragGhost(event.clientX, event.clientY);
   document.addEventListener('pointermove', postopOpBedMarkerPointerMove, { passive: false });
   document.addEventListener('pointerup', postopOpBedMarkerPointerUp, { once: true });
   document.addEventListener('pointercancel', postopOpBedMarkerPointerCancel, { once: true });
@@ -4315,48 +4809,128 @@ function postopOpBedMarkerPointerMove(event) {
   const dx = event.clientX - postopDiagramMarkerDrag.startX;
   const dy = event.clientY - postopDiagramMarkerDrag.startY;
   if (Math.hypot(dx, dy) > 4) postopDiagramMarkerDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone || zone.type !== 'opbed') return;
-  postopDiagramMarkerDrag.lastZone = zone;
+  updatePostopDragGhost(event.clientX, event.clientY);
+  const zone = getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY);
+  if (zone && zone.type === 'opbed') postopDiagramMarkerDrag.lastZone = zone;
+}
+function postopOpBedMarkerPointerUp(event) {
+  document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
+  const drag = postopDiagramMarkerDrag;
+  postopDiagramMarkerDrag = null;
+  if (!drag) return;
+  if (!drag.moved) { openPostopPopup('opbed', drag.site, drag.idx); return; }
+  const zone = (event && getPostopDiagramZoneFromSvgPosition(event.clientX, event.clientY)) || drag.lastZone;
+  if (!zone || zone.type !== 'opbed') { renderPostop(); return; }
   const po = ensurePostopState();
-  const les = po.opBedLesions[postopDiagramMarkerDrag.site] && po.opBedLesions[postopDiagramMarkerDrag.site][postopDiagramMarkerDrag.idx];
-  if (!les) return;
-  const targetSite = postopSiteForOpBedMove(zone, postopDiagramMarkerDrag);
-  const dropPoint = getDiagramSvgPoint(event.clientX, event.clientY) || null;
+  const targetSite = postopSiteForOpBedMove(zone, drag);
+  const les = po.opBedLesions[drag.site] && po.opBedLesions[drag.site][drag.idx];
+  if (!les) { renderPostop(); return; }
+  const dropPoint = event ? getPostopDiagramSvgPoint(event.clientX, event.clientY) : null;
   postopSetDiagramPoint(les, dropPoint, targetSite);
   if (zone.site) {
     les.location = zone.site === 'central' ? 'Central Neck / Thyroidectomy Bed' : zone.site === 'isthmus' ? 'Isthmus Op. Bed' : zone.site === 'right' ? 'Right Op. Bed' : 'Left Op. Bed';
   }
-  if (targetSite !== postopDiagramMarkerDrag.site) {
-    po.opBedLesions[postopDiagramMarkerDrag.site].splice(postopDiagramMarkerDrag.idx, 1);
+  if (targetSite !== drag.site) {
+    po.opBedLesions[drag.site].splice(drag.idx, 1);
     if (!po.opBedLesions[targetSite]) po.opBedLesions[targetSite] = [];
     po.opBedLesions[targetSite].push(les);
-    postopDiagramMarkerDrag.site = targetSite;
-    postopDiagramMarkerDrag.idx = po.opBedLesions[targetSite].length - 1;
   }
   saveState();
   renderPostop();
-  refreshPostopPopupIfOpen(postopDiagramMarkerDrag.site);
-}
-function postopOpBedMarkerPointerUp() {
-  document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
-  const drag = postopDiagramMarkerDrag;
-  postopDiagramMarkerDrag = null;
-  if (!drag) return;
-  if (!drag.moved) openPostopPopup('opbed', drag.site, drag.idx);
+  refreshPostopPopupIfOpen(targetSite);
 }
 function postopOpBedMarkerPointerCancel() {
   document.removeEventListener('pointermove', postopOpBedMarkerPointerMove);
+  clearPostopDraggingClass();
+  clearPostopDragGhost();
   postopDiagramMarkerDrag = null;
+  renderPostop();
 }
-function postopDiagramZoneClick(z) {
-
+function postopOpBedSpanHandlePointerDown(event, site, idx, handle) {
+  event.preventDefault();
+  event.stopPropagation();
+  const po = ensurePostopState();
+  const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
+  if (!les) return;
+  let cx = site === 'right' ? 82 : site === 'left' ? 218 : 150;
+  let cy = site === 'right' ? 104 : site === 'left' ? 104 : 102;
+  if (postopHasDiagramPoint(les)) {
+    const pt = postopClampDiagramPointToSite({ x: Number(les.diagramX), y: Number(les.diagramY) }, site);
+    if (pt) { cx = pt.x; cy = pt.y; }
+  }
+  const shape = postopOpBedMarkerShape(les, false);
+  const currentRy = shape.ry;
+  postopOpBedSpanHandleDrag = { site, idx, handle, cx, cy, currentRy };
+  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
+  if (marker) marker.classList.add('diagram-marker-dragging');
+  document.addEventListener('pointermove', postopOpBedSpanHandlePointerMove, { passive: false });
+  document.addEventListener('pointerup', postopOpBedSpanHandlePointerUp, { once: true });
+  document.addEventListener('pointercancel', postopOpBedSpanHandlePointerCancel, { once: true });
+}
+function postopOpBedSpanHandlePointerMove(event) {
+  if (!postopOpBedSpanHandleDrag) return;
+  event.preventDefault();
+  const { site, idx, handle, cx, cy, currentRy } = postopOpBedSpanHandleDrag;
+  const svgPt = getPostopDiagramSvgPoint(event.clientX, event.clientY);
+  if (!svgPt) return;
+  const po = ensurePostopState();
+  const les = po.opBedLesions[site] && po.opBedLesions[site][idx];
+  if (!les) return;
+  const MIN_RY = 8;
+  const bounds = { right:{minY:36,maxY:170}, left:{minY:36,maxY:170}, isthmus:{minY:90,maxY:114}, central:{minY:72,maxY:138} }[site] || {minY:36,maxY:170};
+  let newRy, newCy;
+  if (handle === 'upper') {
+    const fixedBot = cy + currentRy;
+    const top = Math.max(bounds.minY, Math.min(fixedBot - 2 * MIN_RY, svgPt.y));
+    newRy = (fixedBot - top) / 2;
+    newCy = (fixedBot + top) / 2;
+  } else {
+    const fixedTop = cy - currentRy;
+    const bot = Math.min(bounds.maxY, Math.max(fixedTop + 2 * MIN_RY, svgPt.y));
+    newRy = (bot - fixedTop) / 2;
+    newCy = (fixedTop + bot) / 2;
+  }
+  les.diagramX = Math.round(cx * 10) / 10;
+  les.diagramY = Math.round(newCy * 10) / 10;
+  les.diagramRy = Math.round(newRy * 10) / 10;
+  const svg = document.getElementById('postop-svg');
+  if (svg) {
+    const markers = svg.querySelector('#postop-markers') || svg;
+    renderPostopDiagramMarkers(svg);
+  }
+}
+function postopOpBedSpanHandlePointerUp() {
+  document.removeEventListener('pointermove', postopOpBedSpanHandlePointerMove);
+  clearPostopDraggingClass();
+  postopOpBedSpanHandleDrag = null;
+  saveState();
+  renderPostop();
+}
+function postopOpBedSpanHandlePointerCancel() {
+  document.removeEventListener('pointermove', postopOpBedSpanHandlePointerMove);
+  clearPostopDraggingClass();
+  postopOpBedSpanHandleDrag = null;
+  renderPostop();
+}
+function postopDiagramZoneClick(z, evt, svg) {
+  // Convert click coordinates to SVG space so the new marker appears at the clicked position
+  let svgPt = null;
+  if (evt && svg) {
+    try {
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      const m = svg.getScreenCTM();
+      if (m) svgPt = pt.matrixTransform(m.inverse());
+    } catch(e) {}
+  }
   if (z.type === 'opbed') {
-    const idx = addPostopOpBedLesion(z.site);
+    const idx = addPostopOpBedLesion(z.site, svgPt);
     openPostopPopup('opbed', z.site, idx);
     return;
   }
-  const idx = addPostopResidualNodule(z.lobe, z.loc);
+  const idx = addPostopResidualNodule(z.lobe, z.loc, svgPt);
   openPostopPopup('residual', z.lobe, idx);
 }
 function scrollToPostopCard(containerId, idx) {
@@ -4366,7 +4940,7 @@ function scrollToPostopCard(containerId, idx) {
     card.scrollIntoView({behavior:'smooth', block:'center'});
   }, 30);
 }
-function addPostopResidualNodule(lobe, location) {
+function addPostopResidualNodule(lobe, location, svgPt) {
   const po=ensurePostopState();
   if (po.residualThyroidNodules[lobe].length>=3) return Math.max(0, po.residualThyroidNodules[lobe].length - 1);
   const nod=defaultNodule();
@@ -4378,6 +4952,7 @@ function addPostopResidualNodule(lobe, location) {
     nod.locationMiddle = loc === 'middle';
     nod.locationLower = loc === 'lower';
   }
+  if (svgPt) postopSetDiagramPoint(nod, svgPt, lobe);
   po.residualThyroidNodules[lobe].push(nod);
   const idx=po.residualThyroidNodules[lobe].length-1;
   saveState(); renderPostop();
@@ -4407,7 +4982,7 @@ function renderPostopResidualNoduleCol(lobe) {
 }
 function buildPostopResidualNoduleTable(lobe, idx, nod) {
   const wrap=document.createElement('div'); wrap.className='nodule-item'; const label=LOBE_LABELS[lobe]+(idx+1); const anatomyLabel=getPostopLabelFor('residual', lobe); const info=getKTIRADSInfo(nod,false);
-  const table=document.createElement('table'); table.className='nodule-table-el';
+  const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup());
   const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el';
   const hin=document.createElement('div'); hin.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap';
   const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Nodule '+label+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="tirads-display '+(info.tirads.includes('5')?'tirads-5':info.tirads.includes('4')?'tirads-4':info.tirads.includes('3')?'tirads-3':info.tirads.includes('2')?'tirads-2':'')+'">'+(info.tirads||'[K-TIRADS]')+'</span>'; tw.appendChild(main);
@@ -4432,7 +5007,7 @@ function mkPostopChecks(opts,obj,onch){ const div=document.createElement('div');
 function mkTextarea(obj,key,onch){ const t=document.createElement('textarea'); t.rows=3; t.style.width='100%'; t.value=obj[key]||''; t.oninput=()=>{ obj[key]=t.value; onch(); }; return t; }
 function mkTextInput(obj,key,onch,ph,w){ const i=document.createElement('input'); i.type='text'; i.placeholder=ph||''; i.style.width=w||'90px'; i.value=obj[key]||''; i.oninput=()=>{ obj[key]=i.value; onch(); }; return i; }
 function mkPostopDiameter(obj,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:4px;'; const row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:4px;flex-wrap:wrap;'; ['AP','T','L'].forEach((lab,i)=>{ const key=['diamAP','diamT','diamL'][i]; row.append(lab+':'); row.appendChild(mkTextInput(obj,key,onch,lab,'52px')); if(i<2) row.append(' × '); }); const sel=document.createElement('select'); sel.innerHTML='<option>mm</option><option>cm</option>'; sel.value=obj.diamUnit||'mm'; sel.onchange=()=>{ obj.diamUnit=sel.value; onch(); }; row.appendChild(sel); d.appendChild(row); const auto=document.createElement('div'); auto.className='size-auto'; const ms=calcMaxSize(obj); auto.textContent=ms?('Max: '+ms+' '+(obj.diamUnit||'mm')+(obj.diamAP&&obj.diamT&&obj.diamL?'  Vol: '+formatVolumeMl(parseFloat(obj.diamAP),parseFloat(obj.diamT),parseFloat(obj.diamL)):'')):''; d.appendChild(auto); return d; }
-function addPostopOpBedLesion(site){ const po=ensurePostopState(); po.opBedLesions[site].push(defaultOpBedLesion()); const idx=po.opBedLesions[site].length-1; saveState(); renderPostop(); return idx; }
+function addPostopOpBedLesion(site, svgPt){ const po=ensurePostopState(); const les=defaultOpBedLesion(); if(svgPt) postopSetDiagramPoint(les, svgPt, site); po.opBedLesions[site].push(les); const idx=po.opBedLesions[site].length-1; saveState(); renderPostop(); return idx; }
 function removePostopOpBedLesion(site,idx){ ensurePostopState().opBedLesions[site].splice(idx,1); saveState(); renderPostop(); }
 function updatePostopOpBedLesion(site,idx,les){ autoPostopOpBedImpression(les); ensurePostopState().opBedLesions[site][idx]=les; saveState(); renderPostopResidualNoduleCol(site); refreshPostopPopupIfOpen(site); }
 function postopOpBedLabel(site, idx) {
@@ -4466,9 +5041,9 @@ function autoPostopOpBedImpression(les){
   }
 }
 function renderPostopOpBedCol(site){ const cont=document.getElementById('postop-opbed-'+site); if(!cont)return; cont.innerHTML=''; const list=ensurePostopState().opBedLesions[site]||[]; if(!list.length){ const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent='No op bed lesion.'; cont.appendChild(e); } list.forEach((les,idx)=>cont.appendChild(buildPostopOpBedTable(site,idx,les))); }
-function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
-  addRow('Location', mkOpBedLocation(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Diameter', mkPostopDiameter(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Shape / Orientation', mkPostopRadio('op_shape_ori_'+site+'_'+idx,['Parallel','Nonparallel / Taller-than-wide','Irregular shape'],les,'orientation',()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Margin', mkPostopRadio('op_margin_'+site+'_'+idx,['Smooth','Ill-defined','Irregular','Spiculated','Infiltrative'],les,'margin',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenicity', mkPostopRadio('op_echo_'+site+'_'+idx,['Marked hypoechoic','Mild hypoechoic','Isoechoic','Hyperechoic','Heterogeneous','Cystic / cystic change'],les,'echogenicity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenic foci', mkPostopRadio('op_foci_'+site+'_'+idx,['None','Punctate echogenic foci','Macrocalcification','Rim calcification','Coarse calcification','Surgical clip / artifact suspected'],les,'echogenicFoci',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Vascularity', mkPostopRadio('op_vasc_'+site+'_'+idx,['None','Peripheral','Mild intralesional','Marked intralesional','Abnormal vascularity'],les,'vascularity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Suspicious Features', mkPostopChecks([['suspPEF','Punctate echogenic foci'],['suspIrregular','Irregular or infiltrative margin'],['suspTaller','Nonparallel orientation'],['suspMarkedHypoechoic','Marked hypoechogenicity'],['suspAbnormalVascularity','Abnormal vascularity'],['suspGrowth','Interval growth'],['suspInvasion','Adjacent structure invasion']],les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Adjacent Structure Invasion', mkOpBedInvasion(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Size Change', mkOpBedSizeChange(site,idx,les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Biopsy/Procedure', mkOpBedBiopsy(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Impression Category', mkOpBedImpression(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Comment', mkTextarea(les,'comment',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Recommendation', mkTextarea(les,'recommendation',()=>updatePostopOpBedLesion(site,idx,les)),false); const rr=document.createElement('tr'); const rc=document.createElement('td'); rc.colSpan=2; rc.className='nodule-reset-cell'; const rb=document.createElement('button'); rb.className='pink-btn'; rb.textContent='Reset this op bed lesion'; rb.onclick=()=>{ ensurePostopState().opBedLesions[site][idx]=defaultOpBedLesion(); saveState(); renderPostop(); }; rc.appendChild(rb); rr.appendChild(rc); tbody.appendChild(rr); table.appendChild(tbody); wrap.appendChild(table); return wrap; }
-function mkOpBedLocation(les,onch){ const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:6px;'; wrap.appendChild(mkPostopRadio('oploc_'+Math.random(),['Right Op. Bed','Left Op. Bed','Isthmus Op. Bed','Central Neck / Thyroidectomy Bed','Strap muscle adjacent area','Tracheoesophageal groove','Paraesophageal area','Other'],les,'location',onch)); if(les.location==='Other'){ const i=mkTextInput(les,'locationOtherText',onch,'Other location','180px'); wrap.appendChild(i); } return wrap; }
+function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup()); const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
+  addRow('Location', mkOpBedLocation(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Diameter', mkPostopDiameter(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Shape /\nOrientation', mkPostopRadio('op_shape_ori_'+site+'_'+idx,['Parallel','Nonparallel / Taller-than-wide','Irregular shape'],les,'orientation',()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Margin', mkPostopRadio('op_margin_'+site+'_'+idx,['Smooth','Ill-defined','Irregular','Spiculated','Infiltrative'],les,'margin',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenicity', mkPostopRadio('op_echo_'+site+'_'+idx,['Marked hypoechoic','Mild hypoechoic','Isoechoic','Hyperechoic','Heterogeneous','Cystic / cystic change'],les,'echogenicity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenic foci', mkPostopRadio('op_foci_'+site+'_'+idx,['None','Punctate echogenic foci','Macrocalcification','Rim calcification','Coarse calcification','Surgical clip / artifact suspected'],les,'echogenicFoci',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Vascularity', mkPostopRadio('op_vasc_'+site+'_'+idx,['None','Peripheral','Mild intralesional','Marked intralesional','Abnormal vascularity'],les,'vascularity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Suspicious\nFeatures', mkPostopChecks([['suspPEF','Punctate echogenic foci'],['suspIrregular','Irregular or infiltrative margin'],['suspTaller','Nonparallel orientation'],['suspMarkedHypoechoic','Marked hypoechogenicity'],['suspAbnormalVascularity','Abnormal vascularity'],['suspGrowth','Interval growth'],['suspInvasion','Adjacent structure invasion']],les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Adjacent\nStructure\nInvasion', mkOpBedInvasion(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Size Change', mkOpBedSizeChange(site,idx,les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Biopsy/Procedure', mkOpBedBiopsy(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Impression\nCategory', mkOpBedImpression(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Comment', mkTextarea(les,'comment',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Recommendation', mkTextarea(les,'recommendation',()=>updatePostopOpBedLesion(site,idx,les)),false); const rr=document.createElement('tr'); const rc=document.createElement('td'); rc.colSpan=2; rc.className='nodule-reset-cell'; const rb=document.createElement('button'); rb.className='pink-btn'; rb.textContent='Reset this op bed lesion'; rb.onclick=()=>{ ensurePostopState().opBedLesions[site][idx]=defaultOpBedLesion(); saveState(); renderPostop(); }; rc.appendChild(rb); rr.appendChild(rc); tbody.appendChild(rr); table.appendChild(tbody); wrap.appendChild(table); return wrap; }
+function mkOpBedLocation(les,onch){ const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:6px;'; const sel=document.createElement('select'); sel.style.cssText='width:100%;'; const opts=['','Right Op. Bed','Left Op. Bed','Isthmus Op. Bed','Central Neck / Thyroidectomy Bed','Strap muscle adjacent area','Tracheoesophageal groove','Paraesophageal area','Other']; opts.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o||'-- Select location --'; if(les.location===o) opt.selected=true; sel.appendChild(opt); }); sel.onchange=()=>{ les.location=sel.value; onch(); }; wrap.appendChild(sel); if(les.location==='Other'){ const i=mkTextInput(les,'locationOtherText',onch,'Other location','180px'); wrap.appendChild(i); } return wrap; }
 function mkOpBedTwoRadios(site,idx,les,k1,o1,k2,o2,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopRadio('op_'+k1+'_'+site+'_'+idx,o1,les,k1,onch)); d.appendChild(mkPostopRadio('op_'+k2+'_'+site+'_'+idx,o2,les,k2,onch)); return d; }
 function mkOpBedInvasion(les,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopRadio('op_inv_'+Math.random(),['None','Suspected','Definite'],les,'invasionStatus',onch)); if(['Suspected','Definite'].includes(les.invasionStatus)){ d.appendChild(mkPostopChecks([['invasionStrapMuscle','Strap muscle'],['invasionTrachea','Trachea'],['invasionEsophagus','Esophagus'],['invasionRLN','Recurrent laryngeal nerve area'],['invasionCarotid','Carotid artery'],['invasionIJV','Internal jugular vein'],['invasionOtherSoftTissue','Other soft tissue'],['invasionOther','Other']],les,onch)); if(les.invasionOther) d.appendChild(mkTextInput(les,'invasionOtherText',onch,'Other target','160px')); } return d; }
 function mkOpBedSizeChange(site,idx,les,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopChecks([['sizeChangeInitial','Initial'],['sizeChangeFU','Follow-up']],les,onch)); if(les.sizeChangeFU){ d.appendChild(mkPostopRadio('op_sc_'+site+'_'+idx,['New','Increased','Decreased','Stable'],les,'sizeChangeType',onch)); d.appendChild(mkTextInput(les,'prevSize',onch,'previous size','150px')); } return d; }
@@ -4498,6 +5073,53 @@ function mkOpBedImpression(les,onch){ const d=document.createElement('div'); d.s
 function resetPostop(){ state.postop=defaultPostop(); saveState(); renderAll(); }
 function resetPostopOpBeds(){ ensurePostopState().opBedLesions={ right:[], left:[], central:[], isthmus:[] }; saveState(); renderPostop(); }
 function resetPostopResidualNodules(){ ensurePostopState().residualThyroidNodules={ right:[], left:[], isthmus:[] }; saveState(); renderPostop(); }
+
+// ==================== LN CHIP DRAG-SELECT ====================
+// Click  → native label click handles toggle (no preventDefault)
+// Drag   → mouseover applies dragVal to each chip entered
+// Edge   → drag ending on start chip blocks the imminent click to prevent double-toggle
+(function() {
+  let startLbl = null, dragVal = false, didDrag = false;
+
+  document.addEventListener('mousedown', e => {
+    const lbl = e.target.closest('.ln-check-label');
+    if (!lbl) return;
+    const chk = lbl.querySelector('input[type=checkbox]');
+    if (!chk || chk.disabled) return;
+    startLbl = lbl;
+    dragVal = !chk.checked;
+    didDrag = false;
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (didDrag && startLbl && e.target.closest('.ln-check-label') === startLbl) {
+      // Drag ended on the same chip it started — block the imminent click
+      const once = ev => { ev.preventDefault(); document.removeEventListener('click', once, true); };
+      document.addEventListener('click', once, true);
+    }
+    startLbl = null;
+    didDrag = false;
+  });
+
+  document.addEventListener('mouseover', e => {
+    if (!startLbl) return;
+    const lbl = e.target.closest('.ln-check-label');
+    if (!lbl || lbl === startLbl) return;
+    if (!didDrag) {
+      // First time entering a different chip: apply dragVal to start chip too
+      didDrag = true;
+      const sc = startLbl.querySelector('input[type=checkbox]');
+      if (sc && !sc.disabled && sc.checked !== dragVal) {
+        sc.checked = dragVal;
+        sc.dispatchEvent(new Event('change'));
+      }
+    }
+    const chk = lbl.querySelector('input[type=checkbox]');
+    if (!chk || chk.disabled || chk.checked === dragVal) return;
+    chk.checked = dragVal;
+    chk.dispatchEvent(new Event('change'));
+  });
+})();
 
 // ==================== LYMPH NODE ====================
 // Columns: [lateralRightIndet, lateralRightSusp, lateralLeftIndet, lateralLeftSusp, centralRightIndet, centralRightSusp, centralLeftIndet, centralLeftSusp]
@@ -4531,7 +5153,8 @@ function renderLymphTable() {
   const td1L = document.createElement('td'); td1L.className='row-label'; td1L.textContent='Neck Level'; tr1.appendChild(td1L);
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
-    const td = document.createElement('td'); td.style.verticalAlign='top';
+    const td = document.createElement('td'); td.className='td-top';
+    const group1 = document.createElement('div'); group1.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -4540,8 +5163,9 @@ function renderLymphTable() {
       chk.checked = !!(ln[key]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur[key]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group1.appendChild(lbl);
     });
+    td.appendChild(group1);
     tr1.appendChild(td);
   }
   tbody.appendChild(tr1);
@@ -4552,8 +5176,8 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td'); td.className='required-cell';
-    const mkInp = (ph, stk, ww) => {
-      const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.style.width=ww||'50px'; i.value=ln[stk]||'';
+    const mkInp = (ph, stk) => {
+      const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.className='ln-size-input'; i.value=ln[stk]||'';
       i.addEventListener('input',()=>{ const cur=getLN(ci); cur[stk]=i.value; setLN(ci,cur); saveState(); });
       return i;
     };
@@ -4562,11 +5186,13 @@ function renderLymphTable() {
       s.addEventListener('change',()=>{ const cur=getLN(ci); cur[stk]=s.value; setLN(ci,cur); saveState(); });
       return s;
     };
-    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
-    const r1 = document.createElement('div'); r1.style.display='flex';r1.style.alignItems='center';r1.style.gap='3px';
-    r1.append('LD:'); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
-    const r2 = document.createElement('div'); r2.style.display='flex';r2.style.alignItems='center';r2.style.gap='3px';
-    r2.append('SD:'); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
+    const d = document.createElement('div'); d.className='ln-measure-cell';
+    const r1 = document.createElement('div'); r1.className='ln-measure-row';
+    const l1=document.createElement('span'); l1.className='ln-meas-lbl'; l1.textContent='LD';
+    r1.appendChild(l1); r1.appendChild(mkInp('LD','ldValue')); r1.appendChild(mkSel('ldUnit'));
+    const r2 = document.createElement('div'); r2.className='ln-measure-row';
+    const l2=document.createElement('span'); l2.className='ln-meas-lbl'; l2.textContent='SD';
+    r2.appendChild(l2); r2.appendChild(mkInp('SD','sdValue')); r2.appendChild(mkSel('sdUnit'));
     d.appendChild(r1); d.appendChild(r2);
     td.appendChild(d);
     tr2.appendChild(td);
@@ -4579,7 +5205,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
-    const ta = document.createElement('textarea'); ta.rows=2; ta.style.width='100%'; ta.value=ln.comment||'';
+    const ta = document.createElement('textarea'); ta.rows=2; ta.value=ln.comment||'';
     ta.addEventListener('input',()=>{ const cur=getLN(ci); cur.comment=ta.value; setLN(ci,cur); saveState(); });
     td.appendChild(ta); tr3.appendChild(td);
   }
@@ -4588,7 +5214,7 @@ function renderLymphTable() {
   // Biopsy header
   const trBxH = document.createElement('tr');
   const tdBxH = document.createElement('td'); tdBxH.colSpan=9; tdBxH.className='ln-section-hdr';
-  tdBxH.textContent='--- Biopsy ---'; trBxH.appendChild(tdBxH);
+  tdBxH.textContent='Biopsy'; trBxH.appendChild(tdBxH);
   tbody.appendChild(trBxH);
 
   // Row 4: Biopsy
@@ -4611,6 +5237,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
+    const group5 = document.createElement('div'); group5.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -4619,8 +5246,9 @@ function renderLymphTable() {
       chk.checked = !!(ln['fna_'+lvl]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['fna_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group5.appendChild(lbl);
     });
+    td.appendChild(group5);
     tr5.appendChild(td);
   }
   tbody.appendChild(tr5);
@@ -4631,6 +5259,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
+    const group6 = document.createElement('div'); group6.className='ln-chip-group';
     const levels = isLateral(ci) ? [1,2,3,4,5] : [6,7];
     levels.forEach(lvl => {
       const lbl = document.createElement('label'); lbl.className='ln-check-label';
@@ -4639,8 +5268,9 @@ function renderLymphTable() {
       chk.checked = !!(ln['cnb_'+lvl]);
       chk.addEventListener('change',()=>{ const cur=getLN(ci); cur['cnb_'+lvl]=chk.checked; setLN(ci,cur); saveState(); });
       lbl.appendChild(chk); lbl.append(' '+lvl);
-      td.appendChild(lbl);
+      group6.appendChild(lbl);
     });
+    td.appendChild(group6);
     tr6.appendChild(td);
   }
   tbody.appendChild(tr6);
@@ -4651,7 +5281,7 @@ function renderLymphTable() {
   for (let ci=0; ci<8; ci++) {
     const ln = getLN(ci);
     const td = document.createElement('td');
-    const d = document.createElement('div'); d.style.display='flex';d.style.flexDirection='column';d.style.gap='3px';
+    const d = document.createElement('div'); d.className='ln-measure-cell';
     const r1 = document.createElement('div'); r1.className='check-group';
 
     const noLbl = document.createElement('label'); noLbl.className='inline-check-label';
@@ -4667,7 +5297,7 @@ function renderLymphTable() {
     d.appendChild(r1);
 
     if (ln.compYes) {
-      const compTxt = document.createElement('input'); compTxt.type='text'; compTxt.placeholder='specify'; compTxt.style.width='100%'; compTxt.value=ln.compText||'';
+      const compTxt = document.createElement('input'); compTxt.type='text'; compTxt.placeholder='specify'; compTxt.value=ln.compText||'';
       compTxt.addEventListener('input',()=>{ const cur=getLN(ci); cur.compText=compTxt.value; setLN(ci,cur); saveState(); });
       d.appendChild(compTxt);
     }
@@ -4679,7 +5309,7 @@ function renderLymphTable() {
 
 // ==================== RESET FUNCTIONS ====================
 function resetThyroid() {
-  const keys = ['normalThyroid','clinInd','clinIndCustom','compYear','compMonth','compDay','thySize','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
+  const keys = ['normalThyroid','clinIndDefault','clinIndText','clinHistory','compYear','compMonth','compDay','compType','thySize','sizeRightAP','sizeRightT','sizeRightL','sizeRightUnit','sizeIsthmusAP','sizeIsthmusL','sizeIsthmusUnit','sizeLeftAP','sizeLeftT','sizeLeftL','sizeLeftUnit','diffuseDis','echotexture','parVasc','multinodular'];
   const def = JSON.parse(JSON.stringify(defaultState));
   keys.forEach(k => state[k] = def[k]);
   state.prevBiopsies = [];
@@ -4728,155 +5358,173 @@ function buildReportText() {
   const lines = [];
 
   // Clinical information
-  let clinIndText = state.clinInd === 'custom' ? (state.clinIndCustom || '') : state.clinInd;
-  lines.push('Clinical information: ' + clinIndText);
+  const reportMode = state.reportMode || 'thyroid';
 
-  // Comparison
-  if (state.compYear || state.compMonth || state.compDay) {
-    const yr = state.compYear || 'YYYY';
-    const mo = state.compMonth ? state.compMonth.padStart(2,'0') : 'MM';
-    const dy = state.compDay ? state.compDay.padStart(2,'0') : 'DD';
-    lines.push('Comparison: US (' + yr + '/' + mo + '/' + dy + ')');
+  if (reportMode === 'postop' && state.postop) {
+    const po = state.postop;
+    const poParts = [];
+    if (po.clinIndDefault !== false) poParts.push('Postoperative surveillance');
+    if (po.clinIndText && po.clinIndText.trim()) poParts.push(po.clinIndText.trim());
+    lines.push('Clinical information: ' + (poParts.join(', ') || 'Postoperative surveillance'));
+    if (po.clinHistory && po.clinHistory.trim()) lines.push('Clinical history: ' + po.clinHistory.trim());
+    if (po.compYear || po.compMonth || po.compDay) {
+      const yr = po.compYear || 'YYYY';
+      const mo = po.compMonth ? po.compMonth.padStart(2,'0') : 'MM';
+      const dy = po.compDay ? po.compDay.padStart(2,'0') : 'DD';
+      lines.push('Comparison: ' + (po.compType || 'US') + ' (' + yr + '/' + mo + '/' + dy + ')');
+    } else {
+      lines.push('Comparison: not available');
+    }
   } else {
-    lines.push('Comparison: not available');
+    const thyParts = [];
+    if (state.clinIndDefault !== false) thyParts.push('Thyroid nodule');
+    if (state.clinIndText && state.clinIndText.trim()) thyParts.push(state.clinIndText.trim());
+    lines.push('Clinical information: ' + (thyParts.join(', ') || 'Thyroid nodule'));
+    if (state.clinHistory && state.clinHistory.trim()) lines.push('Clinical history: ' + state.clinHistory.trim());
+    if (state.compYear || state.compMonth || state.compDay) {
+      const yr = state.compYear || 'YYYY';
+      const mo = state.compMonth ? state.compMonth.padStart(2,'0') : 'MM';
+      const dy = state.compDay ? state.compDay.padStart(2,'0') : 'DD';
+      lines.push('Comparison: ' + (state.compType || 'US') + ' (' + yr + '/' + mo + '/' + dy + ')');
+    } else {
+      lines.push('Comparison: not available');
+    }
   }
 
-  // Previous biopsy — collected from per-nodule biopsy history
-  const prevBxLines = [];
-  ['right','isthmus','left'].forEach(lobe => {
-    (state.nodules[lobe] || []).forEach((nod, idx) => {
-      const label = LOBE_LABELS[lobe] + (idx+1);
-      const tgt = ' (target: ' + label + ')';
-      (nod.prevBiopsies || []).forEach(prevBx => {
-        const dateParts = [prevBx.year, prevBx.month, prevBx.day].filter(v=>v);
-        const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-        if (prevBx.fna && prevBx.fnaPathDx && prevBx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + prevBx.fnaPathDx.trim() + '.');
-        if (prevBx.cnb && prevBx.cnbPathDx && prevBx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + prevBx.cnbPathDx.trim() + '.');
+  // Previous biopsy (thyroid mode only)
+  if (reportMode === 'thyroid') {
+    const prevBxLines = [];
+    ['right','isthmus','left'].forEach(lobe => {
+      (state.nodules[lobe] || []).forEach((nod, idx) => {
+        const label = LOBE_LABELS[lobe] + (idx+1);
+        const tgt = ' (target: ' + label + ')';
+        (nod.prevBiopsies || []).forEach(prevBx => {
+          const dateParts = [prevBx.year, prevBx.month, prevBx.day].filter(v=>v);
+          const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+          if (prevBx.fna && prevBx.fnaPathDx && prevBx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + prevBx.fnaPathDx.trim() + '.');
+          if (prevBx.cnb && prevBx.cnbPathDx && prevBx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + prevBx.cnbPathDx.trim() + '.');
+        });
+        if ((!nod.prevBiopsies || nod.prevBiopsies.length === 0) && nod.biopsyDone) {
+          const dateParts = [nod.biopsyYear, nod.biopsyMonth, nod.biopsyDay].filter(v=>v);
+          const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+          if (nod.biopsyFNA && nod.fnaPathDx && nod.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + nod.fnaPathDx.trim() + '.');
+          if (nod.biopsyCNB && nod.cnbPathDx && nod.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + nod.cnbPathDx.trim() + '.');
+        }
       });
-      // Backward compatibility for old ver0.1 nodule-level pathology fields not yet migrated in memory.
-      if ((!nod.prevBiopsies || nod.prevBiopsies.length === 0) && nod.biopsyDone) {
-        const dateParts = [nod.biopsyYear, nod.biopsyMonth, nod.biopsyDay].filter(v=>v);
-        const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-        if (nod.biopsyFNA && nod.fnaPathDx && nod.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + nod.fnaPathDx.trim() + '.');
-        if (nod.biopsyCNB && nod.cnbPathDx && nod.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + nod.cnbPathDx.trim() + '.');
-      }
     });
-  });
-  // Legacy: also include old global prevBiopsies entries (backward compatibility)
-  (state.prevBiopsies || []).forEach(bx => {
-    const tgt = bx.target && bx.target.trim() ? ' (target: ' + bx.target.trim() + ')' : '';
-    const dateParts = [bx.year, bx.month, bx.day].filter(v=>v);
-    const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
-    if (bx.fna && bx.fnaPathDx && bx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + bx.fnaPathDx.trim() + '.');
-    if (bx.cnb && bx.cnbPathDx && bx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + bx.cnbPathDx.trim() + '.');
-  });
-  if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
+    (state.prevBiopsies || []).forEach(bx => {
+      const tgt = bx.target && bx.target.trim() ? ' (target: ' + bx.target.trim() + ')' : '';
+      const dateParts = [bx.year, bx.month, bx.day].filter(v=>v);
+      const dateSuffix = dateParts.length ? ' [' + dateParts.join('/') + ']' : '';
+      if (bx.fna && bx.fnaPathDx && bx.fnaPathDx.trim()) prevBxLines.push('Previous FNA' + tgt + dateSuffix + ': ' + bx.fnaPathDx.trim() + '.');
+      if (bx.cnb && bx.cnbPathDx && bx.cnbPathDx.trim()) prevBxLines.push('Previous CNB' + tgt + dateSuffix + ': ' + bx.cnbPathDx.trim() + '.');
+    });
+    if (prevBxLines.length > 0) lines.push(prevBxLines.join('\n'));
+  }
 
   lines.push('');
   lines.push('Findings:');
-
   let findingNum = 1;
 
-  // 1. Thyroid parenchyma
-  lines.push(findingNum++ + '. Thyroid parenchyma');
-  if (state.normalThyroid) {
-    lines.push('   Normal thyroid');
-  } else {
-    const parLines = [];
-    const szParts = [];
-    if (state.thySize !== 'Normal') szParts.push(state.thySize + ' thyroid');
-    if (szParts.length > 0) parLines.push(szParts.join(', '));
-    if (state.diffuseDis) {
-      let parDesc = 'Diffuse thyroid disease';
-      if (state.echotexture) parDesc += ', ' + state.echotexture + 'geneous echotexture';
-      if (state.parVasc) parDesc += ', ' + state.parVasc.toLowerCase() + ' vascularity';
-      parLines.push(parDesc);
-    }
-    if (state.multinodular) parLines.push('Multinodular goiter');
-    if (parLines.length === 0) parLines.push('No diffuse thyroid disease');
-    parLines.forEach(l => lines.push('   ' + l));
-  }
-
-  // 2. Thyroid nodule
+  // ---- THYROID MODE ----
   const allNodules = [];
-  ['right','isthmus','left'].forEach(lobe => {
-    (state.nodules[lobe]||[]).forEach((nod,idx) => { allNodules.push({lobe,idx,nod}); });
-  });
-
-  if (allNodules.length > 0) {
-    lines.push(findingNum++ + '. Thyroid nodule');
+  if (reportMode === 'thyroid') {
+    lines.push(findingNum++ + '. Thyroid parenchyma');
+    if (state.normalThyroid) {
+      lines.push('   Normal thyroid');
+    } else {
+      const parLines = [];
+      if (state.thySize !== 'Normal') parLines.push(state.thySize + ' thyroid');
+      if (state.diffuseDis) {
+        let parDesc = 'Diffuse thyroid disease';
+        if (state.echotexture) parDesc += ', ' + state.echotexture + 'geneous echotexture';
+        if (state.parVasc) parDesc += ', ' + state.parVasc.toLowerCase() + ' vascularity';
+        parLines.push(parDesc);
+      }
+      if (state.multinodular) parLines.push('Multinodular goiter');
+      if (parLines.length === 0) parLines.push('No diffuse thyroid disease');
+      parLines.forEach(l => lines.push('   ' + l));
+    }
 
     ['right','isthmus','left'].forEach(lobe => {
-      const nods = state.nodules[lobe] || [];
-      if (nods.length === 0) return;
-      const lobeName = lobe === 'right' ? '1) Right lobe' : lobe === 'isthmus' ? '2) Isthmus' : '3) Left lobe';
-      lines.push('   ' + lobeName);
-      nods.forEach((nod, idx) => {
-        const label = LOBE_LABELS[lobe] + (idx+1);
-        const parts = [];
-        const locText = getLocationText(nod, lobe);
-        if (locText) parts.push(locText);
-        const ms = calcMaxSize(nod);
-        if (nod.diamAP || nod.diamT || nod.diamL) {
-          const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
-          parts.push(dimStr);
-        }
-        if (nod.composition) parts.push(nod.composition);
-        if (nod.echogenicity) parts.push(nod.echogenicity);
-        if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
-        if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
-        if (nod.calcification_micro) parts.push('PEF/microcalcification');
-        if (nod.calcification_rim) parts.push('rim calcification');
-        if (nod.calcification_macro) parts.push('macrocalcification');
-        if (nod.calcification_entire) parts.push('macrocalcification (entirely calcified)');
-        if (nod.spongiform === 'Yes') parts.push('spongiform');
-        if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
-        if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
-        if (nod.diffuseLesion === 'infiltrative') parts.push('diffuse infiltrative lesion');
-        if (nod.eteType && nod.eteType !== 'none') {
-          if (nod.eteType === 'minor') {
-            let eteStr = 'minor ETE';
-            const dirs = [];
-            if (nod.eteMinorAnt) dirs.push('ant');
-            if (nod.eteMinorPost) dirs.push('post');
-            if (dirs.length) eteStr += ' (' + dirs.join(', ') + ')';
-            parts.push(eteStr);
-          } else if (nod.eteType === 'gross') {
-            let eteStr = 'gross ETE';
-            const sites = [];
-            if (nod.eteGrossTrachea) sites.push('trachea');
-            if (nod.eteGrossRLN) sites.push('RLN');
-            if (nod.eteGrossStrap) sites.push('strap muscle');
-            if (nod.eteGrossOthers) sites.push(nod.eteGrossOthersText||'others');
-            if (sites.length) eteStr += ' (' + sites.join(', ') + ')';
-            parts.push(eteStr);
-          }
-        }
-        if (nod.sizeChangeInitial) parts.push('initial');
-        else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
-        const tirads = getKTIRADS(nod, state.normalThyroid);
-        if (tirads) parts.push(tirads);
-        lines.push('      ' + label + ': ' + parts.join(', '));
-        if (nod.comment) lines.push('      Comment: ' + nod.comment);
-      });
+      (state.nodules[lobe]||[]).forEach((nod,idx) => { allNodules.push({lobe,idx,nod}); });
     });
+
+    if (allNodules.length > 0) {
+      lines.push(findingNum++ + '. Thyroid nodule');
+      ['right','isthmus','left'].forEach(lobe => {
+        const nods = state.nodules[lobe] || [];
+        if (nods.length === 0) return;
+        const lobeName = lobe === 'right' ? '1) Right lobe' : lobe === 'isthmus' ? '2) Isthmus' : '3) Left lobe';
+        lines.push('   ' + lobeName);
+        nods.forEach((nod, idx) => {
+          const label = LOBE_LABELS[lobe] + (idx+1);
+          const parts = [];
+          const locText = getLocationText(nod, lobe);
+          if (locText) parts.push(locText);
+          if (nod.diamAP || nod.diamT || nod.diamL) {
+            const dimStr = [nod.diamAP,nod.diamT,nod.diamL].filter(v=>v).join('×') + ' ' + (nod.diamUnit||'cm');
+            parts.push(dimStr);
+          }
+          if (nod.composition) parts.push(nod.composition);
+          if (nod.echogenicity) parts.push(nod.echogenicity);
+          if (nod.orientation === 'Nonparallel (taller-than-wide)') parts.push('nonparallel');
+          if (nod.margin === 'Irregular (spiculated/microlobulated)') parts.push('irregular margin');
+          if (nod.calcification_micro) parts.push('PEF/microcalcification');
+          if (nod.calcification_rim) parts.push('rim calcification');
+          if (nod.calcification_macro) parts.push('macrocalcification');
+          if (nod.calcification_entire) parts.push('macrocalcification (entirely calcified)');
+          if (nod.spongiform === 'Yes') parts.push('spongiform');
+          if (nod.cometTailArtifact === 'Yes') parts.push('comet tail artifact');
+          if (nod.diffuseLesion === 'extensive') parts.push('extensive parenchymal PEF');
+          if (nod.diffuseLesion === 'infiltrative') parts.push('diffuse infiltrative lesion');
+          if (nod.eteType && nod.eteType !== 'none') {
+            if (nod.eteType === 'minor') {
+              let eteStr = 'minor ETE';
+              const dirs = [];
+              if (nod.eteMinorAnt) dirs.push('ant');
+              if (nod.eteMinorPost) dirs.push('post');
+              if (dirs.length) eteStr += ' (' + dirs.join(', ') + ')';
+              parts.push(eteStr);
+            } else if (nod.eteType === 'gross') {
+              let eteStr = 'gross ETE';
+              const sites = [];
+              if (nod.eteGrossTrachea) sites.push('trachea');
+              if (nod.eteGrossRLN) sites.push('RLN');
+              if (nod.eteGrossStrap) sites.push('strap muscle');
+              if (nod.eteGrossOthers) sites.push(nod.eteGrossOthersText||'others');
+              if (sites.length) eteStr += ' (' + sites.join(', ') + ')';
+              parts.push(eteStr);
+            }
+          }
+          if (nod.sizeChangeInitial) parts.push('initial');
+          else if (nod.sizeChangeFU && nod.sizeChangeType) parts.push(nod.sizeChangeType.toLowerCase());
+          const tirads = getKTIRADS(nod, state.normalThyroid);
+          if (tirads) parts.push(tirads);
+          lines.push('      ' + label + ': ' + parts.join(', '));
+          if (nod.comment) lines.push('      Comment: ' + nod.comment);
+        });
+      });
+    }
   }
 
-  // Postop
-  const postopLines = buildPostopFindingLines();
-  if (postopLines.length > 0) {
-    lines.push(findingNum++ + '. Postoperative thyroid bed');
-    postopLines.forEach(l => lines.push('   ' + l));
+  // ---- POSTOP MODE ----
+  if (reportMode === 'postop') {
+    const postopLines = buildPostopFindingLines();
+    if (postopLines.length > 0) {
+      lines.push(findingNum++ + '. Postoperative thyroid bed');
+      postopLines.forEach(l => lines.push('   ' + l));
+    }
   }
 
-  // Cervical lymph node
+  // Cervical lymph node (always)
   const lnLines = buildLNFindingLines();
   if (lnLines.length > 0) {
     lines.push(findingNum++ + '. Cervical lymph node');
     lnLines.forEach(l => lines.push('   ' + l));
   }
 
-  // Extrathyroidal lesion
+  // Extrathyroidal lesion (always)
   if (state.extraLesion && state.extraLesion.trim()) {
     lines.push(findingNum++ + '. Extrathyroidal lesion');
     lines.push('   ' + state.extraLesion.trim());
@@ -4887,56 +5535,55 @@ function buildReportText() {
   lines.push('Conclusion:');
   let concNum = 1;
 
-  // Thyroid parenchyma conclusion
-  if (state.normalThyroid) {
-    lines.push(concNum++ + '. Normal thyroid');
-  } else if (state.diffuseDis) {
-    lines.push(concNum++ + '. Diffuse thyroid disease');
+  // ---- THYROID MODE conclusion ----
+  if (reportMode === 'thyroid') {
+    if (state.normalThyroid) {
+      lines.push(concNum++ + '. Normal thyroid');
+    } else if (state.diffuseDis) {
+      lines.push(concNum++ + '. Diffuse thyroid disease');
+    }
+
+    if (allNodules.length > 0) {
+      const tiradsOrder = { '[K-TIRADS 5, High suspicion]': 5, '[K-TIRADS 4, Intermediate suspicion]': 4, '[K-TIRADS 3, Low suspicion]': 3, '[K-TIRADS 2, Benign]': 2, '': 0 };
+      const sorted = [...allNodules].sort((a, b) => {
+        const ta = tiradsOrder[getKTIRADS(a.nod, state.normalThyroid)] || 0;
+        const tb = tiradsOrder[getKTIRADS(b.nod, state.normalThyroid)] || 0;
+        if (tb !== ta) return tb - ta;
+        return (calcMaxSizeCm(b.nod)||0) - (calcMaxSizeCm(a.nod)||0);
+      });
+      lines.push(concNum++ + '. Thyroid nodule');
+      let nodNum = 1;
+      sorted.forEach(({lobe, idx, nod}) => {
+        const label = LOBE_LABELS[lobe] + (idx+1);
+        const tirads = getKTIRADS(nod, state.normalThyroid);
+        const ms = calcMaxSize(nod);
+        const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
+        let line = nodNum++ + ') ' + label;
+        const locT = getLocationText(nod, lobe); if (locT) line += ', ' + locT;
+        if (msStr) line += ', ' + msStr;
+        if (tirads) line += ', ' + tirads;
+        if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
+        lines.push('   ' + line);
+      });
+    }
   }
 
-  // Nodule conclusions (sorted by K-TIRADS desc, size desc)
-  const tiradsOrder = { '[K-TIRADS 5, High suspicion]': 5, '[K-TIRADS 4, Intermediate suspicion]': 4, '[K-TIRADS 3, Low suspicion]': 3, '[K-TIRADS 2, Benign]': 2, '': 0 };
-
-  if (allNodules.length > 0) {
-    const sorted = [...allNodules].sort((a, b) => {
-      const ta = tiradsOrder[getKTIRADS(a.nod, state.normalThyroid)] || 0;
-      const tb = tiradsOrder[getKTIRADS(b.nod, state.normalThyroid)] || 0;
-      if (tb !== ta) return tb - ta;
-      const sa = (state.nodules[a.lobe]?.[a.idx] ? calcMaxSizeCm(a.nod) : 0);
-      const sb = (state.nodules[b.lobe]?.[b.idx] ? calcMaxSizeCm(b.nod) : 0);
-      return sb - sa;
-    });
-
-    lines.push(concNum++ + '. Thyroid nodule');
-    let nodNum = 1;
-    sorted.forEach(({lobe, idx, nod}) => {
-      const label = LOBE_LABELS[lobe] + (idx+1);
-      const tirads = getKTIRADS(nod, state.normalThyroid);
-      const ms = calcMaxSize(nod);
-      const msStr = ms > 0 ? (ms + ' ' + (nod.diamUnit||'cm')) : '';
-      let line = nodNum++ + ') ' + label;
-      const locT = getLocationText(nod, lobe); if (locT) line += ', ' + locT;
-      if (msStr) line += ', ' + msStr;
-      if (tirads) line += ', ' + tirads;
-      if (nod.recommendation) line += '\n   Recommendation: ' + nod.recommendation;
-      lines.push('   ' + line);
-    });
+  // ---- POSTOP MODE conclusion ----
+  if (reportMode === 'postop') {
+    const postopConc = buildPostopConclusionLines();
+    if (postopConc.length > 0) {
+      lines.push(concNum++ + '. Postoperative thyroid bed');
+      postopConc.forEach(l => lines.push('   ' + l));
+    }
   }
 
-  // Postop conclusion
-  const postopConc = buildPostopConclusionLines();
-  if (postopConc.length > 0) {
-    lines.push(concNum++ + '. Postoperative thyroid bed');
-    postopConc.forEach(l => lines.push('   ' + l));
-  }
-
-  // Extrathyroidal lesion conclusion
+  // Extrathyroidal lesion conclusion (always)
   if (state.extraLesion && state.extraLesion.trim()) {
     lines.push(concNum++ + '. Extrathyroidal lesion');
     lines.push('   ' + state.extraLesion.trim());
   }
 
-  // Cervical lymph node conclusion
+  // Cervical lymph node conclusion (always)
   const lnConclusion = buildLNConclusionLines();
   if (lnConclusion.length > 0) {
     lines.push(concNum++ + '. Cervical lymph node');
@@ -4950,12 +5597,14 @@ function buildReportText() {
     bxLines.forEach(l => lines.push('   ' + l));
   }
 
-  // Recommendation
+  // Recommendation (mode-specific)
   const recLines = [];
-  allNodules.forEach(({lobe,idx,nod}) => {
-    if (nod.recommendation) recLines.push(LOBE_LABELS[lobe]+(idx+1)+': '+nod.recommendation);
-  });
-  if (state.postop) {
+  if (reportMode === 'thyroid') {
+    allNodules.forEach(({lobe,idx,nod}) => {
+      if (nod.recommendation) recLines.push(LOBE_LABELS[lobe]+(idx+1)+': '+nod.recommendation);
+    });
+  }
+  if (reportMode === 'postop' && state.postop) {
     ensurePostopState();
     ['right','isthmus','left'].forEach(lobe => (state.postop.residualThyroidNodules[lobe]||[]).forEach((nod,idx)=>{ if(nod.recommendation) recLines.push('Postop '+LOBE_LABELS[lobe]+(idx+1)+' ('+getPostopLabelFor('residual', lobe)+'): '+nod.recommendation); }));
     ['right','isthmus','left','central'].forEach(site => (state.postop.opBedLesions[site]||[]).forEach((les,idx)=>{ if(les.recommendation) recLines.push('Op bed '+postopOpBedLabel(site,idx)+' ('+getPostopLabelFor('opbed', site)+'): '+les.recommendation); }));
@@ -4969,12 +5618,50 @@ function buildReportText() {
 }
 
 
+function generateNormalPostopReport() {
+  const lines = [];
+  const po = ensurePostopState();
+  const poParts = [];
+  if (po.clinIndDefault !== false) poParts.push('Postoperative surveillance');
+  if (po.clinIndText && po.clinIndText.trim()) poParts.push(po.clinIndText.trim());
+  lines.push('Clinical information: ' + (poParts.join(', ') || 'Postoperative surveillance'));
+  if (po.clinHistory && po.clinHistory.trim()) lines.push('Clinical history: ' + po.clinHistory.trim());
+  if (po.compYear || po.compMonth || po.compDay) {
+    const yr = po.compYear || 'YYYY';
+    const mo = po.compMonth ? po.compMonth.padStart(2,'0') : 'MM';
+    const dy = po.compDay ? po.compDay.padStart(2,'0') : 'DD';
+    lines.push('Comparison: ' + (po.compType || 'US') + ' (' + yr + '/' + mo + '/' + dy + ')');
+  } else {
+    lines.push('Comparison: not available');
+  }
+  lines.push('');
+  lines.push('Conclusion:');
+  const opText = postopOperationText() || 'Operation Type';
+  lines.push('1. s/p ' + opText);
+  lines.push('   - No evidence of local recurrence in the op. bed.');
+  lines.push('2. No abnormal lymph node in the both neck.');
+  lines.push('   - No significant lymph node enlargement.');
+  lines.push('   - No suspicious lymph node.');
+  document.getElementById('reportContent').textContent = lines.join('\n');
+  document.getElementById('copyFeedback').textContent = '';
+  document.getElementById('reportDialog').classList.add('show');
+}
+
 function postopOperationText() {
   const po = ensurePostopState();
-  if (!po.operationType) return '';
-  if (po.operationType === 'other') return po.customOperationName || 'Other / Custom operation';
-  const base = POSTOP_OP_LABELS[po.operationType] || po.operationType;
-  return po.withIsthmusectomy && ['rightLobectomy','leftLobectomy'].includes(po.operationType) ? base + ' with isthmusectomy' : base;
+  const types = po.operationTypes && po.operationTypes.length ? po.operationTypes : (po.operationType ? [po.operationType, ...(po.withIsthmusectomy ? ['isthmusectomy'] : [])] : []);
+  if (!types.length) return '';
+  if (types.includes('other') && !types.some(v => v !== 'other')) return po.customOperationName || 'Other / Custom operation';
+  const lobectomies = types.filter(v => ['rightLobectomy','leftLobectomy'].includes(v)).map(v => POSTOP_OP_LABELS[v]);
+  const hasIsthmus = types.includes('isthmusectomy');
+  const hasTotal = types.includes('totalThyroidectomy');
+  const hasOther = types.includes('other');
+  const parts = [];
+  if (lobectomies.length) parts.push(lobectomies.join(' + ') + (hasIsthmus ? ' with isthmusectomy' : ''));
+  else if (hasIsthmus) parts.push('Isthmusectomy');
+  if (hasTotal) parts.push('Total thyroidectomy');
+  if (hasOther) parts.push(po.customOperationName || 'Other / Custom operation');
+  return parts.join(' + ');
 }
 function describePostopOpBedLesion(site, les, idx) {
   const parts=[];
@@ -5303,6 +5990,7 @@ let activePopupIdx  = null;
 let activePostopPopup = null;
 let postopDiagramMarkerDrag = null;
 let postopDiagramSpanHandleDrag = null;
+let postopOpBedSpanHandleDrag = null;
 
 function toggleDiagram() {
   diagramVisible = !diagramVisible;
@@ -5457,6 +6145,27 @@ function diagramPointForLocations(lobe, locations, svgPt) {
   }
   return pt;
 }
+function diagramAnchorPointForSpanHandle(lobe, locations, handle, svgPt) {
+  const pt = svgPt ? { x: svgPt.x, y: svgPt.y } : null;
+  if (!pt) return null;
+  if (lobe === 'isthmus') { pt.y = 100; return pt; }
+  const centers = { upper: 62, middle: 102, lower: 143 };
+  const sorted = (locations || []).slice().sort((a, b) => diagramLocationIndex(a) - diagramLocationIndex(b));
+  const anchorLoc = handle === 'upper' ? sorted[sorted.length - 1] : sorted[0];
+  if (anchorLoc && centers[anchorLoc] !== undefined) pt.y = centers[anchorLoc];
+  return pt;
+}
+function zonesFromEllipse(cy, ry) {
+  const locs = [];
+  if (62 >= cy - ry && 62 <= cy + ry) locs.push('upper');
+  if (102 >= cy - ry && 102 <= cy + ry) locs.push('middle');
+  if (143 >= cy - ry && 143 <= cy + ry) locs.push('lower');
+  if (!locs.length) {
+    const dists = [['upper', Math.abs(62-cy)], ['middle', Math.abs(102-cy)], ['lower', Math.abs(143-cy)]];
+    locs.push(dists.sort((a,b)=>a[1]-b[1])[0][0]);
+  }
+  return locs;
+}
 
 function previewDiagramLocations(lobe, locations) {
   clearDiagramDragPreview();
@@ -5529,13 +6238,14 @@ function updateDiagramDragGhost(clientX, clientY) {
   const zone = getDiagramZoneFromSvgPosition(clientX, clientY);
   const ghostPt = clampDiagramPointToLobe(svgPt, zone ? zone.lobe : diagramMarkerDrag.lobe) || svgPt;
   const shape = diagramMarkerShapeForNodule(nod, diagramMarkerDrag.lobe, true);
+  const ghostRy = (nod.diagramRy != null) ? nod.diagramRy + 2 : shape.ry;
   ghost.innerHTML = '';
 
   const markerShape = document.createElementNS(ns, 'ellipse');
   markerShape.setAttribute('cx', ghostPt.x);
   markerShape.setAttribute('cy', ghostPt.y);
   markerShape.setAttribute('rx', shape.rx);
-  markerShape.setAttribute('ry', shape.ry);
+  markerShape.setAttribute('ry', ghostRy);
   markerShape.setAttribute('fill', diagramMarkerDrag.fill || '#0A84FF');
   markerShape.setAttribute('stroke', '#fff');
   markerShape.setAttribute('stroke-width', '2.4');
@@ -5717,14 +6427,24 @@ function diagramSpanHandlePointerDown(event, lobe, idx, handle) {
   event.stopPropagation();
   const nod = state.nodules[lobe] && state.nodules[lobe][idx];
   if (!nod || lobe === 'isthmus') return;
+  const LOBE_CX = { right: 82, isthmus: 150, left: 218 };
+  const X_OFFSETS = [-14, 0, 14];
+  let cx = LOBE_CX[lobe] + X_OFFSETS[idx];
+  const u = nod.locationUpper, m = nod.locationMiddle, l = nod.locationLower;
+  const zcs = [];
+  if (u) zcs.push(62); if (m) zcs.push(102); if (l) zcs.push(143);
+  let cy = zcs.length ? zcs.reduce((s,y)=>s+y,0)/zcs.length : 102;
+  if (hasCustomDiagramPoint(nod)) {
+    const pt = clampDiagramPointToLobe({ x: Number(nod.diagramX), y: Number(nod.diagramY) }, lobe);
+    if (pt) { cx = pt.x; cy = pt.y; }
+  }
+  const baseRy = (nod.diagramRy != null) ? nod.diagramRy : diagramMarkerShapeForNodule(nod, lobe, false).ry;
+  const fixedEdge = handle === 'upper' ? cy + baseRy : cy - baseRy;
   diagramSpanHandleDrag = {
-    lobe, idx, handle,
-    startX: event.clientX, startY: event.clientY,
-    lastZone: null, moved: false
+    lobe, idx, handle, cx, fixedEdge, moved: false,
+    origDiagramX: nod.diagramX, origDiagramY: nod.diagramY, origDiagramRy: nod.diagramRy,
+    origU: nod.locationUpper, origM: nod.locationMiddle, origL: nod.locationLower
   };
-  const marker = event.currentTarget && event.currentTarget.closest ? event.currentTarget.closest('.diagram-marker-group') : null;
-  if (marker) marker.classList.add('diagram-marker-dragging');
-  previewDiagramLocations(lobe, diagramSelectedLocations(nod));
   document.addEventListener('pointermove', diagramSpanHandlePointerMove, { passive: false });
   document.addEventListener('pointerup', diagramSpanHandlePointerUp, { once: true });
   document.addEventListener('pointercancel', diagramSpanHandlePointerCancel, { once: true });
@@ -5733,33 +6453,44 @@ function diagramSpanHandlePointerDown(event, lobe, idx, handle) {
 function diagramSpanHandlePointerMove(event) {
   if (!diagramSpanHandleDrag) return;
   event.preventDefault();
-  const dx = event.clientX - diagramSpanHandleDrag.startX;
-  const dy = event.clientY - diagramSpanHandleDrag.startY;
-  if (Math.hypot(dx, dy) > 4) diagramSpanHandleDrag.moved = true;
-  const zone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY);
-  if (!zone) return;
-  const nod = state.nodules[diagramSpanHandleDrag.lobe] && state.nodules[diagramSpanHandleDrag.lobe][diagramSpanHandleDrag.idx];
+  const drag = diagramSpanHandleDrag;
+  const svgPt = getDiagramSvgPoint(event.clientX, event.clientY);
+  if (!svgPt) return;
+  drag.moved = true;
+  const nod = state.nodules[drag.lobe] && state.nodules[drag.lobe][drag.idx];
   if (!nod) return;
-  diagramSpanHandleDrag.lastZone = zone;
-  previewDiagramLocations(zone.lobe, diagramLocationsForSpanHandle(nod, zone, diagramSpanHandleDrag));
+  const MIN_RY = 8;
+  let newRy, newCy;
+  if (drag.handle === 'upper') {
+    const top = Math.max(36, Math.min(drag.fixedEdge - 2 * MIN_RY, svgPt.y));
+    newRy = (drag.fixedEdge - top) / 2;
+    newCy = (drag.fixedEdge + top) / 2;
+  } else {
+    const bot = Math.min(170, Math.max(drag.fixedEdge + 2 * MIN_RY, svgPt.y));
+    newRy = (bot - drag.fixedEdge) / 2;
+    newCy = (drag.fixedEdge + bot) / 2;
+  }
+  nod.diagramX = Math.round(drag.cx * 10) / 10;
+  nod.diagramY = Math.round(newCy * 10) / 10;
+  nod.diagramRy = Math.round(newRy * 10) / 10;
+  renderDiagramMarkers();
 }
 
-function diagramSpanHandlePointerUp(event) {
+function diagramSpanHandlePointerUp() {
   document.removeEventListener('pointermove', diagramSpanHandlePointerMove);
   const drag = diagramSpanHandleDrag;
   diagramSpanHandleDrag = null;
   document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
   clearDiagramDragPreview();
   if (!drag || !drag.moved) { renderDiagramMarkers(); return; }
-  const targetZone = getDiagramZoneFromSvgPosition(event.clientX, event.clientY) || drag.lastZone;
-  if (!targetZone || targetZone.lobe !== drag.lobe || targetZone.lobe === 'isthmus') { renderDiagramMarkers(); return; }
   const nod = state.nodules[drag.lobe] && state.nodules[drag.lobe][drag.idx];
   if (!nod) { renderDiagramMarkers(); return; }
-  const locations = diagramLocationsForSpanHandle(nod, targetZone, drag);
-  nod.locationUpper = locations.includes('upper');
-  nod.locationMiddle = locations.includes('middle');
-  nod.locationLower = locations.includes('lower');
-  setNoduleDiagramPoint(nod, diagramPointForLocations(drag.lobe, locations, getDiagramSvgPoint(event.clientX, event.clientY)), drag.lobe);
+  if (nod.diagramRy != null && drag.lobe !== 'isthmus') {
+    const zones = zonesFromEllipse(nod.diagramY, nod.diagramRy);
+    nod.locationUpper = zones.includes('upper');
+    nod.locationMiddle = zones.includes('middle');
+    nod.locationLower = zones.includes('lower');
+  }
   saveState();
   renderNoduleCol(drag.lobe);
   updateLobeBadges();
@@ -5770,8 +6501,17 @@ function diagramSpanHandlePointerUp(event) {
 
 function diagramSpanHandlePointerCancel() {
   document.removeEventListener('pointermove', diagramSpanHandlePointerMove);
+  const drag = diagramSpanHandleDrag;
   diagramSpanHandleDrag = null;
   document.querySelectorAll('#diagram-markers .diagram-marker-dragging').forEach(el => el.classList.remove('diagram-marker-dragging'));
+  if (drag) {
+    const nod = state.nodules[drag.lobe] && state.nodules[drag.lobe][drag.idx];
+    if (nod) {
+      nod.diagramX = drag.origDiagramX; nod.diagramY = drag.origDiagramY;
+      nod.diagramRy = drag.origDiagramRy;
+      nod.locationUpper = drag.origU; nod.locationMiddle = drag.origM; nod.locationLower = drag.origL;
+    }
+  }
   clearDiagramDragPreview();
   renderDiagramMarkers();
 }
@@ -5954,7 +6694,7 @@ function renderDiagramMarkers() {
       const isActive = (activePopupLobe === lobe && activePopupIdx === idx);
       const shape = diagramMarkerShapeForNodule(nod, lobe, isActive);
       const rx = shape.rx;
-      const ry = shape.ry;
+      const ry = (nod.diagramRy != null) ? nod.diagramRy + (isActive ? 2 : 0) : shape.ry;
       const tirads = getKTIRADS(nod, state.normalThyroid);
       let fill = '#0A84FF';
       if      (tirads.includes('5')) fill = '#FF453A';
@@ -6108,7 +6848,7 @@ function setupStaticRadioToggle(name, stateKey) {
 setupStaticRadioToggle('thySize', 'thySize');
 setupStaticRadioToggle('echotexture', 'echotexture');
 setupStaticRadioToggle('parVasc', 'parVasc');
-setupStaticRadioToggle('clinInd', 'clinInd');
+setupStaticRadioToggle('compType', 'compType');
 
 // Bind text inputs in clinical/parenchyma sections
 // Text-only fields use 'input' event
@@ -6130,6 +6870,21 @@ setupStaticRadioToggle('clinInd', 'clinInd');
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { state[id]=el.value; saveState(); });
 });
+
+// ==================== DOWNLOAD ====================
+function downloadCurrentVersion() {
+  const filename = 'Thyroid_K-TIRADS_' + APP_VERSION + '.html';
+  const a = document.createElement('a');
+  a.href = filename;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+function initDownloadBtn() {
+  const btn = document.getElementById('downloadVersionBtn');
+  if (btn) btn.title = '현재 버전 다운로드 (Thyroid_K-TIRADS_' + APP_VERSION + '.html)';
+}
 
 // ==================== THEME TOGGLE ====================
 const ICON_MOON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -6209,6 +6964,7 @@ window.addEventListener('orientationchange', () => setTimeout(adjustMainTop, 180
 // Init sequence
 loadState();   // 1. restore saved state
 renderAll();   // 2. apply state to DOM
+initDownloadBtn();
 // Adjust top margin after layout (for mobile wrapped navbar)
 requestAnimationFrame(() => requestAnimationFrame(adjustMainTop));
 
