@@ -119,6 +119,7 @@ label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 /* Thyroid / Postop segmented mode selector */
 .mode-seg {
   display: inline-flex;
+  flex-wrap: wrap;
   background: rgba(255,255,255,0.08);
   border-radius: 12px;
   padding: 3px;
@@ -2057,6 +2058,28 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
       </svg>
       Postop
     </button>
+    <button class="mode-btn" onclick="selectMode('rfa')" id="tab-rfa">
+      <!-- RFA: needle with heat waves -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="19" x2="16" y2="8"/>
+        <polyline points="13 5 19 5 19 11"/>
+        <path d="M18 8.5 C19.5 7 21 8.5 19.5 10" stroke-width="1.5"/>
+        <path d="M20 6.5 C22 4.5 24 6.5 22 8.5" stroke-width="1.5"/>
+        <circle cx="7" cy="17" r="2.5" fill="currentColor" stroke="none"/>
+      </svg>
+      RFA
+    </button>
+    <button class="mode-btn" onclick="selectMode('ethanol')" id="tab-ethanol">
+      <!-- Ethanol: syringe injecting into cyst -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="5" x2="9" y2="15"/>
+        <path d="M6 18 L9 15 L19 5"/>
+        <rect x="15" y="3" width="5" height="3" rx="1"/>
+        <circle cx="6" cy="18" r="3.5"/>
+        <path d="M4.5 18 Q6 15.5 7.5 18 Q6 20.5 4.5 18Z" fill="currentColor" stroke="none"/>
+      </svg>
+      Ethanol
+    </button>
   </div>
   <div class="nav-sep"></div>
   <button class="sec-nav-btn" onclick="switchTab('lymph')" id="tab-lymph">
@@ -2449,6 +2472,321 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     </div>
   </div>
 
+  <!-- RFA TAB -->
+  <div class="tab-content" id="tab-content-rfa">
+    <div class="action-bar">
+      <button class="pink-btn" onclick="resetRfa()">RFA 초기화</button>
+    </div>
+
+    <!-- Clinical Info -->
+    <div class="table-card">
+      <table class="data-table" id="rfaClinTable">
+        <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Indication</td>
+            <td>
+              <div class="radio-group" style="display:inline-flex;margin-bottom:6px;">
+                <label><input type="checkbox" id="rfaClinIndDefault" onchange="saveRfaState()" checked> Radiofrequency ablation follow-up</label>
+              </div>
+              <textarea id="rfaClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">History</td>
+            <td style="width:100%"><textarea id="rfaClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Benign thyroid nodule s/p RFA (2024/03)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Comparison</td>
+            <td>
+              <select id="rfaCompYear" class="date-select" onchange="saveRfaState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
+              <select id="rfaCompMonth" class="date-select" onchange="saveRfaState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+              <select id="rfaCompDay" class="date-select" onchange="saveRfaState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+              <span style="margin-left:6px;">
+                <label><input type="radio" name="rfaCompType" value="US" onchange="saveRfaState()" checked> US</label>
+                <label style="margin-left:8px;"><input type="radio" name="rfaCompType" value="Outside US" onchange="saveRfaState()"> Outside US</label>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RFA Session Info -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th colspan="2">RFA Session</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Session #</td>
+            <td>
+              <select id="rfaSessionNum" onchange="saveRfaState()">
+                <option value="">Select</option>
+                <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option><option>5th</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Date of RFA</td>
+            <td>
+              <select id="rfaDateYear" class="date-select" onchange="saveRfaState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
+              <select id="rfaDateMonth" class="date-select" onchange="saveRfaState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+              <select id="rfaDateDay" class="date-select" onchange="saveRfaState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Target nodule</td>
+            <td><input type="text" id="rfaTargetNodule" placeholder="e.g. Right lobe, 1.8 cm benign nodule" style="width:100%;box-sizing:border-box;" oninput="saveRfaState()"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Ablation Zone -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th colspan="2">Ablation Zone</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Location</td>
+            <td>
+              <label><input type="radio" name="rfaLocation" value="Right lobe" onchange="saveRfaState()"> Right lobe</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaLocation" value="Left lobe" onchange="saveRfaState()"> Left lobe</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaLocation" value="Isthmus" onchange="saveRfaState()"> Isthmus</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Size (mm)</td>
+            <td style="display:flex;align-items:center;gap:4px;">
+              <input type="number" id="rfaSizeD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span>×</span>
+              <input type="number" id="rfaSizeD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span>×</span>
+              <input type="number" id="rfaSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span style="margin-left:6px;color:var(--label3);font-size:13px;">mm</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Pre-RFA size (mm)</td>
+            <td style="display:flex;align-items:center;gap:4px;">
+              <input type="number" id="rfaPreD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span>×</span>
+              <input type="number" id="rfaPreD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span>×</span>
+              <input type="number" id="rfaPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
+              <span style="margin-left:6px;color:var(--label3);font-size:13px;">mm</span>
+            </td>
+          </tr>
+          <tr id="rfaVRRRow" style="display:none;">
+            <td class="label-cell">VRR</td>
+            <td id="rfaVRRResult" style="font-weight:700;color:var(--blue);"></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Echogenicity</td>
+            <td>
+              <label><input type="radio" name="rfaEcho" value="hypoechoic" onchange="saveRfaState()"> Hypoechoic</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaEcho" value="isoechoic" onchange="saveRfaState()"> Isoechoic</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaEcho" value="hyperechoic" onchange="saveRfaState()"> Hyperechoic</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaEcho" value="mixed" onchange="saveRfaState()"> Mixed</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Vascularity</td>
+            <td>
+              <label><input type="radio" name="rfaVasc" value="absent" onchange="saveRfaState()"> Absent</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaVasc" value="minimal" onchange="saveRfaState()"> Minimal</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaVasc" value="present" onchange="saveRfaState()"> Present</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Residual tumor</td>
+            <td>
+              <label><input type="radio" name="rfaResidual" value="none" onchange="saveRfaState()"> None</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaResidual" value="suspected" onchange="saveRfaState()"> Suspected</label>
+              <label style="margin-left:10px;"><input type="radio" name="rfaResidual" value="definite" onchange="saveRfaState()"> Definite</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Findings</td>
+            <td><textarea id="rfaFindings" rows="3" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="Additional ablation zone findings..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Impression -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>Impression</th></tr></thead>
+        <tbody>
+          <tr><td><textarea id="rfaImpression" rows="4" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="Impression..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div><!-- end tab-content-rfa -->
+
+  <!-- ETHANOL SCLEROTHERAPY TAB -->
+  <div class="tab-content" id="tab-content-ethanol">
+    <div class="action-bar">
+      <button class="pink-btn" onclick="resetEthanol()">Ethanol 초기화</button>
+    </div>
+
+    <!-- Clinical Info -->
+    <div class="table-card">
+      <table class="data-table" id="ethanolClinTable">
+        <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Indication</td>
+            <td>
+              <div class="radio-group" style="display:inline-flex;margin-bottom:6px;">
+                <label><input type="checkbox" id="ethanolClinIndDefault" onchange="saveEthanolState()" checked> Ethanol sclerotherapy follow-up</label>
+              </div>
+              <textarea id="ethanolClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">History</td>
+            <td style="width:100%"><textarea id="ethanolClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Thyroid cyst s/p ethanol sclerotherapy (2024/06)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Comparison</td>
+            <td>
+              <select id="ethanolCompYear" class="date-select" onchange="saveEthanolState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
+              <select id="ethanolCompMonth" class="date-select" onchange="saveEthanolState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+              <select id="ethanolCompDay" class="date-select" onchange="saveEthanolState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+              <span style="margin-left:6px;">
+                <label><input type="radio" name="ethanolCompType" value="US" onchange="saveEthanolState()" checked> US</label>
+                <label style="margin-left:8px;"><input type="radio" name="ethanolCompType" value="Outside US" onchange="saveEthanolState()"> Outside US</label>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Ethanol Session Info -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th colspan="2">Ethanol Sclerotherapy Session</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Session #</td>
+            <td>
+              <select id="ethanolSessionNum" onchange="saveEthanolState()">
+                <option value="">Select</option>
+                <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option><option>5th</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Date of procedure</td>
+            <td>
+              <select id="ethanolDateYear" class="date-select" onchange="saveEthanolState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
+              <select id="ethanolDateMonth" class="date-select" onchange="saveEthanolState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+              <select id="ethanolDateDay" class="date-select" onchange="saveEthanolState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Target lesion</td>
+            <td><input type="text" id="ethanolTargetLesion" placeholder="e.g. Right lobe cyst, 2.5 cm" style="width:100%;box-sizing:border-box;" oninput="saveEthanolState()"></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Lesion type</td>
+            <td>
+              <label><input type="radio" name="ethanolLesionType" value="pure cyst" onchange="saveEthanolState()"> Pure cyst</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolLesionType" value="complex cyst" onchange="saveEthanolState()"> Complex cyst</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolLesionType" value="predominantly cystic" onchange="saveEthanolState()"> Predominantly cystic</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Post-procedure Lesion -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th colspan="2">Post-procedure Lesion</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Location</td>
+            <td>
+              <label><input type="radio" name="ethanolLocation" value="Right lobe" onchange="saveEthanolState()"> Right lobe</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolLocation" value="Left lobe" onchange="saveEthanolState()"> Left lobe</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolLocation" value="Isthmus" onchange="saveEthanolState()"> Isthmus</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Current size (mm)</td>
+            <td style="display:flex;align-items:center;gap:4px;">
+              <input type="number" id="ethanolSizeD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span>×</span>
+              <input type="number" id="ethanolSizeD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span>×</span>
+              <input type="number" id="ethanolSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span style="margin-left:6px;color:var(--label3);font-size:13px;">mm</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Pre-procedure size (mm)</td>
+            <td style="display:flex;align-items:center;gap:4px;">
+              <input type="number" id="ethanolPreD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span>×</span>
+              <input type="number" id="ethanolPreD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span>×</span>
+              <input type="number" id="ethanolPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
+              <span style="margin-left:6px;color:var(--label3);font-size:13px;">mm</span>
+            </td>
+          </tr>
+          <tr id="ethanolVRRRow" style="display:none;">
+            <td class="label-cell">VRR</td>
+            <td id="ethanolVRRResult" style="font-weight:700;color:var(--blue);"></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Cystic component</td>
+            <td>
+              <label><input type="radio" name="ethanolCystic" value="resolved" onchange="saveEthanolState()"> Resolved</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolCystic" value="markedly decreased" onchange="saveEthanolState()"> Markedly decreased</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolCystic" value="decreased" onchange="saveEthanolState()"> Decreased</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolCystic" value="unchanged" onchange="saveEthanolState()"> Unchanged</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolCystic" value="increased" onchange="saveEthanolState()"> Increased</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Residual fluid</td>
+            <td>
+              <label><input type="radio" name="ethanolFluid" value="none" onchange="saveEthanolState()"> None</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolFluid" value="minimal" onchange="saveEthanolState()"> Minimal</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolFluid" value="moderate" onchange="saveEthanolState()"> Moderate</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolFluid" value="significant" onchange="saveEthanolState()"> Significant</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Solid component</td>
+            <td>
+              <label><input type="radio" name="ethanolSolid" value="none" onchange="saveEthanolState()"> None</label>
+              <label style="margin-left:10px;"><input type="radio" name="ethanolSolid" value="present" onchange="saveEthanolState()"> Present</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-cell">Findings</td>
+            <td><textarea id="ethanolFindings" rows="3" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="Additional post-procedure findings..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Impression -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>Impression</th></tr></thead>
+        <tbody>
+          <tr><td><textarea id="ethanolImpression" rows="4" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="Impression..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div><!-- end tab-content-ethanol -->
+
 </div><!-- end main -->
 
 <!-- BOTTOM SECTION -->
@@ -2622,7 +2960,9 @@ const defaultState = {
     centralLeft: [ defaultLN(), defaultLN() ]
   },
   extraLesion: '',
-  addToReport: false
+  addToReport: false,
+  rfa: {},
+  ethanol: {}
 };
 
 function defaultLN() {
@@ -2770,7 +3110,7 @@ function deepMerge(target, source) {
 
 // ==================== TAB SWITCHING ====================
 function selectMode(mode) {
-  // mode = 'thyroid' | 'postop': sets report mode AND navigates to that tab
+  // mode = 'thyroid' | 'postop' | 'rfa' | 'ethanol': sets report mode AND navigates to that tab
   state.reportMode = mode;
   switchTab(mode);
 }
@@ -2787,9 +3127,9 @@ function switchTab(tab) {
   const tabContent = document.getElementById('tab-content-' + tab);
   if (tabContent) tabContent.classList.add('active');
 
-  // Mode buttons (Thyroid/Postop): highlight based on reportMode, not activeTab
+  // Mode buttons (Thyroid/Postop/RFA/Ethanol): highlight based on reportMode, not activeTab
   const rm = state.reportMode || 'thyroid';
-  ['thyroid','postop'].forEach(m => {
+  ['thyroid','postop','rfa','ethanol'].forEach(m => {
     const btn = document.getElementById('tab-' + m);
     if (btn) btn.classList.toggle('active', rm === m);
   });
@@ -2798,6 +3138,170 @@ function switchTab(tab) {
     const btn = document.getElementById('tab-' + s);
     if (btn) btn.classList.toggle('active', tab === s);
   });
+}
+
+// ==================== RFA ====================
+function saveRfaState() {
+  state.rfa = state.rfa || {};
+  const s = state.rfa;
+  s.clinIndDefault = document.getElementById('rfaClinIndDefault')?.checked;
+  s.clinIndText = document.getElementById('rfaClinIndText')?.value || '';
+  s.clinHistory = document.getElementById('rfaClinHistory')?.value || '';
+  s.compYear = document.getElementById('rfaCompYear')?.value || '';
+  s.compMonth = document.getElementById('rfaCompMonth')?.value || '';
+  s.compDay = document.getElementById('rfaCompDay')?.value || '';
+  s.compType = document.querySelector('input[name="rfaCompType"]:checked')?.value || 'US';
+  s.sessionNum = document.getElementById('rfaSessionNum')?.value || '';
+  s.dateYear = document.getElementById('rfaDateYear')?.value || '';
+  s.dateMonth = document.getElementById('rfaDateMonth')?.value || '';
+  s.dateDay = document.getElementById('rfaDateDay')?.value || '';
+  s.targetNodule = document.getElementById('rfaTargetNodule')?.value || '';
+  s.location = document.querySelector('input[name="rfaLocation"]:checked')?.value || '';
+  s.sizeD1 = document.getElementById('rfaSizeD1')?.value || '';
+  s.sizeD2 = document.getElementById('rfaSizeD2')?.value || '';
+  s.sizeD3 = document.getElementById('rfaSizeD3')?.value || '';
+  s.preD1 = document.getElementById('rfaPreD1')?.value || '';
+  s.preD2 = document.getElementById('rfaPreD2')?.value || '';
+  s.preD3 = document.getElementById('rfaPreD3')?.value || '';
+  s.echo = document.querySelector('input[name="rfaEcho"]:checked')?.value || '';
+  s.vasc = document.querySelector('input[name="rfaVasc"]:checked')?.value || '';
+  s.residual = document.querySelector('input[name="rfaResidual"]:checked')?.value || '';
+  s.findings = document.getElementById('rfaFindings')?.value || '';
+  s.impression = document.getElementById('rfaImpression')?.value || '';
+  saveState();
+}
+
+function resetRfa() {
+  state.rfa = {};
+  renderRfa();
+  saveState();
+}
+
+function renderRfa() {
+  const s = state.rfa || {};
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+  const setRadio = (name, v) => { document.querySelectorAll('input[name="'+name+'"]').forEach(r => r.checked = (r.value === v)); };
+  setChk('rfaClinIndDefault', s.clinIndDefault !== false);
+  setVal('rfaClinIndText', s.clinIndText);
+  setVal('rfaClinHistory', s.clinHistory);
+  setVal('rfaCompYear', s.compYear); setVal('rfaCompMonth', s.compMonth); setVal('rfaCompDay', s.compDay);
+  setRadio('rfaCompType', s.compType || 'US');
+  setVal('rfaSessionNum', s.sessionNum);
+  setVal('rfaDateYear', s.dateYear); setVal('rfaDateMonth', s.dateMonth); setVal('rfaDateDay', s.dateDay);
+  setVal('rfaTargetNodule', s.targetNodule);
+  setRadio('rfaLocation', s.location);
+  setVal('rfaSizeD1', s.sizeD1); setVal('rfaSizeD2', s.sizeD2); setVal('rfaSizeD3', s.sizeD3);
+  setVal('rfaPreD1', s.preD1); setVal('rfaPreD2', s.preD2); setVal('rfaPreD3', s.preD3);
+  setRadio('rfaEcho', s.echo); setRadio('rfaVasc', s.vasc); setRadio('rfaResidual', s.residual);
+  setVal('rfaFindings', s.findings);
+  setVal('rfaImpression', s.impression);
+  updateRfaVRR();
+  ['rfaClinIndText','rfaClinHistory','rfaFindings','rfaImpression'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+  });
+}
+
+function calcVolume(d1, d2, d3) {
+  const a = parseFloat(d1), b = parseFloat(d2), c = parseFloat(d3);
+  if (isNaN(a) || isNaN(b) || isNaN(c) || a<=0 || b<=0 || c<=0) return null;
+  return (Math.PI / 6) * a * b * c;
+}
+
+function updateRfaVRR() {
+  saveRfaState();
+  const s = state.rfa || {};
+  const preVol = calcVolume(s.preD1, s.preD2, s.preD3);
+  const curVol = calcVolume(s.sizeD1, s.sizeD2, s.sizeD3);
+  const row = document.getElementById('rfaVRRRow');
+  const res = document.getElementById('rfaVRRResult');
+  if (preVol && curVol && row && res) {
+    const vrr = ((preVol - curVol) / preVol * 100).toFixed(1);
+    res.textContent = vrr + '% (pre: ' + preVol.toFixed(2) + ' mm³ → post: ' + curVol.toFixed(2) + ' mm³)';
+    row.style.display = '';
+  } else if (row) {
+    row.style.display = 'none';
+  }
+}
+
+// ==================== ETHANOL ====================
+function saveEthanolState() {
+  state.ethanol = state.ethanol || {};
+  const s = state.ethanol;
+  s.clinIndDefault = document.getElementById('ethanolClinIndDefault')?.checked;
+  s.clinIndText = document.getElementById('ethanolClinIndText')?.value || '';
+  s.clinHistory = document.getElementById('ethanolClinHistory')?.value || '';
+  s.compYear = document.getElementById('ethanolCompYear')?.value || '';
+  s.compMonth = document.getElementById('ethanolCompMonth')?.value || '';
+  s.compDay = document.getElementById('ethanolCompDay')?.value || '';
+  s.compType = document.querySelector('input[name="ethanolCompType"]:checked')?.value || 'US';
+  s.sessionNum = document.getElementById('ethanolSessionNum')?.value || '';
+  s.dateYear = document.getElementById('ethanolDateYear')?.value || '';
+  s.dateMonth = document.getElementById('ethanolDateMonth')?.value || '';
+  s.dateDay = document.getElementById('ethanolDateDay')?.value || '';
+  s.targetLesion = document.getElementById('ethanolTargetLesion')?.value || '';
+  s.lesionType = document.querySelector('input[name="ethanolLesionType"]:checked')?.value || '';
+  s.location = document.querySelector('input[name="ethanolLocation"]:checked')?.value || '';
+  s.sizeD1 = document.getElementById('ethanolSizeD1')?.value || '';
+  s.sizeD2 = document.getElementById('ethanolSizeD2')?.value || '';
+  s.sizeD3 = document.getElementById('ethanolSizeD3')?.value || '';
+  s.preD1 = document.getElementById('ethanolPreD1')?.value || '';
+  s.preD2 = document.getElementById('ethanolPreD2')?.value || '';
+  s.preD3 = document.getElementById('ethanolPreD3')?.value || '';
+  s.cystic = document.querySelector('input[name="ethanolCystic"]:checked')?.value || '';
+  s.fluid = document.querySelector('input[name="ethanolFluid"]:checked')?.value || '';
+  s.solid = document.querySelector('input[name="ethanolSolid"]:checked')?.value || '';
+  s.findings = document.getElementById('ethanolFindings')?.value || '';
+  s.impression = document.getElementById('ethanolImpression')?.value || '';
+  saveState();
+}
+
+function resetEthanol() {
+  state.ethanol = {};
+  renderEthanol();
+  saveState();
+}
+
+function renderEthanol() {
+  const s = state.ethanol || {};
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+  const setRadio = (name, v) => { document.querySelectorAll('input[name="'+name+'"]').forEach(r => r.checked = (r.value === v)); };
+  setChk('ethanolClinIndDefault', s.clinIndDefault !== false);
+  setVal('ethanolClinIndText', s.clinIndText);
+  setVal('ethanolClinHistory', s.clinHistory);
+  setVal('ethanolCompYear', s.compYear); setVal('ethanolCompMonth', s.compMonth); setVal('ethanolCompDay', s.compDay);
+  setRadio('ethanolCompType', s.compType || 'US');
+  setVal('ethanolSessionNum', s.sessionNum);
+  setVal('ethanolDateYear', s.dateYear); setVal('ethanolDateMonth', s.dateMonth); setVal('ethanolDateDay', s.dateDay);
+  setVal('ethanolTargetLesion', s.targetLesion);
+  setRadio('ethanolLesionType', s.lesionType);
+  setRadio('ethanolLocation', s.location);
+  setVal('ethanolSizeD1', s.sizeD1); setVal('ethanolSizeD2', s.sizeD2); setVal('ethanolSizeD3', s.sizeD3);
+  setVal('ethanolPreD1', s.preD1); setVal('ethanolPreD2', s.preD2); setVal('ethanolPreD3', s.preD3);
+  setRadio('ethanolCystic', s.cystic); setRadio('ethanolFluid', s.fluid); setRadio('ethanolSolid', s.solid);
+  setVal('ethanolFindings', s.findings);
+  setVal('ethanolImpression', s.impression);
+  updateEthanolVRR();
+  ['ethanolClinIndText','ethanolClinHistory','ethanolFindings','ethanolImpression'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+  });
+}
+
+function updateEthanolVRR() {
+  saveEthanolState();
+  const s = state.ethanol || {};
+  const preVol = calcVolume(s.preD1, s.preD2, s.preD3);
+  const curVol = calcVolume(s.sizeD1, s.sizeD2, s.sizeD3);
+  const row = document.getElementById('ethanolVRRRow');
+  const res = document.getElementById('ethanolVRRResult');
+  if (preVol && curVol && row && res) {
+    const vrr = ((preVol - curVol) / preVol * 100).toFixed(1);
+    res.textContent = vrr + '% (pre: ' + preVol.toFixed(2) + ' mm³ → post: ' + curVol.toFixed(2) + ' mm³)';
+    row.style.display = '';
+  } else if (row) {
+    row.style.display = 'none';
+  }
 }
 
 // ==================== RENDER ====================
@@ -2866,6 +3370,12 @@ function renderAll() {
 
   // Extra
   document.getElementById('extraLesion').value = state.extraLesion;
+
+  // RFA
+  renderRfa();
+
+  // Ethanol
+  renderEthanol();
 
   // Bottom
   const addToReportEl = document.getElementById('addToReport');
