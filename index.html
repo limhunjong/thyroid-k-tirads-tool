@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.82</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.83</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -874,6 +874,133 @@ table.ln-table td.td-top { vertical-align: top; }
 .ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; width: 100%; }
 .ln-check-label { min-width: calc(50% - 1px); flex: 1; }
 #tab-content-extra textarea { width: 100%; }
+
+/* ===== RFA / ETHANOL TAB CONSISTENCY ===== */
+/* Ensure vertical alignment and no clipping for flex label groups */
+#tab-content-rfa table.data-table td,
+#tab-content-ethanol table.data-table td {
+  vertical-align: top;
+  padding: 12px 16px;
+}
+#tab-content-rfa table.data-table td.label-cell,
+#tab-content-ethanol table.data-table td.label-cell {
+  vertical-align: top;
+  padding-top: 14px;
+}
+/* Label groups inside RFA/Ethanol: chip-style consistent with radio-group */
+#tab-content-rfa .opt-group,
+#tab-content-ethanol .opt-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0;
+}
+#tab-content-rfa .opt-group label,
+#tab-content-ethanol .opt-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--fill3);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--label1);
+  cursor: pointer;
+  line-height: 1.3;
+  min-height: 36px;
+  transition: background 0.15s;
+  user-select: none;
+}
+#tab-content-rfa .opt-group label:hover,
+#tab-content-ethanol .opt-group label:hover { background: var(--fill2); }
+#tab-content-rfa .opt-group label:has(input:checked),
+#tab-content-ethanol .opt-group label:has(input:checked) {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 600;
+}
+#tab-content-rfa .opt-group input,
+#tab-content-ethanol .opt-group input {
+  width: 15px; height: 15px;
+  accent-color: #fff;
+  flex-shrink: 0;
+}
+/* Size input row wrapper */
+#tab-content-rfa .size-row,
+#tab-content-ethanol .size-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 2px 0;
+}
+#tab-content-rfa .size-row input[type=number],
+#tab-content-ethanol .size-row input[type=number] {
+  width: 64px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0.5px solid var(--sep);
+  background: var(--fill4);
+  color: var(--label1);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+#tab-content-rfa .size-row input[type=number]:focus,
+#tab-content-ethanol .size-row input[type=number]:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: var(--fill3);
+}
+#tab-content-rfa .size-row input[type=number]::-webkit-inner-spin-button,
+#tab-content-rfa .size-row input[type=number]::-webkit-outer-spin-button,
+#tab-content-ethanol .size-row input[type=number]::-webkit-inner-spin-button,
+#tab-content-ethanol .size-row input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+#tab-content-rfa .size-row .sep,
+#tab-content-ethanol .size-row .sep { color: var(--label3); font-weight: 600; }
+#tab-content-rfa .size-row .unit,
+#tab-content-ethanol .size-row .unit { color: var(--label3); font-size: 13px; }
+/* Vol/procedure input */
+#tab-content-rfa .vol-row,
+#tab-content-ethanol .vol-row {
+  display: flex; align-items: center; gap: 8px; padding: 2px 0;
+}
+#tab-content-rfa .vol-row input,
+#tab-content-ethanol .vol-row input {
+  width: 88px; padding: 8px 10px; border-radius: 8px;
+  border: 0.5px solid var(--sep); background: var(--fill4);
+  color: var(--label1); font-size: var(--font-sm); font-family: inherit;
+  text-align: center; -moz-appearance: textfield;
+}
+#tab-content-rfa .vol-row input::-webkit-inner-spin-button,
+#tab-content-rfa .vol-row input::-webkit-outer-spin-button,
+#tab-content-ethanol .vol-row input::-webkit-inner-spin-button,
+#tab-content-ethanol .vol-row input::-webkit-outer-spin-button { -webkit-appearance: none; }
+#tab-content-rfa .vol-row .unit,
+#tab-content-ethanol .vol-row .unit { color: var(--label3); font-size: 13px; }
+/* select styling in rfa/ethanol */
+#tab-content-rfa select,
+#tab-content-ethanol select {
+  padding: 8px 10px; border-radius: 8px;
+  border: 0.5px solid var(--sep); background: var(--fill4);
+  color: var(--label1); font-size: var(--font-sm); font-family: inherit;
+  cursor: pointer;
+}
+/* VRR result row */
+#rfaVRRResult, #ethanolVRRResult {
+  font-size: 15px; font-weight: 700; color: var(--blue);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.2px;
+}
+/* text inputs */
+#tab-content-rfa input[type=text],
+#tab-content-ethanol input[type=text] {
+  width: 100%; box-sizing: border-box; padding: 8px 10px;
+  border-radius: 8px; border: 0.5px solid var(--sep);
+  background: var(--fill4); color: var(--label1);
+  font-size: var(--font-sm); font-family: inherit;
+}
 
 /* ===== NODULE LABEL COLUMN ===== */
 .nodule-label-cell {
@@ -2039,46 +2166,46 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
 <div id="top-bar">
   <div class="mode-seg" role="group" aria-label="Mode">
     <button class="mode-btn active" onclick="selectMode('thyroid')" id="tab-thyroid">
-      <!-- Thyroid gland (two lobes) with nodule dot -->
+      <!-- Thyroid gland two lobes + solid nodule marker -->
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <ellipse cx="8.5" cy="13" rx="5.5" ry="7"/>
-        <ellipse cx="15.5" cy="13" rx="5.5" ry="7"/>
-        <circle cx="9" cy="10.5" r="2.2" fill="currentColor" stroke="none"/>
+        <path d="M12 4 C10 4 7 6 7 11 C7 16 9 20 12 20 C15 20 17 16 17 11 C17 6 14 4 12 4Z"/>
+        <path d="M12 4 C10.5 7 9.5 9 9 11" stroke-width="1.2" stroke-dasharray="1.5 2"/>
+        <circle cx="9.5" cy="10" r="2.5" fill="currentColor" stroke="none"/>
       </svg>
       Thyroid Nodule
     </button>
     <button class="mode-btn" onclick="selectMode('postop')" id="tab-postop">
-      <!-- Bandage / post-surgical dressing -->
+      <!-- Post-op: thyroid outline with surgical scissor cut line -->
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="8" width="18" height="8" rx="4"/>
-        <line x1="10" y1="8" x2="10" y2="16"/>
-        <line x1="14" y1="8" x2="14" y2="16"/>
-        <line x1="12" y1="11" x2="12" y2="13"/>
-        <line x1="11" y1="12" x2="13" y2="12"/>
+        <path d="M12 3 C9 3 6 6 6 11 C6 16 8.5 20 12 20 C15.5 20 18 16 18 11 C18 6 15 3 12 3Z" stroke-dasharray="3 2"/>
+        <line x1="6" y1="11" x2="18" y2="11" stroke-width="2"/>
+        <line x1="8" y1="9" x2="8" y2="13" stroke-width="1.5"/>
+        <line x1="16" y1="9" x2="16" y2="13" stroke-width="1.5"/>
       </svg>
       Postop
     </button>
     <button class="mode-btn" onclick="selectMode('rfa')" id="tab-rfa">
-      <!-- RFA: needle with heat waves -->
+      <!-- RFA: electrode needle tip with concentric heat ripples -->
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="5" y1="19" x2="16" y2="8"/>
-        <polyline points="13 5 19 5 19 11"/>
-        <path d="M18 8.5 C19.5 7 21 8.5 19.5 10" stroke-width="1.5"/>
-        <path d="M20 6.5 C22 4.5 24 6.5 22 8.5" stroke-width="1.5"/>
-        <circle cx="7" cy="17" r="2.5" fill="currentColor" stroke="none"/>
+        <line x1="4" y1="20" x2="14" y2="10"/>
+        <line x1="14" y1="10" x2="16" y2="8" stroke-width="2.5"/>
+        <path d="M17 5 C18.5 6.5 18.5 9.5 17 11" stroke-width="1.5" fill="none"/>
+        <path d="M19.5 3 C22 5.5 22 11.5 19.5 14" stroke-width="1.3" fill="none"/>
+        <circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/>
       </svg>
       RFA
     </button>
     <button class="mode-btn" onclick="selectMode('ethanol')" id="tab-ethanol">
-      <!-- Ethanol: syringe injecting into cyst -->
+      <!-- Ethanol sclerotherapy: syringe with cyst bubble -->
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="5" x2="9" y2="15"/>
-        <path d="M6 18 L9 15 L19 5"/>
-        <rect x="15" y="3" width="5" height="3" rx="1"/>
-        <circle cx="6" cy="18" r="3.5"/>
-        <path d="M4.5 18 Q6 15.5 7.5 18 Q6 20.5 4.5 18Z" fill="currentColor" stroke="none"/>
+        <line x1="3" y1="21" x2="9" y2="15"/>
+        <path d="M9 15 L12 12 L17 7"/>
+        <rect x="14" y="4" width="6" height="4" rx="1.5"/>
+        <line x1="14" y1="6" x2="12" y2="6"/>
+        <circle cx="5.5" cy="18.5" r="3" stroke-dasharray="2 1.5"/>
+        <circle cx="5.5" cy="18.5" r="1.2" fill="currentColor" stroke="none"/>
       </svg>
-      Ethanol
+      Ethanol Sclerotherapy
     </button>
   </div>
   <div class="nav-sep"></div>
@@ -2106,7 +2233,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
-  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.82.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.83.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
   <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
 
@@ -2518,12 +2645,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Location</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaLocation" value="Right lobe" onchange="saveRfaState()"> Right lobe</label>
                 <label><input type="radio" name="rfaLocation" value="Left lobe" onchange="saveRfaState()"> Left lobe</label>
                 <label><input type="radio" name="rfaLocation" value="Isthmus" onchange="saveRfaState()"> Isthmus</label>
               </div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+              <div class="opt-group" style="margin-top:6px;">
                 <label><input type="radio" name="rfaPole" value="Upper" onchange="saveRfaState()"> Upper</label>
                 <label><input type="radio" name="rfaPole" value="Mid" onchange="saveRfaState()"> Mid</label>
                 <label><input type="radio" name="rfaPole" value="Lower" onchange="saveRfaState()"> Lower</label>
@@ -2533,7 +2660,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Composition</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaComposition" value="Solid" onchange="saveRfaState()"> Solid</label>
                 <label><input type="radio" name="rfaComposition" value="Mixed (predominantly solid)" onchange="saveRfaState()"> Mixed (predominantly solid)</label>
                 <label><input type="radio" name="rfaComposition" value="Predominantly cystic" onchange="saveRfaState()"> Predominantly cystic</label>
@@ -2544,7 +2671,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pre-RFA K-TIRADS</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 2" onchange="saveRfaState()"> K-TIRADS 2</label>
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 3" onchange="saveRfaState()"> K-TIRADS 3</label>
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 4" onchange="saveRfaState()"> K-TIRADS 4</label>
@@ -2555,7 +2682,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pathology</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+              <div class="opt-group" style="margin-bottom:6px;">
                 <label><input type="radio" name="rfaPathMethod" value="FNA" onchange="saveRfaState()"> FNA</label>
                 <label><input type="radio" name="rfaPathMethod" value="CNB" onchange="saveRfaState()"> CNB</label>
                 <label><input type="radio" name="rfaPathMethod" value="Not done" onchange="saveRfaState()"> Not done</label>
@@ -2578,13 +2705,13 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pre-RFA size (mm)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <div class="size-row">
                 <input type="number" id="rfaPreD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="rfaPreD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="rfaPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span style="color:var(--label3);font-size:13px;">mm</span>
+                <span class="unit">mm</span>
               </div>
             </td>
           </tr>
@@ -2628,13 +2755,13 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Current size (mm)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <div class="size-row">
                 <input type="number" id="rfaSizeD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="rfaSizeD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="rfaSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
-                <span style="color:var(--label3);font-size:13px;">mm</span>
+                <span class="unit">mm</span>
               </div>
             </td>
           </tr>
@@ -2645,7 +2772,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Echogenicity</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaEcho" value="Hypoechoic" onchange="saveRfaState()"> Hypoechoic</label>
                 <label><input type="radio" name="rfaEcho" value="Heterogeneous" onchange="saveRfaState()"> Heterogeneous</label>
                 <label><input type="radio" name="rfaEcho" value="Isoechoic" onchange="saveRfaState()"> Isoechoic</label>
@@ -2657,7 +2784,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Calcification</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaCalc" value="None" onchange="saveRfaState()"> None</label>
                 <label><input type="radio" name="rfaCalc" value="Coarse calcification" onchange="saveRfaState()"> Coarse</label>
                 <label><input type="radio" name="rfaCalc" value="Rim/eggshell calcification" onchange="saveRfaState()"> Rim/eggshell</label>
@@ -2667,7 +2794,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Vascularity (Doppler)</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaVasc" value="Absent" onchange="saveRfaState()"> Absent</label>
                 <label><input type="radio" name="rfaVasc" value="Peripheral only" onchange="saveRfaState()"> Peripheral only</label>
                 <label><input type="radio" name="rfaVasc" value="Intralesional" onchange="saveRfaState()"> Intralesional</label>
@@ -2677,7 +2804,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Suspicious finding</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="checkbox" id="rfaSuspNone" onchange="rfaSuspNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="rfaSuspEnhance" onchange="saveRfaState()"> Nodular enhancement (viable portion)</label>
                 <label><input type="checkbox" id="rfaSuspGrowth" onchange="saveRfaState()"> Interval growth</label>
@@ -2689,7 +2816,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Adjacent structure</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaAdj" value="No change" onchange="saveRfaState()"> No change</label>
                 <label><input type="radio" name="rfaAdj" value="Adjacent tissue adhesion" onchange="saveRfaState()"> Adhesion</label>
                 <label><input type="radio" name="rfaAdj" value="Tracheal compression" onchange="saveRfaState()"> Tracheal compression</label>
@@ -2699,7 +2826,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Complication</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="checkbox" id="rfaCompNone" onchange="rfaCompNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="rfaCompVoice" onchange="saveRfaState()"> Voice change</label>
                 <label><input type="checkbox" id="rfaCompHematoma" onchange="saveRfaState()"> Hematoma</label>
@@ -2720,7 +2847,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Assessment</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="rfaAssessment" value="Complete ablation" onchange="saveRfaState()"> Complete ablation</label>
                 <label><input type="radio" name="rfaAssessment" value="Residual viable tissue" onchange="saveRfaState()"> Residual viable tissue</label>
                 <label><input type="radio" name="rfaAssessment" value="Local tumor progression" onchange="saveRfaState()"> Local tumor progression</label>
@@ -2787,12 +2914,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Location</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolLocation" value="Right lobe" onchange="saveEthanolState()"> Right lobe</label>
                 <label><input type="radio" name="ethanolLocation" value="Left lobe" onchange="saveEthanolState()"> Left lobe</label>
                 <label><input type="radio" name="ethanolLocation" value="Isthmus" onchange="saveEthanolState()"> Isthmus</label>
               </div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+              <div class="opt-group" style="margin-top:6px;">
                 <label><input type="radio" name="ethanolPole" value="Upper" onchange="saveEthanolState()"> Upper</label>
                 <label><input type="radio" name="ethanolPole" value="Mid" onchange="saveEthanolState()"> Mid</label>
                 <label><input type="radio" name="ethanolPole" value="Lower" onchange="saveEthanolState()"> Lower</label>
@@ -2802,7 +2929,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Lesion type</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolLesionType" value="Pure cyst" onchange="saveEthanolState()"> Pure cyst</label>
                 <label><input type="radio" name="ethanolLesionType" value="Predominantly cystic" onchange="saveEthanolState()"> Predominantly cystic</label>
                 <label><input type="radio" name="ethanolLesionType" value="Mixed (cystic ≥ 50%)" onchange="saveEthanolState()"> Mixed (cystic ≥ 50%)</label>
@@ -2812,13 +2939,13 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pre-procedure size (mm)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <div class="size-row">
                 <input type="number" id="ethanolPreD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="ethanolPreD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="ethanolPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span style="color:var(--label3);font-size:13px;">mm</span>
+                <span class="unit">mm</span>
               </div>
             </td>
           </tr>
@@ -2853,18 +2980,18 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Aspirated volume (mL)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:6px;">
+              <div class="vol-row">
                 <input type="number" id="ethanolAspVol" placeholder="0" min="0" step="0.5" style="width:80px;" oninput="saveEthanolState()">
-                <span style="color:var(--label3);font-size:13px;">mL</span>
+                <span class="unit">mL</span>
               </div>
             </td>
           </tr>
           <tr>
             <td class="label-cell">Ethanol injected (mL)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:6px;">
+              <div class="vol-row">
                 <input type="number" id="ethanolInjVol" placeholder="0" min="0" step="0.5" style="width:80px;" oninput="saveEthanolState()">
-                <span style="color:var(--label3);font-size:13px;">mL</span>
+                <span class="unit">mL</span>
               </div>
             </td>
           </tr>
@@ -2880,13 +3007,13 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Current size (mm)</td>
             <td>
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <div class="size-row">
                 <input type="number" id="ethanolSizeD1" placeholder="AP" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="ethanolSizeD2" placeholder="TR" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span>×</span>
+                <span class="sep">×</span>
                 <input type="number" id="ethanolSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
-                <span style="color:var(--label3);font-size:13px;">mm</span>
+                <span class="unit">mm</span>
               </div>
             </td>
           </tr>
@@ -2897,7 +3024,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Internal content</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolContent" value="Anechoic (no residual)" onchange="saveEthanolState()"> Anechoic — no residual fluid</label>
                 <label><input type="radio" name="ethanolContent" value="Minimal residual fluid" onchange="saveEthanolState()"> Minimal residual fluid</label>
                 <label><input type="radio" name="ethanolContent" value="Moderate residual fluid" onchange="saveEthanolState()"> Moderate residual fluid</label>
@@ -2909,7 +3036,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Solid component</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolSolid" value="None" onchange="saveEthanolState()"> None</label>
                 <label><input type="radio" name="ethanolSolid" value="Decreased compared to prior" onchange="saveEthanolState()"> Decreased</label>
                 <label><input type="radio" name="ethanolSolid" value="Unchanged" onchange="saveEthanolState()"> Unchanged</label>
@@ -2920,7 +3047,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Vascularity</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolVasc" value="Absent" onchange="saveEthanolState()"> Absent</label>
                 <label><input type="radio" name="ethanolVasc" value="Peripheral" onchange="saveEthanolState()"> Peripheral</label>
                 <label><input type="radio" name="ethanolVasc" value="Intralesional" onchange="saveEthanolState()"> Intralesional</label>
@@ -2930,7 +3057,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Complication</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="checkbox" id="ethanolCompNone" onchange="ethanolCompNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="ethanolCompPain" onchange="saveEthanolState()"> Pain/burning</label>
                 <label><input type="checkbox" id="ethanolCompFever" onchange="saveEthanolState()"> Fever</label>
@@ -2942,7 +3069,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Treatment response</td>
             <td>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <div class="opt-group">
                 <label><input type="radio" name="ethanolResponse" value="Complete response (VRR ≥ 50%, no significant residual fluid)" onchange="saveEthanolState()"> Complete response</label>
                 <label><input type="radio" name="ethanolResponse" value="Partial response (VRR &lt; 50%)" onchange="saveEthanolState()"> Partial response</label>
                 <label><input type="radio" name="ethanolResponse" value="No response" onchange="saveEthanolState()"> No response</label>
@@ -2967,7 +3094,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
 
 <!-- BOTTOM SECTION -->
 <div id="bottom-section">
-  <div class="info-text">
+  <div class="info-text" id="ktirads-guideline">
     <strong>K-TIRADS 2021 Guidelines:</strong><br>
     <strong>K-TIRADS 1:</strong> No thyroid nodule<br>
     <strong>K-TIRADS 2:</strong> Benign (malignancy risk &lt; 3%): iso-/hyperechoic spongiform nodule, partially cystic with echogenic foci and comet tail artifacts, pure cyst [Biopsy: Not indicated]<br>
@@ -3099,7 +3226,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.82';
+const APP_VERSION = 'ver0.83';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3314,6 +3441,9 @@ function switchTab(tab) {
     const btn = document.getElementById('tab-' + s);
     if (btn) btn.classList.toggle('active', tab === s);
   });
+  // K-TIRADS guideline: only show for thyroid/postop tabs
+  const kg = document.getElementById('ktirads-guideline');
+  if (kg) kg.style.display = ['thyroid','postop','lymph','extra'].includes(tab) ? '' : 'none';
 }
 
 // ==================== RFA ====================
