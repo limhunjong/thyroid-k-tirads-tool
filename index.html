@@ -902,9 +902,25 @@ table.ln-table td.td-top { vertical-align: top; }
 }
 /* Volume result display */
 .vol-result {
-  font-size: 14px; font-weight: 700; color: var(--blue);
-  font-variant-numeric: tabular-nums; margin-top: 6px;
   display: none;
+  margin-top: 8px;
+}
+.vol-result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+  border-radius: 20px;
+  padding: 4px 12px 4px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+}
+.vol-result-badge svg {
+  flex-shrink: 0;
+  opacity: 0.75;
 }
 /* Size input row wrapper */
 #tab-content-rfa .size-row,
@@ -970,8 +986,29 @@ table.ln-table td.td-top { vertical-align: top; }
 }
 /* VRR result row */
 #rfaVRRResult, #ethanolVRRResult {
-  font-size: 15px; font-weight: 700; color: var(--blue);
-  font-variant-numeric: tabular-nums; letter-spacing: -0.2px;
+  font-variant-numeric: tabular-nums;
+}
+.vrr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--blue) 10%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--blue) 35%, transparent);
+  border-radius: 20px;
+  padding: 5px 14px 5px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
+}
+.vrr-badge .vrr-pct {
+  font-size: 16px;
+}
+.vrr-badge .vrr-detail {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.75;
 }
 /* text inputs */
 #tab-content-rfa input[type=text],
@@ -2591,18 +2628,18 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
         <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
         <tbody>
           <tr>
-            <td class="label-cell">Indication</td>
+            <td class="label-cell">Clinical Indication</td>
             <td>
               <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="rfaClinIndDefault" onchange="saveRfaState()" checked> RFA follow-up</label></div>
               <textarea id="rfaClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea>
             </td>
           </tr>
           <tr>
-            <td class="label-cell">History</td>
+            <td class="label-cell">Clinical History</td>
             <td><textarea id="rfaClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Benign thyroid nodule s/p RFA (2024/03)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td>
           </tr>
           <tr>
-            <td class="label-cell">Comparison</td>
+            <td class="label-cell">US Comparison</td>
             <td>
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
                 <select id="rfaCompYear" class="date-select" onchange="saveRfaState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
@@ -2626,8 +2663,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
             <td class="label-cell">Location</td>
             <td>
               <div class="radio-group">
-                <label><input type="radio" name="rfaLocation" value="Right lobe" onchange="saveRfaState()"> Right lobe</label>
-                <label><input type="radio" name="rfaLocation" value="Left lobe" onchange="saveRfaState()"> Left lobe</label>
+                <label><input type="radio" name="rfaLocation" value="Right" onchange="saveRfaState()"> Right</label>
+                <label><input type="radio" name="rfaLocation" value="Left" onchange="saveRfaState()"> Left</label>
                 <label><input type="radio" name="rfaLocation" value="Isthmus" onchange="saveRfaState()"> Isthmus</label>
               </div>
               <div class="radio-group" style="margin-top:6px;">
@@ -2862,18 +2899,18 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
         <thead><tr><th colspan="2">Clinical Information</th></tr></thead>
         <tbody>
           <tr>
-            <td class="label-cell">Indication</td>
+            <td class="label-cell">Clinical Indication</td>
             <td>
               <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="ethanolClinIndDefault" onchange="saveEthanolState()" checked> Ethanol sclerotherapy follow-up</label></div>
               <textarea id="ethanolClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea>
             </td>
           </tr>
           <tr>
-            <td class="label-cell">History</td>
+            <td class="label-cell">Clinical History</td>
             <td><textarea id="ethanolClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Thyroid cyst s/p ethanol sclerotherapy (2024/06)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td>
           </tr>
           <tr>
-            <td class="label-cell">Comparison</td>
+            <td class="label-cell">US Comparison</td>
             <td>
               <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
                 <select id="ethanolCompYear" class="date-select" onchange="saveEthanolState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
@@ -2897,8 +2934,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
             <td class="label-cell">Location</td>
             <td>
               <div class="radio-group">
-                <label><input type="radio" name="ethanolLocation" value="Right lobe" onchange="saveEthanolState()"> Right lobe</label>
-                <label><input type="radio" name="ethanolLocation" value="Left lobe" onchange="saveEthanolState()"> Left lobe</label>
+                <label><input type="radio" name="ethanolLocation" value="Right" onchange="saveEthanolState()"> Right</label>
+                <label><input type="radio" name="ethanolLocation" value="Left" onchange="saveEthanolState()"> Left</label>
                 <label><input type="radio" name="ethanolLocation" value="Isthmus" onchange="saveEthanolState()"> Isthmus</label>
               </div>
               <div class="radio-group" style="margin-top:6px;">
@@ -3210,7 +3247,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.86';
+const APP_VERSION = 'ver0.87';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3512,7 +3549,10 @@ function showVolResult(elId, vol) {
   const el = document.getElementById(elId);
   if (!el) return;
   if (vol) {
-    el.textContent = '= ' + (vol/1000).toFixed(2) + ' mL';
+    const mL = (vol/1000).toFixed(2);
+    el.innerHTML = '<span class="vol-result-badge">'
+      + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+      + mL + ' mL</span>';
     el.style.display = 'block';
   } else {
     el.style.display = 'none';
@@ -3530,7 +3570,7 @@ function updateRfaVRR() {
   const res = document.getElementById('rfaVRRResult');
   if (preVol && curVol && row && res) {
     const vrr = ((preVol - curVol) / preVol * 100).toFixed(1);
-    res.textContent = vrr + '%  (pre: ' + (preVol/1000).toFixed(2) + ' mL → post: ' + (curVol/1000).toFixed(2) + ' mL)';
+    res.innerHTML = '<span class="vrr-badge"><span class="vrr-pct">' + vrr + '%</span><span class="vrr-detail">pre ' + (preVol/1000).toFixed(2) + ' mL &rarr; ' + (curVol/1000).toFixed(2) + ' mL</span></span>';
     row.style.display = '';
   } else if (row) { row.style.display = 'none'; }
 }
@@ -3606,7 +3646,7 @@ function updateEthanolVRR() {
   const res = document.getElementById('ethanolVRRResult');
   if (preVol && curVol && row && res) {
     const vrr = ((preVol - curVol) / preVol * 100).toFixed(1);
-    res.textContent = vrr + '%  (pre: ' + (preVol/1000).toFixed(2) + ' mL → post: ' + (curVol/1000).toFixed(2) + ' mL)';
+    res.innerHTML = '<span class="vrr-badge"><span class="vrr-pct">' + vrr + '%</span><span class="vrr-detail">pre ' + (preVol/1000).toFixed(2) + ' mL &rarr; ' + (curVol/1000).toFixed(2) + ' mL</span></span>';
     row.style.display = '';
   } else if (row) { row.style.display = 'none'; }
 }
