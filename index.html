@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.83</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.84</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -876,7 +876,7 @@ table.ln-table td.td-top { vertical-align: top; }
 #tab-content-extra textarea { width: 100%; }
 
 /* ===== RFA / ETHANOL TAB CONSISTENCY ===== */
-/* Ensure vertical alignment and no clipping for flex label groups */
+/* Vertical alignment and padding fix */
 #tab-content-rfa table.data-table td,
 #tab-content-ethanol table.data-table td {
   vertical-align: top;
@@ -887,44 +887,20 @@ table.ln-table td.td-top { vertical-align: top; }
   vertical-align: top;
   padding-top: 14px;
 }
-/* Label groups inside RFA/Ethanol: chip-style consistent with radio-group */
-#tab-content-rfa .opt-group,
-#tab-content-ethanol .opt-group {
+/* radio-group in RFA/Ethanol: allow flex-wrap (nodule tab uses grid, these need wrap) */
+#tab-content-rfa .radio-group,
+#tab-content-ethanol .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 2px 0;
+  width: auto;
+  max-width: 100%;
 }
-#tab-content-rfa .opt-group label,
-#tab-content-ethanol .opt-group label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  background: var(--fill3);
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--label1);
-  cursor: pointer;
-  line-height: 1.3;
-  min-height: 36px;
-  transition: background 0.15s;
-  user-select: none;
-}
-#tab-content-rfa .opt-group label:hover,
-#tab-content-ethanol .opt-group label:hover { background: var(--fill2); }
-#tab-content-rfa .opt-group label:has(input:checked),
-#tab-content-ethanol .opt-group label:has(input:checked) {
-  background: var(--blue);
-  color: #fff;
-  font-weight: 600;
-}
-#tab-content-rfa .opt-group input,
-#tab-content-ethanol .opt-group input {
-  width: 15px; height: 15px;
-  accent-color: #fff;
-  flex-shrink: 0;
+#tab-content-rfa .radio-group label,
+#tab-content-ethanol .radio-group label {
+  min-width: unset;
+  white-space: normal;
+  text-align: left;
+  justify-content: flex-start;
 }
 /* Size input row wrapper */
 #tab-content-rfa .size-row,
@@ -2233,7 +2209,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
-  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.83.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.84.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
   <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
 
@@ -2645,12 +2621,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Location</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaLocation" value="Right lobe" onchange="saveRfaState()"> Right lobe</label>
                 <label><input type="radio" name="rfaLocation" value="Left lobe" onchange="saveRfaState()"> Left lobe</label>
                 <label><input type="radio" name="rfaLocation" value="Isthmus" onchange="saveRfaState()"> Isthmus</label>
               </div>
-              <div class="opt-group" style="margin-top:6px;">
+              <div class="radio-group" style="margin-top:6px;">
                 <label><input type="radio" name="rfaPole" value="Upper" onchange="saveRfaState()"> Upper</label>
                 <label><input type="radio" name="rfaPole" value="Mid" onchange="saveRfaState()"> Mid</label>
                 <label><input type="radio" name="rfaPole" value="Lower" onchange="saveRfaState()"> Lower</label>
@@ -2660,7 +2636,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Composition</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaComposition" value="Solid" onchange="saveRfaState()"> Solid</label>
                 <label><input type="radio" name="rfaComposition" value="Mixed (predominantly solid)" onchange="saveRfaState()"> Mixed (predominantly solid)</label>
                 <label><input type="radio" name="rfaComposition" value="Predominantly cystic" onchange="saveRfaState()"> Predominantly cystic</label>
@@ -2671,7 +2647,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pre-RFA K-TIRADS</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 2" onchange="saveRfaState()"> K-TIRADS 2</label>
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 3" onchange="saveRfaState()"> K-TIRADS 3</label>
                 <label><input type="radio" name="rfaPreKtirads" value="K-TIRADS 4" onchange="saveRfaState()"> K-TIRADS 4</label>
@@ -2682,7 +2658,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Pathology</td>
             <td>
-              <div class="opt-group" style="margin-bottom:6px;">
+              <div class="radio-group" style="margin-bottom:6px;">
                 <label><input type="radio" name="rfaPathMethod" value="FNA" onchange="saveRfaState()"> FNA</label>
                 <label><input type="radio" name="rfaPathMethod" value="CNB" onchange="saveRfaState()"> CNB</label>
                 <label><input type="radio" name="rfaPathMethod" value="Not done" onchange="saveRfaState()"> Not done</label>
@@ -2772,7 +2748,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Echogenicity</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaEcho" value="Hypoechoic" onchange="saveRfaState()"> Hypoechoic</label>
                 <label><input type="radio" name="rfaEcho" value="Heterogeneous" onchange="saveRfaState()"> Heterogeneous</label>
                 <label><input type="radio" name="rfaEcho" value="Isoechoic" onchange="saveRfaState()"> Isoechoic</label>
@@ -2784,7 +2760,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Calcification</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaCalc" value="None" onchange="saveRfaState()"> None</label>
                 <label><input type="radio" name="rfaCalc" value="Coarse calcification" onchange="saveRfaState()"> Coarse</label>
                 <label><input type="radio" name="rfaCalc" value="Rim/eggshell calcification" onchange="saveRfaState()"> Rim/eggshell</label>
@@ -2794,7 +2770,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Vascularity (Doppler)</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaVasc" value="Absent" onchange="saveRfaState()"> Absent</label>
                 <label><input type="radio" name="rfaVasc" value="Peripheral only" onchange="saveRfaState()"> Peripheral only</label>
                 <label><input type="radio" name="rfaVasc" value="Intralesional" onchange="saveRfaState()"> Intralesional</label>
@@ -2804,7 +2780,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Suspicious finding</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="checkbox" id="rfaSuspNone" onchange="rfaSuspNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="rfaSuspEnhance" onchange="saveRfaState()"> Nodular enhancement (viable portion)</label>
                 <label><input type="checkbox" id="rfaSuspGrowth" onchange="saveRfaState()"> Interval growth</label>
@@ -2816,7 +2792,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Adjacent structure</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaAdj" value="No change" onchange="saveRfaState()"> No change</label>
                 <label><input type="radio" name="rfaAdj" value="Adjacent tissue adhesion" onchange="saveRfaState()"> Adhesion</label>
                 <label><input type="radio" name="rfaAdj" value="Tracheal compression" onchange="saveRfaState()"> Tracheal compression</label>
@@ -2826,7 +2802,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Complication</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="checkbox" id="rfaCompNone" onchange="rfaCompNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="rfaCompVoice" onchange="saveRfaState()"> Voice change</label>
                 <label><input type="checkbox" id="rfaCompHematoma" onchange="saveRfaState()"> Hematoma</label>
@@ -2847,7 +2823,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Assessment</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="rfaAssessment" value="Complete ablation" onchange="saveRfaState()"> Complete ablation</label>
                 <label><input type="radio" name="rfaAssessment" value="Residual viable tissue" onchange="saveRfaState()"> Residual viable tissue</label>
                 <label><input type="radio" name="rfaAssessment" value="Local tumor progression" onchange="saveRfaState()"> Local tumor progression</label>
@@ -2914,12 +2890,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Location</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolLocation" value="Right lobe" onchange="saveEthanolState()"> Right lobe</label>
                 <label><input type="radio" name="ethanolLocation" value="Left lobe" onchange="saveEthanolState()"> Left lobe</label>
                 <label><input type="radio" name="ethanolLocation" value="Isthmus" onchange="saveEthanolState()"> Isthmus</label>
               </div>
-              <div class="opt-group" style="margin-top:6px;">
+              <div class="radio-group" style="margin-top:6px;">
                 <label><input type="radio" name="ethanolPole" value="Upper" onchange="saveEthanolState()"> Upper</label>
                 <label><input type="radio" name="ethanolPole" value="Mid" onchange="saveEthanolState()"> Mid</label>
                 <label><input type="radio" name="ethanolPole" value="Lower" onchange="saveEthanolState()"> Lower</label>
@@ -2929,7 +2905,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Lesion type</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolLesionType" value="Pure cyst" onchange="saveEthanolState()"> Pure cyst</label>
                 <label><input type="radio" name="ethanolLesionType" value="Predominantly cystic" onchange="saveEthanolState()"> Predominantly cystic</label>
                 <label><input type="radio" name="ethanolLesionType" value="Mixed (cystic ≥ 50%)" onchange="saveEthanolState()"> Mixed (cystic ≥ 50%)</label>
@@ -3024,7 +3000,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Internal content</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolContent" value="Anechoic (no residual)" onchange="saveEthanolState()"> Anechoic — no residual fluid</label>
                 <label><input type="radio" name="ethanolContent" value="Minimal residual fluid" onchange="saveEthanolState()"> Minimal residual fluid</label>
                 <label><input type="radio" name="ethanolContent" value="Moderate residual fluid" onchange="saveEthanolState()"> Moderate residual fluid</label>
@@ -3036,7 +3012,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Solid component</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolSolid" value="None" onchange="saveEthanolState()"> None</label>
                 <label><input type="radio" name="ethanolSolid" value="Decreased compared to prior" onchange="saveEthanolState()"> Decreased</label>
                 <label><input type="radio" name="ethanolSolid" value="Unchanged" onchange="saveEthanolState()"> Unchanged</label>
@@ -3047,7 +3023,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Vascularity</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolVasc" value="Absent" onchange="saveEthanolState()"> Absent</label>
                 <label><input type="radio" name="ethanolVasc" value="Peripheral" onchange="saveEthanolState()"> Peripheral</label>
                 <label><input type="radio" name="ethanolVasc" value="Intralesional" onchange="saveEthanolState()"> Intralesional</label>
@@ -3057,7 +3033,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Complication</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="checkbox" id="ethanolCompNone" onchange="ethanolCompNoneToggle(this)"> None</label>
                 <label><input type="checkbox" id="ethanolCompPain" onchange="saveEthanolState()"> Pain/burning</label>
                 <label><input type="checkbox" id="ethanolCompFever" onchange="saveEthanolState()"> Fever</label>
@@ -3069,7 +3045,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Treatment response</td>
             <td>
-              <div class="opt-group">
+              <div class="radio-group">
                 <label><input type="radio" name="ethanolResponse" value="Complete response (VRR ≥ 50%, no significant residual fluid)" onchange="saveEthanolState()"> Complete response</label>
                 <label><input type="radio" name="ethanolResponse" value="Partial response (VRR &lt; 50%)" onchange="saveEthanolState()"> Partial response</label>
                 <label><input type="radio" name="ethanolResponse" value="No response" onchange="saveEthanolState()"> No response</label>
@@ -3226,7 +3202,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.83';
+const APP_VERSION = 'ver0.84';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
