@@ -903,24 +903,26 @@ table.ln-table td.td-top { vertical-align: top; }
 /* Volume result display */
 .vol-result {
   display: none;
-  margin-top: 8px;
+  align-items: center;
+  margin-left: 10px;
 }
 .vol-result-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: color-mix(in srgb, var(--blue) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+  gap: 5px;
+  background: color-mix(in srgb, var(--blue) 13%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--blue) 35%, transparent);
   border-radius: 20px;
-  padding: 4px 12px 4px 8px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 5px 14px 5px 10px;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--blue);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .vol-result-badge svg {
   flex-shrink: 0;
-  opacity: 0.75;
+  opacity: 0.7;
 }
 /* Size input row wrapper */
 #tab-content-rfa .size-row,
@@ -2645,8 +2647,10 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <select id="rfaCompYear" class="date-select" onchange="saveRfaState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
                 <select id="rfaCompMonth" class="date-select" onchange="saveRfaState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
                 <select id="rfaCompDay" class="date-select" onchange="saveRfaState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
-                <label><input type="radio" name="rfaCompType" value="US" onchange="saveRfaState()" checked> US</label>
-                <label><input type="radio" name="rfaCompType" value="Outside US" onchange="saveRfaState()"> Outside US</label>
+                <div class="radio-group" style="display:inline-flex;">
+                  <label><input type="radio" name="rfaCompType" value="US" onchange="saveRfaState()" checked> US</label>
+                  <label><input type="radio" name="rfaCompType" value="Outside US" onchange="saveRfaState()"> Outside US</label>
+                </div>
               </div>
             </td>
           </tr>
@@ -2729,8 +2733,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <span class="sep">×</span>
                 <input type="number" id="rfaPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
                 <span class="unit">mm</span>
+                <div class="vol-result" id="rfaPreVol"></div>
               </div>
-              <div class="vol-result" id="rfaPreVol"></div>
             </td>
           </tr>
         </tbody>
@@ -2780,8 +2784,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <span class="sep">×</span>
                 <input type="number" id="rfaSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
                 <span class="unit">mm</span>
+                <div class="vol-result" id="rfaCurVol"></div>
               </div>
-              <div class="vol-result" id="rfaCurVol"></div>
             </td>
           </tr>
           <tr id="rfaVRRRow" style="display:none;">
@@ -2916,8 +2920,10 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <select id="ethanolCompYear" class="date-select" onchange="saveEthanolState()"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option></select>
                 <select id="ethanolCompMonth" class="date-select" onchange="saveEthanolState()"><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
                 <select id="ethanolCompDay" class="date-select" onchange="saveEthanolState()"><option value="">DD</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option></select>
-                <label><input type="radio" name="ethanolCompType" value="US" onchange="saveEthanolState()" checked> US</label>
-                <label><input type="radio" name="ethanolCompType" value="Outside US" onchange="saveEthanolState()"> Outside US</label>
+                <div class="radio-group" style="display:inline-flex;">
+                  <label><input type="radio" name="ethanolCompType" value="US" onchange="saveEthanolState()" checked> US</label>
+                  <label><input type="radio" name="ethanolCompType" value="Outside US" onchange="saveEthanolState()"> Outside US</label>
+                </div>
               </div>
             </td>
           </tr>
@@ -2965,8 +2971,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <span class="sep">×</span>
                 <input type="number" id="ethanolPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
                 <span class="unit">mm</span>
+                <div class="vol-result" id="ethanolPreVol"></div>
               </div>
-              <div class="vol-result" id="ethanolPreVol"></div>
             </td>
           </tr>
         </tbody>
@@ -3034,8 +3040,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <span class="sep">×</span>
                 <input type="number" id="ethanolSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
                 <span class="unit">mm</span>
+                <div class="vol-result" id="ethanolCurVol"></div>
               </div>
-              <div class="vol-result" id="ethanolCurVol"></div>
             </td>
           </tr>
           <tr id="ethanolVRRRow" style="display:none;">
@@ -3247,7 +3253,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.87';
+const APP_VERSION = 'ver0.88';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3551,9 +3557,9 @@ function showVolResult(elId, vol) {
   if (vol) {
     const mL = (vol/1000).toFixed(2);
     el.innerHTML = '<span class="vol-result-badge">'
-      + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>'
       + mL + ' mL</span>';
-    el.style.display = 'block';
+    el.style.display = 'inline-flex';
   } else {
     el.style.display = 'none';
   }
