@@ -3,7 +3,7 @@
 <html lang="ko" style="--nav-h: 52px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.84</title>
+<title>Thyroid Finding Tool - K-TIRADS 2021 ver0.85</title>
 <style>
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -888,11 +888,11 @@ table.ln-table td.td-top { vertical-align: top; }
   padding-top: 14px;
 }
 /* radio-group in RFA/Ethanol: allow flex-wrap (nodule tab uses grid, these need wrap) */
+/* Fix 3: radio-group in RFA/Ethanol keeps fit-content width (don't stretch full row) */
 #tab-content-rfa .radio-group,
 #tab-content-ethanol .radio-group {
-  display: flex;
   flex-wrap: wrap;
-  width: auto;
+  width: fit-content;
   max-width: 100%;
 }
 #tab-content-rfa .radio-group label,
@@ -901,6 +901,13 @@ table.ln-table td.td-top { vertical-align: top; }
   white-space: normal;
   text-align: left;
   justify-content: flex-start;
+}
+/* Fix 2: indication/history textarea rows need top alignment & breathing room */
+#tab-content-rfa table.data-table td,
+#tab-content-ethanol table.data-table td {
+  vertical-align: top;
+  padding: 12px 16px;
+  line-height: 1.4;
 }
 /* Size input row wrapper */
 #tab-content-rfa .size-row,
@@ -2209,7 +2216,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <div class="top-spacer"></div>
   <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
   <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
-  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.84.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.85.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
   <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
 
@@ -2589,7 +2596,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Indication</td>
             <td>
-              <div style="margin-bottom:6px;"><label><input type="checkbox" id="rfaClinIndDefault" onchange="saveRfaState()" checked> RFA follow-up</label></div>
+              <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="rfaClinIndDefault" onchange="saveRfaState()" checked> RFA follow-up</label></div>
               <textarea id="rfaClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea>
             </td>
           </tr>
@@ -2858,7 +2865,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
           <tr>
             <td class="label-cell">Indication</td>
             <td>
-              <div style="margin-bottom:6px;"><label><input type="checkbox" id="ethanolClinIndDefault" onchange="saveEthanolState()" checked> Ethanol sclerotherapy follow-up</label></div>
+              <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="ethanolClinIndDefault" onchange="saveEthanolState()" checked> Ethanol sclerotherapy follow-up</label></div>
               <textarea id="ethanolClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea>
             </td>
           </tr>
@@ -3202,7 +3209,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.84';
+const APP_VERSION = 'ver0.85';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
