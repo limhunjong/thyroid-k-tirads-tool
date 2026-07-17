@@ -876,19 +876,17 @@ table.ln-table td.td-top { vertical-align: top; }
 #tab-content-extra textarea { width: 100%; }
 
 /* ===== RFA / ETHANOL TAB CONSISTENCY ===== */
-/* Vertical alignment and padding fix */
 #tab-content-rfa table.data-table td,
 #tab-content-ethanol table.data-table td {
-  vertical-align: top;
-  padding: 12px 16px;
+  vertical-align: top !important;
+  padding: 14px 16px !important;
+  line-height: 1.45;
 }
 #tab-content-rfa table.data-table td.label-cell,
 #tab-content-ethanol table.data-table td.label-cell {
-  vertical-align: top;
-  padding-top: 14px;
+  padding-top: 16px !important;
 }
-/* radio-group in RFA/Ethanol: allow flex-wrap (nodule tab uses grid, these need wrap) */
-/* Fix 3: radio-group in RFA/Ethanol keeps fit-content width (don't stretch full row) */
+/* radio-group: wrap, fit-content width */
 #tab-content-rfa .radio-group,
 #tab-content-ethanol .radio-group {
   flex-wrap: wrap;
@@ -902,12 +900,11 @@ table.ln-table td.td-top { vertical-align: top; }
   text-align: left;
   justify-content: flex-start;
 }
-/* Fix 2: indication/history textarea rows need top alignment & breathing room */
-#tab-content-rfa table.data-table td,
-#tab-content-ethanol table.data-table td {
-  vertical-align: top;
-  padding: 12px 16px;
-  line-height: 1.4;
+/* Volume result display */
+.vol-result {
+  font-size: 14px; font-weight: 700; color: var(--blue);
+  font-variant-numeric: tabular-nums; margin-top: 6px;
+  display: none;
 }
 /* Size input row wrapper */
 #tab-content-rfa .size-row,
@@ -2696,6 +2693,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <input type="number" id="rfaPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
                 <span class="unit">mm</span>
               </div>
+              <div class="vol-result" id="rfaPreVol"></div>
             </td>
           </tr>
         </tbody>
@@ -2746,6 +2744,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <input type="number" id="rfaSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateRfaVRR()">
                 <span class="unit">mm</span>
               </div>
+              <div class="vol-result" id="rfaCurVol"></div>
             </td>
           </tr>
           <tr id="rfaVRRRow" style="display:none;">
@@ -2930,6 +2929,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <input type="number" id="ethanolPreD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
                 <span class="unit">mm</span>
               </div>
+              <div class="vol-result" id="ethanolPreVol"></div>
             </td>
           </tr>
         </tbody>
@@ -2998,6 +2998,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
                 <input type="number" id="ethanolSizeD3" placeholder="CC" min="0" step="0.1" style="width:60px;" oninput="updateEthanolVRR()">
                 <span class="unit">mm</span>
               </div>
+              <div class="vol-result" id="ethanolCurVol"></div>
             </td>
           </tr>
           <tr id="ethanolVRRRow" style="display:none;">
@@ -3209,7 +3210,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.85';
+const APP_VERSION = 'ver0.86';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3507,11 +3508,24 @@ function calcVolume(d1, d2, d3) {
   return (Math.PI / 6) * a * b * c;
 }
 
+function showVolResult(elId, vol) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (vol) {
+    el.textContent = '= ' + (vol/1000).toFixed(2) + ' mL';
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 function updateRfaVRR() {
   saveRfaState();
   const s = state.rfa || {};
   const preVol = calcVolume(s.preD1, s.preD2, s.preD3);
   const curVol = calcVolume(s.sizeD1, s.sizeD2, s.sizeD3);
+  showVolResult('rfaPreVol', preVol);
+  showVolResult('rfaCurVol', curVol);
   const row = document.getElementById('rfaVRRRow');
   const res = document.getElementById('rfaVRRResult');
   if (preVol && curVol && row && res) {
@@ -3586,6 +3600,8 @@ function updateEthanolVRR() {
   const s = state.ethanol || {};
   const preVol = calcVolume(s.preD1, s.preD2, s.preD3);
   const curVol = calcVolume(s.sizeD1, s.sizeD2, s.sizeD3);
+  showVolResult('ethanolPreVol', preVol);
+  showVolResult('ethanolCurVol', curVol);
   const row = document.getElementById('ethanolVRRRow');
   const res = document.getElementById('ethanolVRRResult');
   if (preVol && curVol && row && res) {
