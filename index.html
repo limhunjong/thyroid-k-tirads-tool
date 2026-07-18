@@ -464,6 +464,8 @@ table.data-table td.section-header {
   overflow-wrap: anywhere;
   justify-self: stretch;
   align-self: stretch;
+  justify-content: center;
+  text-align: center;
 }
 /* 1 option: single full-width column */
 .nodule-data-cell .radio-group:has(> label:only-child),
@@ -500,31 +502,37 @@ table.data-table td.section-header {
 /* ===== CHECKBOX GROUPS ===== */
 .check-group { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
 .check-group label {
-  display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
-  font-size: var(--font-md); padding: 8px 13px; border-radius: var(--r-sm);
-  transition: background 0.15s; user-select: none;
-  color: var(--label2); min-height: 42px; letter-spacing: -0.1px; line-height: var(--control-line); text-align: center;
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+  font-size: var(--font-md); font-weight: 600; padding: 9px 18px; border-radius: 10px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s; user-select: none;
+  color: var(--label2); min-height: var(--control-min-h); letter-spacing: -0.1px; line-height: var(--control-line); text-align: center;
 }
-.check-group label:active { background: var(--fill4); }
+.check-group label input[type=checkbox] {
+  position: absolute; opacity: 0;
+  width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);
+  -webkit-appearance: none; appearance: none;
+}
+.check-group label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
 .check-group label:has(input:checked) {
-  background: var(--blue-bg); color: var(--blue); font-weight: 700;
+  background: var(--blue); color: #fff; font-weight: 700; box-shadow: var(--shadow-seg);
 }
 
 /* ===== INLINE CHECKBOX ===== */
 .inline-check-label {
-  display: inline-flex !important; align-items: center; justify-content: center; gap: 6px;
-  padding: 8px 13px; border-radius: var(--r-sm); cursor: pointer;
-  font-size: var(--font-md); transition: background 0.15s; user-select: none;
-  color: var(--label2); min-height: 42px; letter-spacing: -0.1px; line-height: var(--control-line); text-align: center;
+  position: relative; display: inline-flex !important; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 18px; border-radius: 10px; cursor: pointer;
+  font-size: var(--font-md); font-weight: 600;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s; user-select: none;
+  color: var(--label2); min-height: var(--control-min-h); letter-spacing: -0.1px; line-height: var(--control-line); text-align: center;
 }
 .inline-check-label input[type=checkbox] {
   position: absolute; opacity: 0;
   width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);
   -webkit-appearance: none; appearance: none;
 }
-.inline-check-label:active { background: var(--fill4); }
+.inline-check-label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
 .inline-check-label:has(input:checked) {
-  background: var(--blue-bg); color: var(--blue); font-weight: 700;
+  background: var(--blue); color: #fff; font-weight: 700; box-shadow: var(--shadow-seg);
 }
 
 /* ===== INPUTS ===== */
@@ -850,13 +858,13 @@ col.nodule-label-col { width: 136px; }
   border-bottom: none; background: var(--bg1);
 }
 .ln-check-label {
+  position: relative;
   display: flex; align-items: center; justify-content: center; gap: 4px;
   white-space: nowrap; cursor: pointer;
-  padding: 3px 8px; border-radius: 6px;
-  transition: background 0.15s;
-  background: var(--fill3);
-  color: var(--label2); font-size: var(--font-base); font-weight: 500; letter-spacing: 0;
-  min-height: 26px; text-align: center;
+  padding: 6px 10px; border-radius: 8px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  color: var(--label2); font-size: var(--font-sm); font-weight: 600; letter-spacing: -0.1px;
+  min-height: 34px; text-align: center;
   user-select: none; -webkit-user-select: none;
 }
 .ln-check-label input[type=checkbox] {
@@ -864,11 +872,11 @@ col.nodule-label-col { width: 136px; }
   width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);
   -webkit-appearance: none; appearance: none;
 }
-.ln-check-label:active { background: var(--fill4); }
-.ln-check-label:has(input:checked) { background: var(--blue-bg); color: var(--blue); font-weight: 700; }
+.ln-check-label:active:not(:has(input:checked)) { background: rgba(255,255,255,0.09); }
+.ln-check-label:has(input:checked) { background: var(--blue); color: #fff; font-weight: 700; box-shadow: var(--shadow-seg); }
 .ln-check-label:has(input:disabled) { opacity: 0.35; pointer-events: none; }
 /* Biopsy / Complications inline checks in LN table */
-table.ln-table .inline-check-label { background: var(--fill3); }
+table.ln-table .inline-check-label { min-height: 34px; padding: 6px 10px; font-size: var(--font-sm); border-radius: 8px; }
 .ln-section-hdr {
   background: var(--fill4); color: var(--label3);
   font-weight: 700; text-align: left;
@@ -3272,7 +3280,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.91';
+const APP_VERSION = 'ver0.92';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
