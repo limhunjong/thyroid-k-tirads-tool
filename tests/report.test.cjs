@@ -237,6 +237,64 @@ test('a previous LN biopsy alone makes the LN study non-normal', async page => {
   assert(r === false, 'LN study with prior biopsy history must not count as empty/normal');
 });
 
+test('nodule card orders US features before Size Change and Biopsy', async page => {
+  const order = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    renderNoduleCol('right');
+    const labels = [...document.querySelectorAll('#nodules-right table tbody td.nodule-label-cell, #nodules-right table tbody td')]
+      .map(td => td.textContent.trim());
+    const find = s => labels.findIndex(l => l.startsWith(s));
+    return { orient: find('Orientation'), ete: find('Extrathyroidal'), sc: find('Size Change'), comment: find('Comment') };
+  });
+  assert(order.orient >= 0 && order.sc >= 0, 'rows not found: ' + JSON.stringify(order));
+  assert(order.orient < order.sc, 'Orientation must come before Size Change');
+  assert(order.ete < order.sc, 'ETE must come before Size Change');
+  assert(order.sc < order.comment, 'Size Change must come before Comment');
+});
+
+test('K-TIRADS rationale and not-gradable warning render in the card header', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    n.locationUpper = true; n.diamAP = '12';
+    renderNoduleCol('right');
+    const hdr1 = document.querySelector('#nodules-right table thead').textContent;
+    n.composition = 'Solid'; n.echogenicity = 'Marked hypo'; n.calcification_micro = true;
+    renderNoduleCol('right');
+    const hdr2 = document.querySelector('#nodules-right table thead').textContent;
+    return { hdr1, hdr2, errs: (() => { n.composition=''; n.echogenicity=''; return validateReport(); })() };
+  });
+  assert(r.hdr1.includes('not gradable'), 'missing not-gradable warning: ' + r.hdr1.slice(0, 120));
+  assert(r.hdr2.includes('solid') && r.hdr2.includes('punctate echogenic foci'),
+    'missing rationale: ' + r.hdr2.slice(0, 160));
+  assert(r.errs.some(e => e.includes('K-TIRADS not gradable')), 'missing ungradable validation error');
+});
+
+test('location detail (posterior/medial) appears in report location text', async page => {
+  const txt = await page.evaluate(() => {
+    const n = defaultNodule();
+    n.locationMiddle = true; n.locationPost = true; n.locationMedial = true;
+    return getLocationText(n, 'right');
+  });
+  assert(txt === 'Middle, posterior medial aspect', 'unexpected location text: ' + txt);
+});
+
+test('Duplicate copies a nodule (minus diagram position) and respects the 3-nodule cap', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    n.composition = 'Solid'; n.echogenicity = 'Iso'; n.diamAP = '9'; n.diagramX = 50; n.diagramY = 60;
+    renderNoduleCol('right');
+    document.querySelector('#nodules-right .dup-nodule-btn').click();
+    const copy = state.nodules.right[1];
+    return { count: state.nodules.right.length, comp: copy && copy.composition,
+             noDiagram: copy && copy.diagramX === undefined };
+  });
+  assert(r.count === 2, 'duplicate should add a second nodule');
+  assert(r.comp === 'Solid', 'duplicate should copy fields');
+  assert(r.noDiagram, 'duplicate must not copy the diagram marker position');
+});
+
 test('biopsy indication follows K-TIRADS size thresholds', async page => {
   const r = await page.evaluate(() => {
     const mk = (tiradsSetup, size) => {
