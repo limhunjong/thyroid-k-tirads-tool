@@ -887,7 +887,7 @@ table.ln-table .inline-check-label { min-height: 34px; padding: 6px 10px; font-s
 .ln-measure-row { display: flex; align-items: center; gap: 2px; width: 100%; min-width: 0; }
 .ln-meas-lbl { font-size: 14px; font-weight: 600; color: var(--label3); flex-shrink: 0; }
 .ln-size-input { flex: 1; min-width: 0; width: 0; font-size: var(--font-base); }
-.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: var(--font-base); max-width: 62px; }
+.ln-measure-row select { flex-shrink: 1; min-width: 0; font-size: var(--font-base); max-width: 62px; text-align: center; text-align-last: center; }
 table.ln-table textarea { width: 100%; box-sizing: border-box; min-width: 0; font-size: var(--font-base); }
 table.ln-table td.td-top { vertical-align: top; }
 .ln-chip-group { display: flex; flex-wrap: wrap; gap: 2px; width: 100%; }
@@ -1010,6 +1010,7 @@ table.ln-table td.td-top { vertical-align: top; }
   border: 0.5px solid var(--sep); background: var(--fill4);
   color: var(--label1); font-size: var(--font-sm); font-family: inherit;
   cursor: pointer;
+  text-align: center; text-align-last: center;
 }
 /* VRR result row */
 #rfaVRRResult, #ethanolVRRResult {
@@ -2163,6 +2164,7 @@ body.light .zone-path.zone-drag-preview { fill: rgba(0,122,255,0.18); stroke: rg
   box-sizing: border-box;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center; text-align-last: center;
 }
 @media (max-width: 767px) {
   .biopsy-result-row {
@@ -3277,7 +3279,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.93';
+const APP_VERSION = 'ver0.94';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
