@@ -55,3 +55,15 @@ All incremental versions are kept in `versions/`.
 
 - This repository preserves the iterative development process as separate versioned HTML files.
 - Clinical guideline logic should be validated separately against K-TIRADS 2021 source material before clinical deployment.
+
+## Testing
+
+Regression tests exercise the real page (report generation, gating rules,
+validation, undo) in headless Chromium:
+
+```
+node tests/report.test.cjs
+```
+
+Requires Playwright with a Chromium binary (`CHROMIUM_BIN` env var overrides
+the browser path). Run this after any change to `index.html`.
