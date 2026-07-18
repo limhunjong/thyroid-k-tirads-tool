@@ -141,19 +141,45 @@ test('validation flags Biopsy=Yes with no FNA/CNB level', async page => {
     'expected LN biopsy validation error, got: ' + JSON.stringify(errs));
 });
 
-test('LN FNA result and Tg washout appear in the biopsy report lines', async page => {
+test('current LN biopsy reports procedure only — no pathology result', async page => {
   const txt = await page.evaluate(() => {
     const c = getLN(1);
-    c.level_3 = true; c.ldValue = '1.5'; c.biopsy = true; c.fna_3 = true;
-    c.fnaResult = 'Metastatic carcinoma'; c.tgWashout = '850';
-    c.cnb_3 = true; c.cnbResult = 'Metastatic papillary carcinoma';
+    c.level_3 = true; c.ldValue = '1.5'; c.biopsy = true; c.fna_3 = true; c.cnb_3 = true;
     setLN(1, c);
     return buildReportText();
   });
-  assert(txt.includes('LN FNA: Right lateral (suspicious) level 3 — metastatic carcinoma, Tg washout 850 ng/mL'),
-    'FNA result line missing: ' + (txt.match(/LN FNA[^\n]*/) || ['(none)'])[0]);
-  assert(txt.includes('LN CNB: Right lateral (suspicious) level 3 — Metastatic papillary carcinoma'),
-    'CNB result line missing');
+  assert(txt.includes('LN FNA: Right lateral (suspicious) level 3'),
+    'current FNA line missing: ' + (txt.match(/LN FNA[^\n]*/) || ['(none)'])[0]);
+  const fnaLine = (txt.match(/LN FNA[^\n]*/) || [''])[0];
+  assert(!fnaLine.includes('—') && !/carcinoma|benign|washout/i.test(fnaLine),
+    'current biopsy line must not carry a result: ' + fnaLine);
+});
+
+test('previous LN biopsy with date and results appears in the clinical section', async page => {
+  const txt = await page.evaluate(() => {
+    const c = getLN(1);
+    c.prevBiopsies = [{ year:'2024', month:'03', day:'15',
+      fna:true, fnaLevels:[3], fnaResult:'Metastatic carcinoma', tgWashout:'850',
+      cnb:true, cnbLevels:[3], cnbResult:'Metastatic papillary carcinoma' }];
+    setLN(1, c);
+    return buildReportText();
+  });
+  assert(txt.includes('Previous LN FNA (Right lateral level 3) [2024/03/15]: metastatic carcinoma, Tg washout 850 ng/mL.'),
+    'prev FNA line missing: ' + (txt.match(/Previous LN FNA[^\n]*/) || ['(none)'])[0]);
+  assert(txt.includes('Previous LN CNB (Right lateral level 3) [2024/03/15]: Metastatic papillary carcinoma.'),
+    'prev CNB line missing');
+  const header = txt.indexOf('Findings:');
+  assert(txt.indexOf('Previous LN FNA') < header, 'prev biopsy must appear before Findings');
+});
+
+test('a previous LN biopsy alone makes the LN study non-normal', async page => {
+  const r = await page.evaluate(() => {
+    const c = getLN(0);
+    c.prevBiopsies = [{ year:'2023', month:'01', day:'10', fna:true, fnaLevels:[2], fnaResult:'Benign', tgWashout:'', cnb:false, cnbLevels:[], cnbResult:'' }];
+    setLN(0, c);
+    return isLymphStudyEmpty();
+  });
+  assert(r === false, 'LN study with prior biopsy history must not count as empty/normal');
 });
 
 test('biopsy indication follows K-TIRADS size thresholds', async page => {
