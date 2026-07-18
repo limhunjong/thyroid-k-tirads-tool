@@ -1662,7 +1662,7 @@ body.light #right-panel.sheet-open #live-preview-pane {
   }
   .preview-header::before { display: none; }
   #right-panel.preview-open .preview-close-btn { display: flex !important; }
-  /* Hide FAB here; use the top-right 판독문 button to show/hide preview */
+  /* Hide FAB here; use the top-right Report button to show/hide preview */
   #preview-fab { display: none !important; }
 
   /* Show lobe tabs in the left panel (single-column nodule view) */
@@ -2260,10 +2260,10 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     Extrathyroidal Lesion
   </button>
   <div class="top-spacer"></div>
-  <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">판독문</button>
-  <button class="reset-all-btn" onclick="confirmResetAll()">전체 초기화</button>
-  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="현재 버전 다운로드 (Thyroid_K-TIRADS_ver0.85.html)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드 전환"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
+  <button class="report-btn" id="report-toggle-btn" onclick="toggleReportPreview()">Report</button>
+  <button class="reset-all-btn" onclick="confirmResetAll()">Reset All</button>
+  <button class="theme-toggle-btn" id="downloadVersionBtn" onclick="downloadCurrentVersion()" title="Download current version"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle dark/light mode"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button>
 </div>
 
 <div id="app-layout" style="margin-top: 52px;"><div id="left-panel">
@@ -2315,7 +2315,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     <!-- Section B: Thyroid Parenchyma -->
     <div class="table-card">
     <table class="data-table" id="parenchymaTable">
-      <thead><tr><th colspan="2" style="position:relative;">Thyroid Parenchyma<button class="section-reset-btn" onclick="resetThyroid()">갑상선 초기화</button></th></tr></thead>
+      <thead><tr><th colspan="2" style="position:relative;">Thyroid Parenchyma<button class="section-reset-btn" onclick="resetThyroid()">Reset Thyroid</button></th></tr></thead>
       <tbody>
         <tr>
           <td class="label-cell">Thyroid Size</td>
@@ -2447,7 +2447,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
         </svg>
       </div>
       <div class="diagram-hint">Click/drag zones to add &nbsp;·&nbsp; Drag marker freely &nbsp;·&nbsp; Click marker to edit &nbsp;·&nbsp; Tap ✕ to delete</div>
-      <div class="diagram-undo-bar" id="diagram-undo-bar"><span id="diagram-undo-msg">Nodule deleted.</span><button class="diagram-undo-btn" type="button" onclick="undoLastDiagramDelete()">복원</button></div>
+      <div class="diagram-undo-bar" id="diagram-undo-bar"><span id="diagram-undo-msg">Nodule deleted.</span><button class="diagram-undo-btn" type="button" onclick="undoLastDiagramDelete()">Undo</button></div>
     </div>
 
     <!-- Lobe tabs: visible on mobile only (CSS controlled) -->
@@ -2520,7 +2520,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
 
     <div class="table-card">
       <table class="data-table">
-        <thead><tr><th colspan="2" style="position:relative;">Operation Status<button class="section-reset-btn" onclick="resetPostop()">Postop 초기화</button></th></tr></thead>
+        <thead><tr><th colspan="2" style="position:relative;">Operation Status<button class="section-reset-btn" onclick="resetPostop()">Reset Postop</button></th></tr></thead>
         <tbody>
           <tr>
             <td class="label-cell required">Operation Type</td>
@@ -2556,8 +2556,8 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
     <div class="nodule-section-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <span>Postop Lesions</span>
       <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="section-reset-btn" onclick="resetPostopOpBeds()">Op bed 초기화</button>
-        <button class="section-reset-btn" onclick="resetPostopResidualNodules()">Residual 초기화</button>
+        <button class="section-reset-btn" onclick="resetPostopOpBeds()">Reset Op Bed</button>
+        <button class="section-reset-btn" onclick="resetPostopResidualNodules()">Reset Residual</button>
       </div>
     </div>
     <div class="nodule-section" id="postopResidualNoduleSection">
@@ -2580,7 +2580,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <div class="tab-content" id="tab-content-lymph">
     <div class="action-bar" style="justify-content:space-between;">
       <label class="action-quick-btn"><input type="checkbox" id="normalLymph" onchange="saveState()" style="display:none;"> Normal Lymph Node</label>
-      <button class="section-reset-btn" style="position:static;transform:none;" onclick="resetLymph()">경부 림프 초기화</button>
+      <button class="section-reset-btn" style="position:static;transform:none;" onclick="resetLymph()">Reset Lymph Node</button>
     </div>
     <div class="ln-table-wrap">
       <table class="ln-table" id="lnTable">
@@ -2616,7 +2616,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <!-- TAB 4: EXTRATHYROIDAL LESION -->
   <div class="tab-content" id="tab-content-extra">
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetExtra()">갑상선외 병변 초기화</button>
+      <button class="pink-btn" onclick="resetExtra()">Reset Extra-thyroidal</button>
     </div>
     <div class="table-card">
     <table class="data-table">
@@ -2631,7 +2631,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <!-- RFA TAB -->
   <div class="tab-content" id="tab-content-rfa">
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetRfa()">RFA 초기화</button>
+      <button class="pink-btn" onclick="resetRfa()">Reset RFA</button>
     </div>
 
     <!-- Clinical Info -->
@@ -2904,7 +2904,7 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
   <!-- ETHANOL SCLEROTHERAPY TAB -->
   <div class="tab-content" id="tab-content-ethanol">
     <div class="action-bar">
-      <button class="pink-btn" onclick="resetEthanol()">Ethanol 초기화</button>
+      <button class="pink-btn" onclick="resetEthanol()">Reset Ethanol</button>
     </div>
 
     <!-- Clinical Info -->
@@ -3207,7 +3207,7 @@ Biopsy recommendation</div>
 <!-- REPORT DIALOG -->
 <div class="dialog-overlay" id="reportDialog">
   <div class="dialog-box">
-    <div class="dialog-title">판독문 (Radiology Report)</div>
+    <div class="dialog-title">Report (Radiology Report)</div>
     <div class="dialog-body" id="reportContent"></div>
     <div class="dialog-actions">
       <span class="copy-feedback" id="copyFeedback"></span>
@@ -3231,11 +3231,11 @@ Biopsy recommendation</div>
 <!-- CONFIRM DIALOG -->
 <div class="dialog-overlay" id="confirmDialog">
   <div class="dialog-box">
-    <div class="dialog-title">전체 초기화</div>
-    <div class="dialog-body" style="font-family:inherit;font-size:15px;background:transparent;padding:0 0 4px;color:var(--label2);line-height:1.55;white-space:normal;">모든 입력 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</div>
+    <div class="dialog-title">Reset All</div>
+    <div class="dialog-body" style="font-family:inherit;font-size:15px;background:transparent;padding:0 0 4px;color:var(--label2);line-height:1.55;white-space:normal;">All input data will be deleted. This action cannot be undone.</div>
     <div class="dialog-actions">
-      <button class="blue-btn" onclick="closeDialog(&#39;confirmDialog&#39;)">취소</button>
-      <button class="pink-btn" onclick="doResetAll()">초기화</button>
+      <button class="blue-btn" onclick="closeDialog(&#39;confirmDialog&#39;)">Cancel</button>
+      <button class="pink-btn" onclick="doResetAll()">Reset</button>
     </div>
   </div>
 </div>
@@ -3263,7 +3263,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.89';
+const APP_VERSION = 'ver0.90';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -4108,7 +4108,7 @@ function buildNoduleTable(lobe, idx, nod) {
   }
 
   const delBtn = document.createElement('button');
-  delBtn.textContent = '✕ 삭제';
+  delBtn.textContent = '✕ Remove';
   delBtn.className = 'del-nodule-btn';
   delBtn.onclick = (e) => { e.stopPropagation(); removeNodule(lobe, idx); };
 
@@ -5860,7 +5860,7 @@ function buildPostopResidualNoduleTable(lobe, idx, nod) {
   const hin=document.createElement('div'); hin.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap';
   const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Nodule '+label+' <span style="color:var(--label2);font-weight:600;">('+anatomyLabel+')</span> &nbsp;<span class="tirads-display '+(info.tirads.includes('5')?'tirads-5':info.tirads.includes('4')?'tirads-4':info.tirads.includes('3')?'tirads-3':info.tirads.includes('2')?'tirads-2':'')+'">'+(info.tirads||'[K-TIRADS]')+'</span>'; tw.appendChild(main);
   if(info.risk){ const ri=document.createElement('div'); ri.className='tirads-risk-info'; ri.innerHTML='<span class="'+info.riskClass+'">'+info.risk+' malignancy</span> · '+info.threshold; tw.appendChild(ri); }
-  const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopResidualNodule(lobe,idx); hin.appendChild(tw); hin.appendChild(del); th.appendChild(hin); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead);
+  const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ Remove'; del.onclick=()=>removePostopResidualNodule(lobe,idx); hin.appendChild(tw); hin.appendChild(del); th.appendChild(hin); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead);
   const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
   addRow('Location *', mkPostopChecks([['locationUpper','Upper'],['locationMiddle','Middle'],['locationLower','Lower']], nod, ()=>updatePostopResidualNodule(lobe,idx,nod)), true);
   addRow('Diameter *', mkPostopDiameter(nod, ()=>updatePostopResidualNodule(lobe,idx,nod)), true);
@@ -5914,7 +5914,7 @@ function autoPostopOpBedImpression(les){
   }
 }
 function renderPostopOpBedCol(site){ const cont=document.getElementById('postop-opbed-'+site); if(!cont)return; cont.innerHTML=''; const list=ensurePostopState().opBedLesions[site]||[]; if(!list.length){ const e=document.createElement('div'); e.className='postop-section-empty'; e.textContent='No op bed lesion.'; cont.appendChild(e); } list.forEach((les,idx)=>cont.appendChild(buildPostopOpBedTable(site,idx,les))); }
-function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup()); const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ 삭제'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
+function buildPostopOpBedTable(site,idx,les){ autoPostopOpBedImpression(les); const anatomyLabel=getPostopLabelFor('opbed', site); const wrap=document.createElement('div'); wrap.className='nodule-item'; const table=document.createElement('table'); table.className='nodule-table-el'; table.appendChild(makeNoduleColgroup()); const thead=document.createElement('thead'); const hr=document.createElement('tr'); const th=document.createElement('th'); th.colSpan=2; th.className='nodule-th-el'; const hi=document.createElement('div'); hi.className='nodule-header-inner'; const tw=document.createElement('div'); tw.className='nodule-title-wrap'; const main=document.createElement('div'); main.className='nodule-title-main'; main.innerHTML='Lesion '+postopOpBedLabel(site, idx)+' <span style="color:var(--label2);font-weight:600;">at '+anatomyLabel+'</span> &nbsp;<span class="postop-impression-pill">'+les.impressionCategory+'</span>'; tw.appendChild(main); const del=document.createElement('button'); del.className='del-nodule-btn'; del.textContent='✕ Remove'; del.onclick=()=>removePostopOpBedLesion(site,idx); hi.appendChild(tw); hi.appendChild(del); th.appendChild(hi); hr.appendChild(th); thead.appendChild(hr); table.appendChild(thead); const tbody=document.createElement('tbody'); const addRow=(lab,cell,req)=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.className='nodule-label-cell'+(req?' required':''); td1.textContent=lab; const td2=document.createElement('td'); td2.className='nodule-data-cell'+(req?' required':''); td2.appendChild(cell); tr.appendChild(td1); tr.appendChild(td2); tbody.appendChild(tr); };
   addRow('Location', mkOpBedLocation(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Diameter', mkPostopDiameter(les,()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Shape /\nOrientation', mkPostopRadio('op_shape_ori_'+site+'_'+idx,['Parallel','Nonparallel / Taller-than-wide','Irregular shape'],les,'orientation',()=>updatePostopOpBedLesion(site,idx,les)), false); addRow('Margin', mkPostopRadio('op_margin_'+site+'_'+idx,['Smooth','Ill-defined','Irregular','Spiculated','Infiltrative'],les,'margin',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenicity', mkPostopRadio('op_echo_'+site+'_'+idx,['Marked hypoechoic','Mild hypoechoic','Isoechoic','Hyperechoic','Heterogeneous','Cystic / cystic change'],les,'echogenicity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Echogenic foci', mkPostopRadio('op_foci_'+site+'_'+idx,['None','Punctate echogenic foci','Macrocalcification','Rim calcification','Coarse calcification','Surgical clip / artifact suspected'],les,'echogenicFoci',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Vascularity', mkPostopRadio('op_vasc_'+site+'_'+idx,['None','Peripheral','Mild intralesional','Marked intralesional','Abnormal vascularity'],les,'vascularity',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Suspicious\nFeatures', mkPostopChecks([['suspPEF','Punctate echogenic foci'],['suspIrregular','Irregular or infiltrative margin'],['suspTaller','Nonparallel orientation'],['suspMarkedHypoechoic','Marked hypoechogenicity'],['suspAbnormalVascularity','Abnormal vascularity'],['suspGrowth','Interval growth'],['suspInvasion','Adjacent structure invasion']],les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Adjacent\nStructure\nInvasion', mkOpBedInvasion(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Size Change', mkOpBedSizeChange(site,idx,les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Biopsy/Procedure', mkOpBedBiopsy(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Impression\nCategory', mkOpBedImpression(les,()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Comment', mkTextarea(les,'comment',()=>updatePostopOpBedLesion(site,idx,les)),false); addRow('Recommendation', mkTextarea(les,'recommendation',()=>updatePostopOpBedLesion(site,idx,les)),false); const rr=document.createElement('tr'); const rc=document.createElement('td'); rc.colSpan=2; rc.className='nodule-reset-cell'; const rb=document.createElement('button'); rb.className='pink-btn'; rb.textContent='Reset this op bed lesion'; rb.onclick=()=>{ ensurePostopState().opBedLesions[site][idx]=defaultOpBedLesion(); saveState(); renderPostop(); }; rc.appendChild(rb); rr.appendChild(rc); tbody.appendChild(rr); table.appendChild(tbody); wrap.appendChild(table); return wrap; }
 function mkOpBedLocation(les,onch){ const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;gap:6px;'; const sel=document.createElement('select'); sel.style.cssText='width:100%;'; const opts=['','Right Op. Bed','Left Op. Bed','Isthmus Op. Bed','Central Neck / Thyroidectomy Bed','Strap muscle adjacent area','Tracheoesophageal groove','Paraesophageal area','Other']; opts.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o||'-- Select location --'; if(les.location===o) opt.selected=true; sel.appendChild(opt); }); sel.onchange=()=>{ les.location=sel.value; onch(); }; wrap.appendChild(sel); if(les.location==='Other'){ const i=mkTextInput(les,'locationOtherText',onch,'Other location','180px'); wrap.appendChild(i); } return wrap; }
 function mkOpBedTwoRadios(site,idx,les,k1,o1,k2,o2,onch){ const d=document.createElement('div'); d.style.cssText='display:flex;flex-direction:column;gap:6px;'; d.appendChild(mkPostopRadio('op_'+k1+'_'+site+'_'+idx,o1,les,k1,onch)); d.appendChild(mkPostopRadio('op_'+k2+'_'+site+'_'+idx,o2,les,k2,onch)); return d; }
@@ -6805,7 +6805,7 @@ function openPreviewSheet() {
   const fabLabel = document.getElementById('preview-fab-label');
   if (panel) panel.classList.add('sheet-open');
   if (backdrop) backdrop.classList.add('show');
-  if (fabLabel) fabLabel.textContent = '닫기';
+  if (fabLabel) fabLabel.textContent = 'Close';
   const btn = document.getElementById('report-toggle-btn');
   if (btn) btn.classList.add('active');
   updateLivePreview();
@@ -7408,8 +7408,8 @@ function showDiagramUndoBar() {
   const count = diagramDeletedNoduleHistory.length;
   if (msg) {
     msg.textContent = count > 1
-      ? `Nodule ${deleted.label} 삭제됨 · ${count}개 복원 가능`
-      : `Nodule ${deleted.label} 삭제됨`;
+      ? `Nodule ${deleted.label} deleted · ${count} undo available`
+      : `Nodule ${deleted.label} deleted`;
   }
   bar.classList.add('show');
 }
@@ -7756,7 +7756,7 @@ function downloadCurrentVersion() {
 }
 function initDownloadBtn() {
   const btn = document.getElementById('downloadVersionBtn');
-  if (btn) btn.title = '현재 버전 다운로드 (Thyroid_K-TIRADS_' + APP_VERSION + '.html)';
+  if (btn) btn.title = 'Download current version (' + APP_VERSION + ')';
 }
 
 // ==================== THEME TOGGLE ====================
