@@ -39,11 +39,41 @@ function test(name, fn) { tests.push({ name, fn }); }
 
 // ---------------------------------------------------------------- tests --
 
-test('empty study auto-reports normal thyroid and normal lymph nodes', async page => {
-  const txt = await page.evaluate(() => buildReportText());
-  assert(txt.includes('Normal thyroid'), 'missing "Normal thyroid"');
-  assert(txt.includes('No abnormal cervical lymph node') || txt.includes('Normal cervical lymph node'),
-    'missing normal LN wording');
+test('untouched study is NOT normal: placeholders shown and validation blocks', async page => {
+  const r = await page.evaluate(() => ({ txt: buildReportText(), errs: validateReport() }));
+  assert(!r.txt.includes('Normal thyroid'), 'unconfirmed empty study must not read as normal');
+  assert(r.txt.includes('[Not assessed'), 'missing not-assessed placeholder');
+  assert(r.errs.some(e => e.includes('Normal parenchyma')), 'missing parenchyma validation error');
+  assert(r.errs.some(e => e.includes('No thyroid nodule')), 'missing nodule validation error');
+  assert(r.errs.some(e => e.includes('No abnormal lymph node')), 'missing LN validation error');
+});
+
+test('explicitly confirmed empty study reports normal wording and passes validation', async page => {
+  const r = await page.evaluate(() => {
+    state.confirmNormalParenchyma = true;
+    state.confirmNoNodule = true;
+    state.confirmNormalLymph = true;
+    return { txt: buildReportText(), errs: validateReport() };
+  });
+  assert(r.txt.includes('Normal thyroid'), 'missing "Normal thyroid" after confirmation');
+  assert(r.txt.includes('No abnormal cervical lymph node') || r.txt.includes('Normal cervical lymph node'),
+    'missing normal LN wording after confirmation');
+  assert(r.errs.length === 0, 'confirmed study should pass validation: ' + JSON.stringify(r.errs));
+});
+
+test('entering findings auto-clears and disables the confirmation chip', async page => {
+  const r = await page.evaluate(() => {
+    state.confirmNoNodule = true;
+    state.nodules.right.push(defaultNodule());
+    saveState();               // triggers refreshConfirmChips
+    renderAll();
+    return {
+      cleared: state.confirmNoNodule === false,
+      disabled: document.getElementById('confirmNoNodule').disabled,
+    };
+  });
+  assert(r.cleared, 'confirm flag should auto-clear when a nodule exists');
+  assert(r.disabled, 'chip should be disabled when a nodule exists');
 });
 
 test('report header contains title and report date', async page => {
@@ -212,14 +242,17 @@ test('undo restores state after a section reset', async page => {
   assert(r.restored, 'undo did not restore');
 });
 
-test('new patient clears everything and report returns to normal wording', async page => {
-  const txt = await page.evaluate(() => {
+test('new patient clears everything including confirmations (back to not-assessed)', async page => {
+  const r = await page.evaluate(() => {
     state.nodules.left.push(defaultNodule());
     state.nodules.left[0].composition = 'Solid';
+    state.confirmNormalLymph = true;
     doNewPatient();
-    return buildReportText();
+    return { txt: buildReportText(), confirms: [state.confirmNormalParenchyma, state.confirmNoNodule, state.confirmNormalLymph] };
   });
-  assert(txt.includes('Normal thyroid'), 'new patient did not reset to normal report');
+  assert(!r.txt.includes('Normal thyroid'), 'new patient must not auto-report normal');
+  assert(r.txt.includes('[Not assessed'), 'new patient should return to not-assessed state');
+  assert(r.confirms.every(c => !c), 'confirmation chips must reset for a new patient');
 });
 
 // ------------------------------------------------------------- runner --
