@@ -551,15 +551,56 @@ input[type=text]:focus {
 input[type=text]:disabled {
   background: var(--fill4); color: var(--label4);
 }
-select {
+/* native select hidden — replaced by .csel */
+select.csel-hidden {
+  position: absolute; opacity: 0; pointer-events: none;
+  width: 1px; height: 1px; overflow: hidden;
+}
+/* fallback for any non-upgraded native select */
+select:not(.csel-hidden) {
   padding: 9px 11px; border: none; border-radius: var(--r-sm);
   min-height: var(--control-min-h); line-height: var(--control-line);
   font-size: var(--font-base); font-weight: 500; background: var(--fill3);
   cursor: pointer; color: var(--label1); font-family: inherit;
   transition: box-shadow 0.15s; text-align: center; text-align-last: center;
 }
-select option { background: var(--bg2); color: var(--label1); text-align: center; }
-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
+select:not(.csel-hidden) option { background: var(--bg2); color: var(--label1); }
+select:not(.csel-hidden):focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
+
+/* ===== CUSTOM SELECT (.csel) ===== */
+.csel {
+  position: relative; display: inline-flex; flex-direction: column;
+}
+.csel-btn {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 9px 14px; border: none; border-radius: var(--r-sm);
+  min-height: var(--control-min-h); line-height: var(--control-line);
+  font-size: var(--font-base); font-weight: 500; background: var(--fill3);
+  cursor: pointer; color: var(--label1); font-family: inherit;
+  transition: box-shadow 0.15s; width: 100%; text-align: center;
+  white-space: nowrap; box-sizing: border-box;
+}
+.csel-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
+.csel.open > .csel-btn { box-shadow: 0 0 0 3px rgba(10,132,255,0.45); border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.csel-arrow { font-size: 10px; opacity: 0.5; transition: transform 0.15s; flex-shrink: 0; }
+.csel.open .csel-arrow { transform: rotate(180deg); }
+.csel-list {
+  display: none; position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--bg2); border-radius: 0 0 var(--r-sm) var(--r-sm);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 9999; max-height: 240px; overflow-y: auto;
+  overscroll-behavior: contain; min-width: 100%;
+}
+.csel.open > .csel-list { display: block; }
+.csel-item {
+  padding: 10px 14px; text-align: center; cursor: pointer;
+  font-size: var(--font-base); font-weight: 500; color: var(--label2);
+  transition: background 0.1s; white-space: nowrap;
+}
+.csel-item:hover { background: var(--fill3); color: var(--label1); }
+.csel-item.csel-selected { background: var(--blue); color: #fff; font-weight: 700; }
+/* compact variant for date parts */
+.csel.date-select > .csel-btn { padding: 8px 10px; }
 textarea {
   padding: 11px 13px; border: none; border-radius: var(--r-sm);
   font-size: var(--font-base); line-height: 1.45; resize: vertical; font-family: inherit;
@@ -782,8 +823,7 @@ hr.section-sep { border: none; border-top: 0.5px solid rgba(84,84,88,0.3); margi
   cursor: pointer; color: var(--label1); font-family: inherit;
   transition: box-shadow 0.15s; text-align: center; text-align-last: center;
 }
-#compYear, .date-select[data-date-part="year"] { min-width: 78px; }
-#compMonth, #compDay,
+.date-select[data-date-part="year"] { min-width: 78px; }
 .date-select[data-date-part="month"],
 .date-select[data-date-part="day"] { min-width: 64px; }
 .date-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(10,132,255,0.45); }
@@ -3279,7 +3319,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.94';
+const APP_VERSION = 'ver0.95';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
@@ -3543,7 +3583,7 @@ function resetRfa() { state.rfa = {}; renderRfa(); saveState(); }
 
 function renderRfa() {
   const s = state.rfa || {};
-  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; cselMap[id]?.setValue(v || ''); };
   const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
   const setRadio = (name, v) => { document.querySelectorAll('input[name="'+name+'"]').forEach(r => r.checked = (r.value === v)); };
   setChk('rfaClinIndDefault', s.clinIndDefault !== false);
@@ -3642,7 +3682,7 @@ function resetEthanol() { state.ethanol = {}; renderEthanol(); saveState(); }
 
 function renderEthanol() {
   const s = state.ethanol || {};
-  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; cselMap[id]?.setValue(v || ''); };
   const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
   const setRadio = (name, v) => { document.querySelectorAll('input[name="'+name+'"]').forEach(r => r.checked = (r.value === v)); };
   setChk('ethanolClinIndDefault', s.clinIndDefault !== false);
@@ -3685,6 +3725,8 @@ function updateEthanolVRR() {
 
 // ==================== RENDER ====================
 function renderAll() {
+  // Upgrade static selects first (idempotent) so cselMap is ready for value setters
+  upgradeAllSelects();
   // Active tab
   switchTab(state.activeTab || 'thyroid');
 
@@ -3709,23 +3751,23 @@ function renderAll() {
       cnb: !!state.prevBxCNB, cnbPathDx: state.prevBxCNBPathDx||'' }];
   }
   renderPrevBiopsies();
-  document.getElementById('compYear').value = state.compYear;
-  document.getElementById('compMonth').value = state.compMonth;
-  document.getElementById('compDay').value = state.compDay;
+  document.getElementById('compYear').value = state.compYear; cselMap['compYear']?.setValue(state.compYear);
+  document.getElementById('compMonth').value = state.compMonth; cselMap['compMonth']?.setValue(state.compMonth);
+  document.getElementById('compDay').value = state.compDay; cselMap['compDay']?.setValue(state.compDay);
 
   // Thyroid size
   document.querySelectorAll('input[name="thySize"]').forEach(r => r.checked = (r.value === state.thySize));
   document.getElementById('sizeRightAP').value = state.sizeRightAP;
   document.getElementById('sizeRightT').value = state.sizeRightT;
   document.getElementById('sizeRightL').value = state.sizeRightL;
-  document.getElementById('sizeRightUnit').value = state.sizeRightUnit;
+  document.getElementById('sizeRightUnit').value = state.sizeRightUnit; cselMap['sizeRightUnit']?.setValue(state.sizeRightUnit);
   document.getElementById('sizeIsthmusAP').value = state.sizeIsthmusAP;
   document.getElementById('sizeIsthmusL').value = state.sizeIsthmusL;
-  document.getElementById('sizeIsthmusUnit').value = state.sizeIsthmusUnit;
+  document.getElementById('sizeIsthmusUnit').value = state.sizeIsthmusUnit; cselMap['sizeIsthmusUnit']?.setValue(state.sizeIsthmusUnit);
   document.getElementById('sizeLeftAP').value = state.sizeLeftAP;
   document.getElementById('sizeLeftT').value = state.sizeLeftT;
   document.getElementById('sizeLeftL').value = state.sizeLeftL;
-  document.getElementById('sizeLeftUnit').value = state.sizeLeftUnit;
+  document.getElementById('sizeLeftUnit').value = state.sizeLeftUnit; cselMap['sizeLeftUnit']?.setValue(state.sizeLeftUnit);
 
   // Parenchyma
   document.getElementById('diffuseDis').checked = state.diffuseDis;
@@ -3844,26 +3886,130 @@ function deletePrevBiopsy(i) {
   updateLivePreview();
 }
 
+// ===== CUSTOM SELECT (.csel) =====
+const cselMap = {};
+
+function makeCsel(placeholder, optsArr, currentVal, onChange, extraClass) {
+  const wrap = document.createElement('div');
+  wrap.className = 'csel' + (extraClass ? ' ' + extraClass : '');
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'csel-btn';
+
+  const label = document.createElement('span');
+  label.className = 'csel-label';
+  label.textContent = currentVal || placeholder;
+
+  const arrow = document.createElement('span');
+  arrow.className = 'csel-arrow';
+  arrow.textContent = '▼';
+
+  btn.appendChild(label);
+  btn.appendChild(arrow);
+
+  const list = document.createElement('div');
+  list.className = 'csel-list';
+
+  const defItem = document.createElement('div');
+  defItem.className = 'csel-item' + (!currentVal ? ' csel-selected' : '');
+  defItem.dataset.val = '';
+  defItem.textContent = placeholder;
+  list.appendChild(defItem);
+
+  optsArr.forEach(o => {
+    const item = document.createElement('div');
+    item.className = 'csel-item' + (o === currentVal ? ' csel-selected' : '');
+    item.dataset.val = o;
+    item.textContent = o;
+    list.appendChild(item);
+  });
+
+  wrap.appendChild(btn);
+  wrap.appendChild(list);
+
+  let _val = currentVal || '';
+
+  function selectVal(v) {
+    _val = v;
+    label.textContent = v || placeholder;
+    list.querySelectorAll('.csel-item').forEach(it => {
+      it.classList.toggle('csel-selected', it.dataset.val === v);
+    });
+    wrap.classList.remove('open');
+    onChange(v);
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = wrap.classList.contains('open');
+    document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) wrap.classList.add('open');
+  });
+
+  list.addEventListener('click', e => {
+    const item = e.target.closest('.csel-item');
+    if (item) { e.stopPropagation(); selectVal(item.dataset.val); }
+  });
+
+  wrap.getValue = () => _val;
+  wrap.setValue = v => {
+    _val = v || '';
+    label.textContent = _val || placeholder;
+    list.querySelectorAll('.csel-item').forEach(it => {
+      it.classList.toggle('csel-selected', it.dataset.val === _val);
+    });
+  };
+
+  return wrap;
+}
+
+function upgradeSelect(sel) {
+  if (!sel || sel.classList.contains('csel-upgraded')) return;
+  sel.classList.add('csel-upgraded', 'csel-hidden');
+  const id = sel.id;
+  const placeholder = sel.options[0] ? sel.options[0].textContent : '—';
+  const optsArr = Array.from(sel.options).slice(1).map(o => o.value).filter(Boolean);
+  const currentVal = sel.value;
+  const extraClass = sel.className.replace('csel-upgraded','').replace('csel-hidden','').trim();
+
+  const csel = makeCsel(placeholder, optsArr, currentVal, v => {
+    sel.value = v;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }, extraClass);
+
+  sel.parentNode.insertBefore(csel, sel);
+
+  if (id) {
+    cselMap[id] = csel;
+    // Patch getElementById().value setter via proxy isn't possible,
+    // but we expose cselMap[id].setValue() for render functions to call.
+  }
+}
+
+function upgradeAllSelects() {
+  document.querySelectorAll('select:not(.csel-hidden):not(.csel-upgraded)').forEach(upgradeSelect);
+}
+
+// Close open csel on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open'));
+});
+
 function makeDateSel(placeholder, options, val, onChange) {
-  const sel = document.createElement('select');
-  sel.className = 'date-select';
-  if (placeholder === 'Year') sel.dataset.datePart = 'year';
-  else if (placeholder === 'MM') sel.dataset.datePart = 'month';
-  else if (placeholder === 'DD') sel.dataset.datePart = 'day';
-  const def = document.createElement('option'); def.value = ''; def.textContent = placeholder; sel.appendChild(def);
-  options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === val) opt.selected = true; sel.appendChild(opt); });
-  sel.onchange = () => onChange(sel.value);
-  return sel;
+  const extraClass = 'date-select';
+  const csel = makeCsel(placeholder, options, val, onChange, extraClass);
+  if (placeholder === 'Year') csel.dataset.datePart = 'year';
+  else if (placeholder === 'MM') csel.dataset.datePart = 'month';
+  else if (placeholder === 'DD') csel.dataset.datePart = 'day';
+  return csel;
 }
 
 function makePathDxSel(options, val, onChange) {
-  const sel = document.createElement('select');
-  sel.className = 'biopsy-path-select';
-  sel.style.cssText = 'width:100%;max-width:100%;min-width:0;';
-  const def = document.createElement('option'); def.value = ''; def.textContent = '— Select —'; sel.appendChild(def);
-  options.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; if (o === val) opt.selected = true; sel.appendChild(opt); });
-  sel.onchange = () => onChange(sel.value);
-  return sel;
+  const optsArr = options;
+  const csel = makeCsel('— Select —', optsArr, val, onChange, 'biopsy-path-select');
+  csel.style.cssText = 'width:100%;max-width:100%;min-width:0;';
+  return csel;
 }
 
 function buildPrevBiopsyCard(bx, i) {
@@ -5024,9 +5170,9 @@ function renderPostop() {
   const pcid = document.getElementById('postopClinIndDefault'); if (pcid) pcid.checked = po.clinIndDefault !== false;
   const pci = document.getElementById('postopClinIndText'); if (pci) { pci.value = po.clinIndText || ''; pci.style.height='auto'; pci.style.height=pci.scrollHeight+'px'; }
   const pch = document.getElementById('postopClinHistory'); if (pch) { pch.value = po.clinHistory || ''; pch.style.height='auto'; pch.style.height=pch.scrollHeight+'px'; }
-  const pcy = document.getElementById('postopCompYear'); if (pcy) pcy.value = po.compYear || '';
-  const pcm = document.getElementById('postopCompMonth'); if (pcm) pcm.value = po.compMonth || '';
-  const pcd = document.getElementById('postopCompDay'); if (pcd) pcd.value = po.compDay || '';
+  const pcy = document.getElementById('postopCompYear'); if (pcy) pcy.value = po.compYear || ''; cselMap['postopCompYear']?.setValue(po.compYear || '');
+  const pcm = document.getElementById('postopCompMonth'); if (pcm) pcm.value = po.compMonth || ''; cselMap['postopCompMonth']?.setValue(po.compMonth || '');
+  const pcd = document.getElementById('postopCompDay'); if (pcd) pcd.value = po.compDay || ''; cselMap['postopCompDay']?.setValue(po.compDay || '');
   document.querySelectorAll('input[name="postopCompType"]').forEach(r => r.checked = (r.value === (po.compType || 'US')));
   const opTypes = po.operationTypes || (po.operationType ? [po.operationType, ...(po.withIsthmusectomy ? ['isthmusectomy'] : [])] : []);
   document.querySelectorAll('input[name="postopOperationType"]').forEach(chk => { chk.checked = opTypes.includes(chk.value); });
