@@ -61,6 +61,31 @@ test('explicitly confirmed empty study reports normal wording and passes validat
   assert(r.errs.length === 0, 'confirmed study should pass validation: ' + JSON.stringify(r.errs));
 });
 
+test('Normal Study button confirms all chips at once, only while study is empty', async page => {
+  const r = await page.evaluate(() => {
+    const out = {};
+    toggleNormalStudy();
+    out.allOn = state.confirmNormalParenchyma && state.confirmNoNodule && state.confirmNormalLymph;
+    out.reportNormal = buildReportText().includes('Normal thyroid');
+    out.btnActive = document.getElementById('normalStudyBtn').classList.contains('active');
+    toggleNormalStudy();   // toggles back off
+    out.allOff = !state.confirmNormalParenchyma && !state.confirmNoNodule && !state.confirmNormalLymph;
+    // with findings the button must be disabled and a no-op
+    state.nodules.right.push(defaultNodule());
+    saveState();
+    out.btnDisabled = document.getElementById('normalStudyBtn').disabled;
+    toggleNormalStudy();
+    out.stillOff = !state.confirmNormalParenchyma;
+    return out;
+  });
+  assert(r.allOn, 'one click should confirm all three');
+  assert(r.reportNormal, 'report should read normal after one-click confirm');
+  assert(r.btnActive, 'button should show active state');
+  assert(r.allOff, 'second click should unconfirm all three');
+  assert(r.btnDisabled, 'button must be disabled once findings exist');
+  assert(r.stillOff, 'disabled button must be a no-op');
+});
+
 test('entering findings auto-clears and disables the confirmation chip', async page => {
   const r = await page.evaluate(() => {
     state.confirmNoNodule = true;
