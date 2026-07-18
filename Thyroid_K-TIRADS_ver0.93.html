@@ -571,7 +571,8 @@ textarea:disabled { background: var(--fill4); color: var(--label4); }
 
 /* Center and size the compact clinical/dimension fields consistently */
 #clinIndText { width: 100%; }
-#clinIndText, #clinHistory, #postopClinIndText, #postopClinHistory { min-height: 64px; }
+#clinIndText, #clinHistory, #postopClinIndText, #postopClinHistory,
+#rfaClinIndText, #rfaClinHistory, #ethanolClinIndText, #ethanolClinHistory { min-height: 64px; }
 input[id^="sizeRight"],
 input[id^="sizeIsthmus"],
 input[id^="sizeLeft"] {
@@ -911,7 +912,7 @@ table.ln-table td.td-top { vertical-align: top; }
   vertical-align: top !important;
   padding-top: 14px !important;
 }
-/* radio-group: wrap, fit-content width */
+/* radio-group: wrap, fit-content width — keep all sizing identical to Thyroid Nodule tab */
 #tab-content-rfa .radio-group,
 #tab-content-ethanol .radio-group {
   flex-wrap: wrap;
@@ -921,12 +922,8 @@ table.ln-table td.td-top { vertical-align: top; }
 #tab-content-rfa .radio-group label,
 #tab-content-ethanol .radio-group label {
   min-width: unset;
-  min-height: unset;
-  white-space: nowrap;
-  text-align: left;
-  justify-content: flex-start;
-  padding: 7px 14px;
-  font-size: 15px;
+  /* deliberately NOT overriding min-height, padding, justify-content, font-size
+     so they inherit from .radio-group label base rule (44px height, 9px 18px padding, center) */
 }
 /* Volume result display */
 .vol-result {
@@ -2660,12 +2657,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">Clinical Indication</td>
             <td>
               <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="rfaClinIndDefault" onchange="saveRfaState()" checked> RFA follow-up</label></div>
-              <textarea id="rfaClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea>
+              <textarea id="rfaClinIndText" rows="3" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea>
             </td>
           </tr>
           <tr>
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">Clinical History</td>
-            <td><textarea id="rfaClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Benign thyroid nodule s/p RFA (2024/03)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td>
+            <td><textarea id="rfaClinHistory" rows="3" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Benign thyroid nodule s/p RFA (2024/03)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveRfaState()"></textarea></td>
           </tr>
           <tr>
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">US Comparison</td>
@@ -2933,12 +2930,12 @@ body.dark .postop-diagram-marker.opbed .marker-body { fill:#1c1109; }
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">Clinical Indication</td>
             <td>
               <div class="radio-group" style="margin-bottom:6px;"><label><input type="checkbox" id="ethanolClinIndDefault" onchange="saveEthanolState()" checked> Ethanol sclerotherapy follow-up</label></div>
-              <textarea id="ethanolClinIndText" rows="2" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea>
+              <textarea id="ethanolClinIndText" rows="3" placeholder="Additional info (optional)" style="display:block;width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea>
             </td>
           </tr>
           <tr>
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">Clinical History</td>
-            <td><textarea id="ethanolClinHistory" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Thyroid cyst s/p ethanol sclerotherapy (2024/06)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td>
+            <td><textarea id="ethanolClinHistory" rows="3" style="width:100%;box-sizing:border-box;resize:none;overflow-y:hidden;" placeholder="e.g. Thyroid cyst s/p ethanol sclerotherapy (2024/06)..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';saveEthanolState()"></textarea></td>
           </tr>
           <tr>
             <td class="label-cell" style="vertical-align:top;padding-top:16px;">US Comparison</td>
@@ -3280,7 +3277,7 @@ Biopsy recommendation</div>
 </div>
 
 <script>
-const APP_VERSION = 'ver0.92';
+const APP_VERSION = 'ver0.93';
 // ==================== HELPERS ====================
 function formatVolumeMl(ap, t, l) {
   if (!ap || !t || !l) return '';
