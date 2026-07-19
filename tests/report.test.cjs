@@ -313,6 +313,27 @@ test('biopsy indication follows K-TIRADS size thresholds', async page => {
   assert(r.k5small && r.k5small.indicated === false, 'K5 8mm should be below threshold');
 });
 
+test('below-threshold nodules get a follow-up interval badge and FU suggest chip', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    n.locationUpper = true;
+    n.composition = 'Solid'; n.echogenicity = 'Marked hypo'; n.calcification_micro = true; // K5
+    n.diamAP = '8'; n.diamUnit = 'mm';
+    renderNoduleCol('right');
+    const bi = getBiopsyIndication(n, false);
+    const chips = [...document.querySelectorAll('#nodules-right .preset-strip')].map(s => s.textContent);
+    const fuChip = [...document.querySelectorAll('#nodules-right .preset-chip')].find(b => b.textContent.startsWith('FU'));
+    fuChip.click();
+    return { badge: bi.text, fu: bi.fu, rec: state.nodules.right[0].recommendation,
+             intervals: { k4: getFollowUpInterval('[K-TIRADS 4]'), k3: getFollowUpInterval('[K-TIRADS 3]'), k2: getFollowUpInterval('[K-TIRADS 2]') } };
+  });
+  assert(r.badge.includes('FU 6–12 months'), 'K5 below-threshold badge missing FU interval: ' + r.badge);
+  assert(r.rec === 'Follow-up US in 6–12 months is recommended.', 'FU chip fill wrong: ' + r.rec);
+  assert(r.intervals.k4 === '12 months' && r.intervals.k3 === '12–24 months' && r.intervals.k2 === '24 months',
+    'interval table wrong: ' + JSON.stringify(r.intervals));
+});
+
 test('date combo inputs: keyboard entry, 8-digit smart split, pad and clamp', async page => {
   await page.click('#compYear');
   await page.keyboard.type('20240315');
