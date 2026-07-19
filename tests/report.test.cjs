@@ -467,11 +467,15 @@ test('LN neck diagram toggles levels per selected class', async page => {
   const r = await page.evaluate(() => {
     switchTab('lymph'); renderLymphTable();
     const boxes = document.querySelectorAll('#ln-diagram .lnd-box').length;
+    const press = () => {
+      document.querySelector('#ln-diagram .lnd-box').dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    };
     lnDiagClass = 'indet'; renderLnDiagram();
-    document.querySelector('#ln-diagram .lnd-box').dispatchEvent(new Event('click'));
+    press();
     const indetOn = getLN(0).level_1 === true;
     lnDiagClass = 'susp'; renderLnDiagram();
-    document.querySelector('#ln-diagram .lnd-box').dispatchEvent(new Event('click'));
+    press();
     const suspOn = getLN(1).level_1 === true;
     lnDiagClass = 'indet';
     switchTab('thyroid');
