@@ -279,20 +279,52 @@ test('location detail (posterior/medial) appears in report location text', async
   assert(txt === 'Middle, posterior medial aspect', 'unexpected location text: ' + txt);
 });
 
-test('Duplicate copies a nodule (minus diagram position) and respects the 3-nodule cap', async page => {
+test('Duplicate menu copies a nodule to any lobe (location cleared on lobe-type change)', async page => {
   const r = await page.evaluate(() => {
     state.nodules.right.push(defaultNodule());
     const n = state.nodules.right[0];
-    n.composition = 'Solid'; n.echogenicity = 'Iso'; n.diamAP = '9'; n.diagramX = 50; n.diagramY = 60;
+    n.composition = 'Solid'; n.echogenicity = 'Iso'; n.diamAP = '9';
+    n.locationUpper = true; n.diagramX = 50; n.diagramY = 60;
     renderNoduleCol('right');
     document.querySelector('#nodules-right .dup-nodule-btn').click();
-    const copy = state.nodules.right[1];
-    return { count: state.nodules.right.length, comp: copy && copy.composition,
-             noDiagram: copy && copy.diagramX === undefined };
+    const menu = document.getElementById('dup-menu');
+    const items = [...menu.querySelectorAll('button')].map(b => b.textContent);
+    [...menu.querySelectorAll('button')].find(b => b.textContent.includes('Left')).click();
+    const toLeft = state.nodules.left[state.nodules.left.length - 1];
+    document.querySelector('#nodules-right .dup-nodule-btn').click();
+    [...document.getElementById('dup-menu').querySelectorAll('button')]
+      .find(b => b.textContent.includes('Isthmus')).click();
+    const toIsthmus = state.nodules.isthmus[state.nodules.isthmus.length - 1];
+    return { items, leftComp: toLeft.composition, leftLoc: toLeft.locationUpper,
+             leftNoDiagram: toLeft.diagramX === undefined,
+             isthmusLocCleared: !toIsthmus.locationUpper };
   });
-  assert(r.count === 2, 'duplicate should add a second nodule');
-  assert(r.comp === 'Solid', 'duplicate should copy fields');
-  assert(r.noDiagram, 'duplicate must not copy the diagram marker position');
+  assert(r.items.length === 3, 'menu should offer all three lobes');
+  assert(r.leftComp === 'Solid' && r.leftLoc === true, 'lobe-to-lobe copy keeps fields and location');
+  assert(r.leftNoDiagram, 'copy must not carry the diagram marker');
+  assert(r.isthmusLocCleared, 'lobe-to-isthmus copy must clear location fields');
+});
+
+test('missing required fields highlight live and clear when filled', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    n.composition = 'Solid';        // content, but no location/diameter/echogenicity
+    renderNoduleCol('right');
+    const before = [...document.querySelectorAll('#nodules-right .req-missing')].map(e => e.textContent.trim());
+    n.locationUpper = true; n.diamAP = '12'; n.echogenicity = 'Iso';
+    renderNoduleCol('right');
+    const after = document.querySelectorAll('#nodules-right .req-missing').length;
+    state.nodules.left.push(defaultNodule());
+    renderNoduleCol('left');
+    const emptyNoise = document.querySelectorAll('#nodules-left .req-missing').length;
+    return { before, after, emptyNoise };
+  });
+  assert(r.before.some(x => x.startsWith('Location')), 'Location should be flagged');
+  assert(r.before.some(x => x.startsWith('Diameter')), 'Diameter should be flagged');
+  assert(r.before.some(x => x.startsWith('Echogenicity')), 'Echogenicity should be flagged');
+  assert(r.after === 0, 'flags should clear once filled');
+  assert(r.emptyNoise === 0, 'an untouched nodule must not be flagged');
 });
 
 test('biopsy indication follows K-TIRADS size thresholds', async page => {
