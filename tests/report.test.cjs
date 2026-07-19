@@ -505,6 +505,25 @@ test('report dialog is editable plain text', async page => {
   assert(attr === 'plaintext-only', 'report dialog should be contenteditable plaintext-only');
 });
 
+
+test('saved session survives a page reload (init must not overwrite storage before load)', async page => {
+  await page.evaluate(() => {
+    state.clinHistory = 'SURVIVE-ME';
+    state.nodules.right.push(defaultNodule());
+    state.nodules.right[0].composition = 'Solid';
+    saveState();
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(400);
+  const r = await page.evaluate(() => ({
+    hist: state.clinHistory,
+    nods: state.nodules.right.length,
+    stored: JSON.parse(localStorage.getItem('thyroidTool_v5')).clinHistory,
+  }));
+  assert(r.hist === 'SURVIVE-ME' && r.stored === 'SURVIVE-ME', 'state lost on reload: ' + JSON.stringify(r));
+  assert(r.nods === 1, 'nodule lost on reload');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
