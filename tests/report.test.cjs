@@ -313,6 +313,27 @@ test('biopsy indication follows K-TIRADS size thresholds', async page => {
   assert(r.k5small && r.k5small.indicated === false, 'K5 8mm should be below threshold');
 });
 
+test('date combo inputs: keyboard entry, 8-digit smart split, pad and clamp', async page => {
+  await page.click('#compYear');
+  await page.keyboard.type('20240315');
+  const r1 = await page.evaluate(() => ({ y: state.compYear, m: state.compMonth, d: state.compDay }));
+  assert(r1.y === '2024' && r1.m === '03' && r1.d === '15',
+    '8-digit smart split failed: ' + JSON.stringify(r1));
+  const r2 = await page.evaluate(() => {
+    const el = document.getElementById('compMonth');
+    el.value = '3'; el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('blur'));
+    const pad = state.compMonth;
+    el.value = '44'; el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('blur'));
+    const clamp = state.compMonth;
+    const yEl = document.getElementById('compYear');
+    yEl.value = 'ab2024'; yEl.dispatchEvent(new Event('input'));
+    return { pad, clamp, sanitized: yEl.value };
+  });
+  assert(r2.pad === '03', 'single digit should pad to 03: ' + r2.pad);
+  assert(r2.clamp === '12', 'month over 12 should clamp: ' + r2.clamp);
+  assert(r2.sanitized === '2024', 'non-digits should be stripped: ' + r2.sanitized);
+});
+
 test('undo restores state after a section reset', async page => {
   const r = await page.evaluate(() => {
     state.clinHistory = 'KEEP-ME'; saveState();
