@@ -366,6 +366,27 @@ test('below-threshold nodules get a follow-up interval badge and FU suggest chip
     'interval table wrong: ' + JSON.stringify(r.intervals));
 });
 
+test('thyroid lobe volumes: live badges and report size line with totals', async page => {
+  const r = await page.evaluate(() => {
+    const setIn = (id, v) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input')); };
+    setIn('sizeRightAP','4.5'); setIn('sizeRightT','1.5'); setIn('sizeRightL','1.6');
+    setIn('sizeLeftAP','4.2'); setIn('sizeLeftT','1.4'); setIn('sizeLeftL','1.5');
+    state.confirmNormalParenchyma = true; state.confirmNoNodule = true; state.confirmNormalLymph = true;
+    const txt = buildReportText();
+    return {
+      badge: document.getElementById('volRight').textContent,
+      total: document.getElementById('volTotal').textContent,
+      line: (txt.split('\n').find(l => l.includes('Thyroid size:')) || '').trim(),
+      normalKept: txt.includes('Normal thyroid'),
+    };
+  });
+  assert(r.badge === 'Vol 5.7 mL', 'right lobe badge wrong: ' + r.badge);
+  assert(r.total.includes('10.3 mL'), 'total volume wrong: ' + r.total);
+  assert(r.line.includes('right lobe 4.5×1.5×1.6 cm (5.7 mL)') && r.line.includes('total 10.3 mL'),
+    'report size line wrong: ' + r.line);
+  assert(r.normalKept, 'size measurements must not suppress normal wording');
+});
+
 test('date combo inputs: keyboard entry, 8-digit smart split, pad and clamp', async page => {
   await page.click('#compYear');
   await page.keyboard.type('20240315');
