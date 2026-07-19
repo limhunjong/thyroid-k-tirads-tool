@@ -286,12 +286,12 @@ test('Duplicate menu copies a nodule to any lobe (location cleared on lobe-type 
     n.composition = 'Solid'; n.echogenicity = 'Iso'; n.diamAP = '9';
     n.locationUpper = true; n.diagramX = 50; n.diagramY = 60;
     renderNoduleCol('right');
-    document.querySelector('#nodules-right .dup-nodule-btn').click();
+    [...document.querySelectorAll('#nodules-right .dup-nodule-btn')].find(b => b.textContent.includes('Duplicate')).click();
     const menu = document.getElementById('dup-menu');
     const items = [...menu.querySelectorAll('button')].map(b => b.textContent);
     [...menu.querySelectorAll('button')].find(b => b.textContent.includes('Left')).click();
     const toLeft = state.nodules.left[state.nodules.left.length - 1];
-    document.querySelector('#nodules-right .dup-nodule-btn').click();
+    [...document.querySelectorAll('#nodules-right .dup-nodule-btn')].find(b => b.textContent.includes('Duplicate')).click();
     [...document.getElementById('dup-menu').querySelectorAll('button')]
       .find(b => b.textContent.includes('Isthmus')).click();
     const toIsthmus = state.nodules.isthmus[state.nodules.isthmus.length - 1];
@@ -431,6 +431,74 @@ test('new patient clears everything including confirmations (back to not-assesse
   assert(!r.txt.includes('Normal thyroid'), 'new patient must not auto-report normal');
   assert(r.txt.includes('[Not assessed'), 'new patient should return to not-assessed state');
   assert(r.confirms.every(c => !c), 'confirmation chips must reset for a new patient');
+});
+
+
+test('user presets: add/remove persists in localStorage and applies to textarea', async page => {
+  const r = await page.evaluate(() => {
+    loadPresets();
+    const base = getPresets('clinInd').length;
+    addPresetItem('clinInd', 'My custom phrase');
+    const stored = JSON.parse(localStorage.getItem('thyroidTool_presets_v1')).clinInd.includes('My custom phrase');
+    const chips = [...document.querySelectorAll('#strip-clinInd .preset-chip')].map(b => b.textContent);
+    removePresetItem('clinInd', getPresets('clinInd').length - 1);
+    return { base, afterAdd: chips.includes('My custom phrase'), stored,
+             afterRemove: getPresets('clinInd').length === base };
+  });
+  assert(r.afterAdd, 'new preset chip should render');
+  assert(r.stored, 'preset should persist in localStorage');
+  assert(r.afterRemove, 'remove should restore original count');
+});
+
+test('validation errors carry jump anchors and render as clickable items', async page => {
+  const r = await page.evaluate(() => {
+    const errs = validateReportDetailed();
+    renderErrorList(errs);
+    const items = document.querySelectorAll('#errorContent .err-jump').length;
+    jumpToError(errs[0]);
+    return { n: errs.length, allAnchored: errs.every(e => e.tab && e.anchor), items };
+  });
+  assert(r.n >= 3, 'expected the three not-assessed errors');
+  assert(r.allAnchored, 'every error needs tab + anchor');
+  assert(r.items === r.n, 'error list items should be clickable divs');
+});
+
+test('LN neck diagram toggles levels per selected class', async page => {
+  const r = await page.evaluate(() => {
+    switchTab('lymph'); renderLymphTable();
+    const boxes = document.querySelectorAll('#ln-diagram .lnd-box').length;
+    lnDiagClass = 'indet'; renderLnDiagram();
+    document.querySelector('#ln-diagram .lnd-box').dispatchEvent(new Event('click'));
+    const indetOn = getLN(0).level_1 === true;
+    lnDiagClass = 'susp'; renderLnDiagram();
+    document.querySelector('#ln-diagram .lnd-box').dispatchEvent(new Event('click'));
+    const suspOn = getLN(1).level_1 === true;
+    lnDiagClass = 'indet';
+    switchTab('thyroid');
+    return { boxes, indetOn, suspOn };
+  });
+  assert(r.boxes === 14, 'expected 14 level boxes (5+2+2+5): ' + r.boxes);
+  assert(r.indetOn && r.suspOn, 'clicks should toggle the level in the selected class column');
+});
+
+test('nodule card collapses to header summary and expands back', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    renderNoduleCol('right');
+    const find = txt => [...document.querySelectorAll('#nodules-right .dup-nodule-btn')].find(b => b.textContent.includes(txt));
+    find('Collapse').click();
+    const collapsed = !document.querySelector('#nodules-right table tbody');
+    find('Expand').click();
+    const expanded = !!document.querySelector('#nodules-right table tbody');
+    return { collapsed, expanded };
+  });
+  assert(r.collapsed, 'collapse should remove the body');
+  assert(r.expanded, 'expand should restore the body');
+});
+
+test('report dialog is editable plain text', async page => {
+  const attr = await page.$eval('#reportContent', el => el.getAttribute('contenteditable'));
+  assert(attr === 'plaintext-only', 'report dialog should be contenteditable plaintext-only');
 });
 
 // ------------------------------------------------------------- runner --
