@@ -166,8 +166,8 @@ test('indeterminate columns expose only non-suspicious features', async page => 
     indet: lnFeaturesFor(0).map(f => f.key),
     susp: lnFeaturesFor(1).map(f => f.key),
   }));
-  assert(r.indet.join(',') === 'hilum,round', 'indeterminate features: ' + r.indet);
-  assert(r.susp.length === 6, 'suspicious column should list all 6 features');
+  assert(r.indet.join(',') === 'hilum,hilarvasc', 'indeterminate features: ' + r.indet);
+  assert(r.susp.length === 4, 'suspicious column should list the 4 suspicious-class features');
 });
 
 test('LN biopsy is gated on imaging-diagnosis levels', async page => {
