@@ -524,6 +524,43 @@ test('saved session survives a page reload (init must not overwrite storage befo
   assert(r.nods === 1, 'nodule lost on reload');
 });
 
+
+test('KeyTips: Alt shows badges, Alt+combo runs actions, context-aware', async page => {
+  await page.keyboard.down('Alt');
+  await page.waitForTimeout(120);
+  const badges = await page.evaluate(() => [...document.querySelectorAll('.keytip')].map(b => b.textContent));
+  await page.keyboard.up('Alt');
+  await page.waitForTimeout(80);
+  const gone = await page.evaluate(() => !document.getElementById('keytips'));
+  assert(badges.includes('Alt+R') && badges.includes('Alt+P'), 'badges missing: ' + badges);
+  assert(gone, 'badges must disappear on Alt release');
+  await page.keyboard.press('Alt+Digit2');
+  await page.waitForTimeout(100);
+  const tab = await page.evaluate(() => state.activeTab);
+  assert(tab === 'lymph', 'Alt+2 should switch to lymph: ' + tab);
+  await page.keyboard.press('Alt+KeyL');
+  await page.waitForTimeout(80);
+  const lnConfirm = await page.evaluate(() => state.confirmNormalLymph === true);
+  assert(lnConfirm, 'Alt+L should toggle the LN confirm chip');
+  await page.keyboard.press('Alt+Digit1');
+  await page.waitForTimeout(80);
+});
+
+test('exam date defaults to today and refills after resets', async page => {
+  const r = await page.evaluate(() => {
+    defaultExamDateToToday();
+    const n = new Date();
+    const today = state.examYear === String(n.getFullYear()) &&
+                  state.examMonth === String(n.getMonth() + 1).padStart(2, '0') &&
+                  state.examDay === String(n.getDate()).padStart(2, '0');
+    resetThyroid();
+    const afterReset = state.examYear !== '' && state.examMonth !== '';
+    return { today, afterReset };
+  });
+  assert(r.today, 'exam date should default to today');
+  assert(r.afterReset, 'exam date should refill after Reset Thyroid');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
