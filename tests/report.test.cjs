@@ -565,6 +565,28 @@ test('exam date defaults to today and refills after resets', async page => {
   assert(r.afterReset, 'exam date should refill after Reset Thyroid');
 });
 
+
+test('LN column highlight lights the hovered column across both tables', async page => {
+  const r = await page.evaluate(() => {
+    switchTab('lymph'); renderLymphTable();
+    const rows = [...document.getElementById('lnTableBody').rows].filter(r => r.cells.length > 2);
+    const nl = rows.find(r => r.cells[0].textContent.trim() === 'Neck Level');
+    nl.cells[3].dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    const hi = {
+      main: document.querySelectorAll('#lnTable td.col-hi').length,
+      bx: document.querySelectorAll('#lnBiopsyTable td.col-hi').length,
+      th: document.querySelectorAll('#lnTable thead th.col-hi').length,
+    };
+    document.getElementById('lnTable').dispatchEvent(new MouseEvent('mouseleave'));
+    const cleared = document.querySelectorAll('.col-hi').length === 0;
+    switchTab('thyroid');
+    return { ...hi, cleared };
+  });
+  assert(r.main > 0 && r.bx > 0, 'both tables should highlight the column: ' + JSON.stringify(r));
+  assert(r.th === 1, 'class header should highlight');
+  assert(r.cleared, 'highlight should clear on mouseleave');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
