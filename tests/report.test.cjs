@@ -369,6 +369,8 @@ test('below-threshold nodules get a follow-up interval badge and FU suggest chip
 test('thyroid lobe volumes: live badges and report size line with totals', async page => {
   const r = await page.evaluate(() => {
     const setIn = (id, v) => { const el = document.getElementById(id); el.value = v; el.dispatchEvent(new Event('input')); };
+    // default unit is now mm — pick cm explicitly for this case
+    ['sizeRightUnit','sizeLeftUnit'].forEach(id => { const s = document.getElementById(id); s.value = 'cm'; s.dispatchEvent(new Event('change')); });
     setIn('sizeRightAP','4.5'); setIn('sizeRightT','1.5'); setIn('sizeRightL','1.6');
     setIn('sizeLeftAP','4.2'); setIn('sizeLeftT','1.4'); setIn('sizeLeftL','1.5');
     state.confirmNormalParenchyma = true; state.confirmNoNodule = true; state.confirmNormalLymph = true;
