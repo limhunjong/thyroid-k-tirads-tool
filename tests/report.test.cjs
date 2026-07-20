@@ -531,9 +531,13 @@ test('KeyTips: Alt shows badges, Alt+combo runs actions, context-aware', async p
   const badges = await page.evaluate(() => [...document.querySelectorAll('.keytip')].map(b => b.textContent));
   await page.keyboard.up('Alt');
   await page.waitForTimeout(80);
-  const gone = await page.evaluate(() => !document.getElementById('keytips'));
+  const sticky = await page.evaluate(() => !!document.getElementById('keytips'));
   assert(badges.includes('Alt+R') && badges.includes('Alt+P'), 'badges missing: ' + badges);
-  assert(gone, 'badges must disappear on Alt release');
+  assert(sticky, 'pure Alt tap must keep badges (sticky mode)');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(60);
+  const gone = await page.evaluate(() => !document.getElementById('keytips'));
+  assert(gone, 'Escape must dismiss sticky badges');
   await page.keyboard.press('Alt+Digit2');
   await page.waitForTimeout(100);
   const tab = await page.evaluate(() => state.activeTab);
