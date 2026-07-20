@@ -589,6 +589,23 @@ test('LN column highlight lights the hovered column across both tables', async p
   assert(r.cleared, 'highlight should clear on mouseleave');
 });
 
+
+test('hotkey trap fixed: Esc closes a dialog even with an input focused; Alt+P works after', async page => {
+  await page.click('#clinHistory');
+  await page.keyboard.press('Alt+KeyA');
+  await page.waitForTimeout(100);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(80);
+  const closed = await page.evaluate(() => !document.getElementById('confirmDialog').classList.contains('show'));
+  assert(closed, 'Escape must close the dialog while an input is focused');
+  await page.keyboard.press('Alt+KeyP');
+  await page.waitForTimeout(100);
+  const p = await page.evaluate(() => state.confirmNormalParenchyma);
+  assert(p === true, 'Alt+P must work after the dialog is dismissed');
+  await page.keyboard.press('Alt+KeyP');
+  await page.waitForTimeout(60);
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
