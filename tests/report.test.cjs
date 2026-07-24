@@ -452,6 +452,44 @@ test('user presets: add/remove persists in localStorage and applies to textarea'
   assert(r.afterRemove, 'remove should restore original count');
 });
 
+test('preset chips toggle on/off: click adds text and highlights, click again removes it', async page => {
+  const r = await page.evaluate(() => {
+    const ta = document.getElementById('clinIndText');
+    ta.value = '';
+    renderStaticPresetStrips();
+    const chip = [...document.querySelectorAll('#strip-clinInd .preset-chip')]
+      .find(b => b.textContent === 'Palpable mass');
+    chip.click();
+    const afterFirst = { text: ta.value, active: chip.classList.contains('active') };
+    chip.click();
+    const afterSecond = { text: ta.value, active: chip.classList.contains('active') };
+    return { afterFirst, afterSecond };
+  });
+  assert(r.afterFirst.text === 'Palpable mass', 'first click should insert the phrase: ' + r.afterFirst.text);
+  assert(r.afterFirst.active === true, 'chip should be highlighted active after first click');
+  assert(r.afterSecond.text === '', 'second click should remove the phrase: ' + r.afterSecond.text);
+  assert(r.afterSecond.active === false, 'chip should lose active state after second click');
+});
+
+test('preset chip toggle removes only its own text, leaving the rest intact', async page => {
+  const r = await page.evaluate(() => {
+    const ta = document.getElementById('clinIndText');
+    ta.value = '';
+    renderStaticPresetStrips();
+    const chips = [...document.querySelectorAll('#strip-clinInd .preset-chip')];
+    const mass = chips.find(b => b.textContent === 'Palpable mass');
+    const screening = chips.find(b => b.textContent === 'Screening');
+    mass.click();
+    screening.click();
+    const afterBoth = ta.value;
+    mass.click(); // remove first one
+    const afterRemoveFirst = ta.value;
+    return { afterBoth, afterRemoveFirst };
+  });
+  assert(r.afterBoth === 'Palpable mass, Screening', 'both phrases should be joined: ' + r.afterBoth);
+  assert(r.afterRemoveFirst === 'Screening', 'removing the first phrase should leave the second intact: ' + r.afterRemoveFirst);
+});
+
 test('validation errors carry jump anchors and render as clickable items', async page => {
   const r = await page.evaluate(() => {
     const errs = validateReportDetailed();
