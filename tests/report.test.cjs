@@ -252,7 +252,7 @@ test('nodule card orders US features before Size Change and Biopsy', async page 
   assert(order.sc < order.comment, 'Size Change must come before Comment');
 });
 
-test('K-TIRADS rationale and not-gradable warning render in the card header', async page => {
+test('not-gradable warning renders in the card header until graded', async page => {
   const r = await page.evaluate(() => {
     state.nodules.right.push(defaultNodule());
     const n = state.nodules.right[0];
@@ -265,8 +265,7 @@ test('K-TIRADS rationale and not-gradable warning render in the card header', as
     return { hdr1, hdr2, errs: (() => { n.composition=''; n.echogenicity=''; return validateReport(); })() };
   });
   assert(r.hdr1.includes('not gradable'), 'missing not-gradable warning: ' + r.hdr1.slice(0, 120));
-  assert(r.hdr2.includes('solid') && r.hdr2.includes('punctate echogenic foci'),
-    'missing rationale: ' + r.hdr2.slice(0, 160));
+  assert(r.hdr2.includes('K-TIRADS 5'), 'missing computed grade once gradable: ' + r.hdr2.slice(0, 160));
   assert(r.errs.some(e => e.includes('K-TIRADS not gradable')), 'missing ungradable validation error');
 });
 
