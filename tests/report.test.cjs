@@ -489,6 +489,30 @@ test('preset chip toggle removes only its own text, leaving the rest intact', as
   assert(r.afterRemoveFirst === 'Screening', 'removing the first phrase should leave the second intact: ' + r.afterRemoveFirst);
 });
 
+test('extrathyroidal chips insert an editable report sentence, caret on first blank, appended per line', async page => {
+  const r = await page.evaluate(() => {
+    switchTab('extra');
+    const ta = document.getElementById('extraLesion');
+    ta.value = '';
+    renderStaticPresetStrips();
+    const labels = [...document.querySelectorAll('#strip-extra .preset-chip')].map(b => b.textContent);
+    const para = [...document.querySelectorAll('#strip-extra .preset-chip')].find(b => b.textContent === 'Parathyroid lesion');
+    para.click();
+    const afterFirst = { value: ta.value, caret: ta.selectionStart };
+    const sal = [...document.querySelectorAll('#strip-extra .preset-chip')].find(b => b.textContent === 'Salivary gland lesion');
+    sal.click();
+    const afterSecond = ta.value;
+    switchTab('thyroid');
+    return { labels, afterFirst, afterSecond, state: state.extraLesion };
+  });
+  assert(r.labels.includes('Parathyroid lesion') && !r.labels.some(l => l.includes('feeding')),
+    'chips should show short labels, not the full sentence: ' + JSON.stringify(r.labels));
+  assert(/suspected parathyroid lesion\.$/.test(r.afterFirst.value), 'full sentence should be inserted: ' + r.afterFirst.value);
+  assert(r.afterFirst.caret === 6, 'caret should sit in the first blank (after "About "): ' + r.afterFirst.caret);
+  assert(r.afterSecond.split('\n').length === 2, 'second chip should append on a new line: ' + JSON.stringify(r.afterSecond));
+  assert(r.state === r.afterSecond, 'state.extraLesion should stay in sync');
+});
+
 test('validation errors carry jump anchors and render as clickable items', async page => {
   const r = await page.evaluate(() => {
     const errs = validateReportDetailed();
