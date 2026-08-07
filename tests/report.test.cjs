@@ -672,6 +672,69 @@ test('hotkey trap fixed: Esc closes a dialog even with an input focused; Alt+P w
   await page.waitForTimeout(60);
 });
 
+
+test('research coding: Min.Cystic grades as solid; spongiform 3-state; echo N/A hidden from report', async page => {
+  const r = await page.evaluate(() => {
+    const n = defaultNodule();
+    n.composition = 'Min.Cystic'; n.echogenicity = 'Mild hypo'; n.calcification_micro = true;
+    const k5 = getKTIRADS(n, false);
+    n.calcification_micro = false; n.composition = 'P.Solid'; n.echogenicity = 'Iso';
+    n.spongiform = '\u226590%'; const k2 = getKTIRADS(n, false);
+    n.spongiform = '50\u201390%'; const partial = getKTIRADS(n, false);
+    state.nodules.right.push(defaultNodule());
+    const m = state.nodules.right[0];
+    m.locationUpper = true; m.diamAP = '12'; m.composition = 'Cystic'; m.echogenicity = 'N/A (cyst/calcified)';
+    const txt = buildReportText();
+    return { k5, k2, partial, cystGrade: getKTIRADS(m, false), leaked: txt.includes('N/A (cyst/calcified)') };
+  });
+  assert(r.k5.includes('5'), 'Min.Cystic + hypo + PEF must grade K-TIRADS 5: ' + r.k5);
+  assert(r.k2.includes('2'), 'spongiform >=90% must grade K-TIRADS 2: ' + r.k2);
+  assert(!r.partial.includes('2'), 'spongiform 50-90% must NOT grade K-TIRADS 2: ' + r.partial);
+  assert(r.cystGrade.includes('2'), 'cystic + N/A echo should still grade K-2');
+  assert(!r.leaked, 'N/A echogenicity label must not appear in the report');
+});
+
+test('patient demographics and coded risk factors persist; None is exclusive; none leak into report', async page => {
+  const r = await page.evaluate(() => {
+    state.patientName = '\ud64d\uae38\ub3d9'; state.patientAge = '58'; state.patientSex = 'F';
+    state.risk.fhx = true; state.risk.fhxCount = '2'; state.risk.pet = true;
+    renderRiskFactorRow();
+    // click None -> everything else clears
+    const chips = [...document.querySelectorAll('#riskFactorRow .inline-check-label')];
+    chips.find(l => l.textContent.trim() === 'None').querySelector('input').click();
+    const cleared = !state.risk.fhx && !state.risk.pet && state.risk.none && state.risk.fhxCount === '';
+    state.confirmNormalParenchyma = true; state.confirmNoNodule = true; state.confirmNormalLymph = true;
+    const txt = buildReportText();
+    return { cleared, leaked: /\ud64d\uae38\ub3d9|PET uptake|FHx/.test(txt) };
+  });
+  assert(r.cleared, 'None must clear all other risk factors');
+  assert(!r.leaked, 'patient name / risk factors must not appear in the report');
+});
+
+test('nodule research fields and OP record persist and never appear in the report', async page => {
+  const r = await page.evaluate(() => {
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    n.locationUpper = true; n.diamAP = '14'; n.composition = 'Solid'; n.echogenicity = 'Iso';
+    n.rs = { halo2: true, mvi: '2', mviPattern: '3', satellite: true, trabecular: true };
+    n.opDone = true; n.opWhoDx = 'Papillary thyroid carcinoma'; n.opFinalCat = '3'; n.opReport = 'full path text';
+    n.prevBiopsies = [{ year:'2024', month:'01', day:'10', fna:true, fnaPathDx:'VI (Malignant)', fnaReport:'FNA full text', cnb:false, cnbPathDx:'', cnbReport:'' }];
+    saveState();
+    const reloaded = JSON.parse(localStorage.getItem('thyroidTool_v5')).nodules.right[0];
+    const txt = buildReportText();
+    return {
+      rsKept: reloaded.rs && reloaded.rs.mvi === '2' && reloaded.rs.satellite === true,
+      opKept: reloaded.opDone && reloaded.opWhoDx === 'Papillary thyroid carcinoma' && reloaded.opFinalCat === '3',
+      bxRepKept: reloaded.prevBiopsies[0].fnaReport === 'FNA full text',
+      leaked: /Papillary thyroid carcinoma|full path text|FNA full text|satellite|spoke wheel/i.test(txt),
+    };
+  });
+  assert(r.rsKept, 'research fields must persist through save/load');
+  assert(r.opKept, 'OP record must persist');
+  assert(r.bxRepKept, 'prev-biopsy full path report must persist');
+  assert(!r.leaked, 'research/OP/path-report data must never leak into the report');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
