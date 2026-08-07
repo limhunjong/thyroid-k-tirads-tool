@@ -422,11 +422,11 @@ test('undo restores state after a section reset', async page => {
 });
 
 test('new patient clears everything including confirmations (back to not-assessed)', async page => {
-  const r = await page.evaluate(() => {
+  const r = await page.evaluate(async () => {
     state.nodules.left.push(defaultNodule());
     state.nodules.left[0].composition = 'Solid';
     state.confirmNormalLymph = true;
-    doNewPatient();
+    await doNewPatient();   // async: archives the study before clearing
     return { txt: buildReportText(), confirms: [state.confirmNormalParenchyma, state.confirmNoNodule, state.confirmNormalLymph] };
   });
   assert(!r.txt.includes('Normal thyroid'), 'new patient must not auto-report normal');
@@ -733,6 +733,110 @@ test('nodule research fields and OP record persist and never appear in the repor
   assert(r.opKept, 'OP record must persist');
   assert(r.bxRepKept, 'prev-biopsy full path report must persist');
   assert(!r.leaked, 'research/OP/path-report data must never leak into the report');
+});
+
+
+test('research CSV: 58 columns, coded values, oldest-first FNA slots, CSV escaping', async page => {
+  const r = await page.evaluate(() => {
+    state.examYear='2025'; state.examMonth='11'; state.examDay='01';
+    state.patientId='4321'; state.patientName='홍길동'; state.patientAge='28'; state.patientSex='M';
+    state.risk.fhx = true; state.risk.fhxCount = '2';
+    state.nodules.right.push(defaultNodule());
+    const n = state.nodules.right[0];
+    Object.assign(n, {
+      locationUpper: true, diamAP:'23', diamT:'18', diamL:'15', diamUnit:'mm',
+      composition:'Solid', echogenicity:'Mild hypo', margin:'Smooth', orientation:'Parallel',
+      calcification_micro: true, vascularity_peri: true, vascularity_mild: true,
+      rs: { mixedEcho:'Iso/hyper', pef1:true, pef2:true, ct3:true, halo2:true, mvi:'3', mviPattern:'2', satellite:true },
+      opDone:true, opYear:'2026', opMonth:'02', opDay:'03', opWhoDx:'PTC', opFinalCat:'3', opReport:'op path',
+    });
+    n.prevBiopsies = [
+      { year:'2025', month:'11', day:'01', fna:true, fnaPathDx:'II (Benign)', fnaReport:'benign', cnb:false, cnbPathDx:'', cnbReport:'' },
+      { year:'2024', month:'03', day:'15', fna:true, fnaPathDx:'VI (Malignant)', fnaReport:'has "quote", and\nnewline', cnb:false, cnbPathDx:'', cnbReport:'' },
+    ];
+    state.nodules.isthmus.push(defaultNodule());
+    state.nodules.isthmus[0].composition = 'Cystic';
+    const rows = buildResearchRows();
+    return { headerLen: RESEARCH_HEADERS.length, lens: rows.map(x => x.length), r0: rows[0], r1: rows[1],
+             line0: csvLine(rows[0]) };
+  });
+  assert(r.headerLen === 58, 'header must have 58 columns: ' + r.headerLen);
+  assert(r.lens.every(l => l === 58), 'every row must have 58 cells: ' + r.lens);
+  const g = (col) => { // A=0 ... BF=57
+    let n = 0; for (const ch of col) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return r.r0[n - 1];
+  };
+  assert(g('A') === '20251101', 'exam date: ' + g('A'));
+  assert(g('F') === '0', 'male must code 0: ' + g('F'));
+  assert(g('G') === 'R1', 'site number: ' + g('G'));
+  assert(g('H') === '23', 'size in mm: ' + g('H'));
+  assert(g('I') === '1(2명)', 'risk code with family count: ' + g('I'));
+  assert(g('K') === '1' && g('M') === '2' && g('N') === '3', 'composition/echo/mixed codes');
+  assert(g('Q') === '12', 'PEF multi-code: ' + g('Q'));
+  assert(g('U') === '2', 'halo >=50% -> 2: ' + g('U'));
+  assert(g('W') === '12', 'CDUS multi-code: ' + g('W'));
+  assert(g('AF') === '1', 'satellite flag: ' + g('AF'));
+  assert(g('AI') === '20240315' && g('AJ') === '6', 'FNA1 must be the oldest: ' + g('AI') + '/' + g('AJ'));
+  assert(g('AM') === '20251101' && g('AN') === '2', 'FNA2 must be the newer one');
+  assert(g('BC') === '20260203' && g('BF') === '3', 'OP date/category');
+  assert(r.r1[6] === 'IS1', 'isthmus site label: ' + r.r1[6]);
+  assert(r.line0.includes('"has ""quote"", and'), 'CSV must escape quotes: ' + r.line0.slice(0, 60));
+});
+
+test('research CSV: New Patient appends rows to the connected folder without repeating the header', async page => {
+  const r = await page.evaluate(async () => {
+    let fileText = '';
+    const fakeFile = { get size() { return new TextEncoder().encode(fileText).length; }, text: async () => fileText };
+    const fakeHandle = {
+      name: 'MockFolder',
+      queryPermission: async () => 'granted',
+      requestPermission: async () => 'granted',
+      getFileHandle: async () => ({
+        getFile: async () => fakeFile,
+        createWritable: async () => ({
+          write: async (op) => {
+            const enc = new TextEncoder();
+            const cur = enc.encode(fileText), add = enc.encode(op.data);
+            const merged = new Uint8Array(Math.max(cur.length, op.position) + add.length);
+            merged.set(cur, 0); merged.set(add, op.position);
+            fileText = new TextDecoder('utf-8', { ignoreBOM: true }).decode(merged);
+          },
+          close: async () => {},
+        }),
+      }),
+    };
+    const origIdbGet = window.idbGet;
+    window.idbGet = async (k) => (k === 'researchDir' ? fakeHandle : null);
+
+    state.patientId = 'P001'; state.patientName = 'A';
+    state.nodules.right.push(defaultNodule());
+    await doNewPatient();
+    const afterFirst = fileText.trim().split('\r\n').length;
+    const hadBom = fileText.charCodeAt(0) === 0xFEFF;
+
+    state.patientId = 'P002'; state.patientName = 'B';
+    state.nodules.right.push(defaultNodule());
+    state.nodules.left.push(defaultNodule());
+    await doNewPatient();
+    const lines = fileText.trim().split('\r\n');
+
+    const lenBefore = fileText.length;
+    await doNewPatient();               // empty form must not write
+    const emptyWrote = fileText.length !== lenBefore;
+
+    window.idbGet = origIdbGet;
+    return { afterFirst, hadBom, total: lines.length,
+             headers: lines.filter(l => l.includes('US EXAM DATE')).length,
+             ids: lines.slice(1).map(l => l.split(',')[2]),
+             emptyWrote, logged: researchLogCount() };
+  });
+  assert(r.hadBom, 'file must start with a UTF-8 BOM so Excel reads Korean correctly');
+  assert(r.afterFirst === 2, 'first save: header + 1 row, got ' + r.afterFirst);
+  assert(r.total === 4, 'second save appends 2 more rows, got ' + r.total);
+  assert(r.headers === 1, 'header must be written exactly once, got ' + r.headers);
+  assert(r.ids.join(',') === 'P001,P002,P002', 'row order/ids wrong: ' + r.ids);
+  assert(!r.emptyWrote, 'an empty form must not append a row');
+  assert(r.logged === 3, 'localStorage backup must mirror the rows: ' + r.logged);
 });
 
 // ------------------------------------------------------------- runner --
