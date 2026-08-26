@@ -1310,6 +1310,39 @@ test('chips share one weight: every option label is 600, selected 700', async pa
     'a selected chip must not get lighter: ' + r.selectedWeights.join(','));
 });
 
+test('prior report: the whole size chain is kept, not just the last measurement', async page => {
+  const r = await page.evaluate(sample => {
+    applyPriorReport(parsePriorReport(sample), { axisOrder: 'LTA' });
+    saveState(); renderAll();
+    const n = state.nodules.right[0];
+    // today's measurement, so the report prints a full chain
+    n.diamAP = '28'; n.diamT = '15'; n.diamL = '21'; n.sizeChangeType = 'Decreased';
+    saveState();
+    return {
+      history: n.sizeHistory,
+      prev: [n.prevAP, n.prevT, n.prevL],
+      r2history: state.nodules.right[1].sizeHistory,
+      line: buildReportText().split('\n').find(l => /R1:/.test(l)) || '',
+      persists: (() => {
+        renderAll();
+        const again = state.nodules.right[0];
+        return JSON.stringify(again.sizeHistory);
+      })(),
+    };
+  }, PRIOR_SAMPLE);
+
+  // chain was 1.7x1.2x2.5 -> 1.5x1.6x2.4 -> 2.3x1.6x3.1 -> 1.93x1.30x2.69 cm, read L x T x AP
+  assert(r.history.length === 3, 'the three earlier measurements must survive: ' + JSON.stringify(r.history));
+  assert(r.history[0].join(',') === '25,12,17', 'oldest entry wrong (stored AP,T,L): ' + r.history[0]);
+  assert(r.history[2].join(',') === '31,16,23', 'newest earlier entry wrong: ' + r.history[2]);
+  assert(r.prev.join(',') === '26.9,13,19.3', 'the last chain value still belongs in Prev: ' + r.prev);
+  assert(r.r2history.length === 0, 'a single-size nodule must not invent history: ' + JSON.stringify(r.r2history));
+
+  assert(/25×12×17 → 24×16×15 → 31×16×23 → 26.9×13×19.3 → 28×15×21 mm/.test(r.line),
+    'the report should read as one chain: ' + r.line);
+  assert(r.persists === JSON.stringify(r.history), 'history must survive a re-render: ' + r.persists);
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
