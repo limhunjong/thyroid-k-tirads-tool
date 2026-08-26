@@ -13,8 +13,11 @@
 ## 명령
 
 ```bash
-node tests/report.test.cjs    # 44개 회귀 테스트 — 수정 전후로 실행, 전부 통과해야 한다
+npm run setup    # 최초 1회 — playwright + chromium 설치
+npm test         # 44개 회귀 테스트 — 수정 전후로 실행, 전부 통과해야 한다
 ```
+
+앱 자체는 빌드가 필요 없다. `index.html`을 브라우저로 열면 그대로 동작한다.
 
 ## 버전 관리
 

@@ -13,10 +13,22 @@
 - 탭 3개만 유지: Thyroid Nodule / Lymph Node / Extrathyroidal Lesion
   (Postop·RFA·Ethanol은 ver1.0x에서 의도적으로 삭제했다. 되살리지 말 것)
 
+## 로컬 최초 설정
+
+```bash
+git clone https://github.com/limhunjong/thyroid-k-tirads-tool.git
+cd thyroid-k-tirads-tool
+git checkout claude/hopeful-faraday-4vtgl9
+npm run setup                   # playwright + chromium (테스트에만 필요)
+```
+
+필요한 것은 Node.js(18 이상)와 Python 3뿐이다. 앱 자체는 빌드가 필요 없다 —
+`index.html`을 브라우저로 열면 그대로 동작한다.
+
 ## 작업 전 반드시 실행
 
 ```bash
-node tests/report.test.cjs      # 44개 회귀 테스트, 전부 통과해야 정상
+npm test                        # 44개 회귀 테스트, 전부 통과해야 정상
 ```
 
 수정 후에도 다시 돌린다. 이 테스트는 "A를 고치니 B가 깨지는" 일이 반복돼서 만든 것이다.
@@ -59,10 +71,15 @@ LibreOffice도 고장나 있어(plain .txt조차 못 연다) 렌더 확인은 HT
 
 ```bash
 cd presentation
-python3 render_html.py                                  # build_deck.py 실행 + preview.html 생성
-NODE_PATH=/opt/node22/lib/node_modules node ../shot.js  # Chromium으로 장별 캡처 (스크립트는 직접 작성)
-python3 check_pptx.py KTIRADS_vibecoding.pptx           # 구조 검증, errors: 0 이어야 함
+python3 render_html.py                          # build_deck.py 실행 + preview.html 생성
+python3 check_pptx.py KTIRADS_vibecoding.pptx   # 구조 검증, errors: 0 이어야 함
 ```
+
+**로컬에서는 사정이 다르다.** `npm install pptxgenjs`와 LibreOffice 설치가 가능하므로,
+직접 만든 우회책(`pptxlite.py`, `render_html.py`, `check_pptx.py`)에 매일 필요가 없다.
+슬라이드를 크게 손볼 일이 생기면 pptxgenjs로 다시 쓰는 편이 낫다
+(`build_deck.js`가 그 방향으로 쓰다 만 초안이다). 문구만 고칠 거면 지금 구조 그대로가 빠르다.
+LibreOffice가 있으면 `soffice --headless --convert-to pdf` → `pdftoppm`으로 실제 렌더 검수가 된다.
 
 | 파일 | 역할 |
 |---|---|

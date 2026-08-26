@@ -7,3 +7,13 @@
 .vscode/
 .idea/
 data/
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+
+# Generated presentation preview
+presentation/preview.html
