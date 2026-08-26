@@ -999,6 +999,12 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
       klass: chips.map(c => c.className),
       pending, confirmed,
       notes: document.querySelectorAll('.confirm-note').length,
+      // caption stacked above the chip row, in both action bars
+      captionAbove: [...document.querySelectorAll('.confirm-bar')].map(bar => {
+        const note = bar.querySelector('.confirm-note').getBoundingClientRect();
+        const chips = bar.querySelector('.confirm-chips').getBoundingClientRect();
+        return note.bottom <= chips.top + 1;
+      }),
       // the risk-factor chips share the Quick-chip type scale
       risk: (() => { const l = document.querySelector('.risk-group label'); const s = getComputedStyle(l);
                      return [s.fontSize, s.fontWeight]; })(),
@@ -1011,8 +1017,34 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
   assert(r.pending.every(b => b === 'dashed'), 'unconfirmed gate must read as outstanding: ' + r.pending);
   assert(r.confirmed.every(b => b === 'solid'), 'confirmed gate must read as settled: ' + r.confirmed);
   assert(r.notes === 2, 'both action bars need the "required" caption, got ' + r.notes);
+  assert(r.captionAbove.every(Boolean),
+    'the caption must sit above its chips, not beside them: ' + JSON.stringify(r.captionAbove));
   assert(r.risk.join() === r.quick.join(),
     'risk chips and quick chips must share a type scale: ' + r.risk + ' vs ' + r.quick);
+});
+
+test('risk factor wording spells out what the chip and its count mean', async page => {
+  const r = await page.evaluate(() => {
+    state.risk.fhx = true;
+    renderRiskFactorRow();
+    const labels = RISK_FACTORS.map(f => f.label);
+    const unit = document.querySelector('#riskFactorRow .fhx-count-unit');
+    const input = document.querySelector('#riskFactorRow .fhx-count input');
+    return {
+      labels,
+      unitText: unit ? unit.textContent : null,
+      unitVisible: unit ? unit.getBoundingClientRect().width > 0 : false,
+      inputTitle: input ? input.title : null,
+    };
+  });
+  assert(r.labels.includes('FHx. thyroid cancer'), 'FHx. needs its period: ' + r.labels);
+  assert(r.labels.includes('Neck RT Hx.'), 'Hx. abbreviations must be punctuated alike: ' + r.labels);
+  assert(r.labels.includes('Hemithyroidectomy for cancer'),
+    'the hemithyroidectomy chip must say why it was done: ' + r.labels);
+  assert(!r.labels.some(l => /\(ca\)/.test(l)), 'the opaque "(ca)" wording should be gone: ' + r.labels);
+  assert(r.unitText === 'affected relatives' && r.unitVisible,
+    'the count needs its unit on screen, not only in a tooltip: ' + r.unitText);
+  assert(/thyroid cancer/i.test(r.inputTitle || ''), 'count tooltip should still spell it out: ' + r.inputTitle);
 });
 
 // ------------------------------------------------------------- runner --

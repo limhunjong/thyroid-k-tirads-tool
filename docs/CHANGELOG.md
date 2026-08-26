@@ -1,5 +1,18 @@
 # Changelog
 
+## ver2.0004
+
+- `REQUIRED FOR A NORMAL REPORT` 캡션을 확인 칩 **위로** 올려 세로로 쌓았다 (Thyroid·Lymph 두 탭 모두).
+  Lymph 탭의 `Reset Lymph Node` 버튼은 캡션이 아니라 칩 줄과 같은 높이에 오도록 맞췄다.
+- Risk Factor 문구를 뜻이 드러나게 고쳤다:
+  `FHx thyroid cancer` → `FHx. thyroid cancer`, `Neck RT Hx` → `Neck RT Hx.`,
+  `Hemithyroidectomy (ca)` → `Hemithyroidectomy for cancer`.
+- FHx 개수 입력칸이 `n` 하나뿐이라 툴팁을 봐야 뜻을 알 수 있던 것을, 옆에 `affected relatives`를
+  상시 표시하도록 바꿨다. 화면만 보고 "갑상선암 가족 2명"으로 읽힌다.
+- Risk 라벨은 UI 전용이라 판독문·연구 CSV(숫자 코드 사용)에는 영향이 없다.
+- 회귀 테스트 1개 추가 + 기존 게이트 테스트 확장 (51 → 52): 캡션이 칩보다 위에 있는지(경계 상자 비교),
+  라벨 문구와 단위 텍스트가 화면에 보이는지.
+
 ## ver2.0003
 
 - **정상 판독문을 여는 확인 3개(Normal parenchyma / No thyroid nodule / No abnormal lymph node)를
