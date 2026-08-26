@@ -5996,6 +5996,200 @@ document.addEventListener('keydown', e => {
   else if (e.key === '3') switchTab('extra');
 });
 
+// ==================== XLSX APPEND ENGINE (ver2.0005) ====================
+// Appends research rows to an existing .xlsx without any library.
+//
+// The sheet XML is spliced as text: new <row> elements go in immediately
+// before </sheetData> and nothing else in the package is rewritten. That is
+// deliberate — the research file carries column widths, a bold header, cell comments
+// and, most importantly, pathology columns the user fills in by hand later.
+// Re-generating the workbook would destroy all of it.
+
+// ---- CRC32 (needed for the zip central directory) ----
+let CRC32_TABLE = null;
+function crc32(bytes) {
+  if (!CRC32_TABLE) {
+    CRC32_TABLE = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      CRC32_TABLE[i] = c >>> 0;
+    }
+  }
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC32_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+async function streamBytes(bytes, stream) {
+  const blob = new Blob([bytes]);
+  const out = blob.stream().pipeThrough(stream);
+  return new Uint8Array(await new Response(out).arrayBuffer());
+}
+const inflateRaw = b => streamBytes(b, new DecompressionStream('deflate-raw'));
+const deflateRaw = b => streamBytes(b, new CompressionStream('deflate-raw'));
+
+// ---- zip reader: returns entries in their original order ----
+async function zipRead(bytes) {
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let eocd = -1;
+  for (let i = bytes.length - 22; i >= 0 && i >= bytes.length - 66000; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('not a zip file');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const entries = [];
+  for (let i = 0; i < count; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('bad central directory');
+    const method = dv.getUint16(p + 10, true);
+    const compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true);
+    const extraLen = dv.getUint16(p + 30, true);
+    const cmtLen = dv.getUint16(p + 32, true);
+    const local = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
+    const lNameLen = dv.getUint16(local + 26, true);
+    const lExtraLen = dv.getUint16(local + 28, true);
+    const dataStart = local + 30 + lNameLen + lExtraLen;
+    entries.push({ name, method, raw: bytes.subarray(dataStart, dataStart + compSize) });
+    p += 46 + nameLen + extraLen + cmtLen;
+  }
+  for (const e of entries) e.data = e.method === 8 ? await inflateRaw(e.raw) : e.raw;
+  return entries;
+}
+
+// ---- zip writer ----
+async function zipWrite(entries) {
+  const enc = new TextEncoder();
+  const parts = [], central = [];
+  let offset = 0;
+  for (const e of entries) {
+    const nameBytes = enc.encode(e.name);
+    const comp = await deflateRaw(e.data);
+    const crc = crc32(e.data);
+    const local = new Uint8Array(30 + nameBytes.length);
+    const ldv = new DataView(local.buffer);
+    ldv.setUint32(0, 0x04034b50, true);
+    ldv.setUint16(4, 20, true);          // version needed
+    ldv.setUint16(6, 0, true);           // flags
+    ldv.setUint16(8, 8, true);           // deflate
+    ldv.setUint32(14, crc, true);
+    ldv.setUint32(18, comp.length, true);
+    ldv.setUint32(22, e.data.length, true);
+    ldv.setUint16(26, nameBytes.length, true);
+    local.set(nameBytes, 30);
+    parts.push(local, comp);
+
+    const cen = new Uint8Array(46 + nameBytes.length);
+    const cdv = new DataView(cen.buffer);
+    cdv.setUint32(0, 0x02014b50, true);
+    cdv.setUint16(4, 20, true);
+    cdv.setUint16(6, 20, true);
+    cdv.setUint16(10, 8, true);
+    cdv.setUint32(16, crc, true);
+    cdv.setUint32(20, comp.length, true);
+    cdv.setUint32(24, e.data.length, true);
+    cdv.setUint16(28, nameBytes.length, true);
+    cdv.setUint32(42, offset, true);
+    cen.set(nameBytes, 46);
+    central.push(cen);
+    offset += local.length + comp.length;
+  }
+  const cenSize = central.reduce((n, c) => n + c.length, 0);
+  const end = new Uint8Array(22);
+  const edv = new DataView(end.buffer);
+  edv.setUint32(0, 0x06054b50, true);
+  edv.setUint16(8, entries.length, true);
+  edv.setUint16(10, entries.length, true);
+  edv.setUint32(12, cenSize, true);
+  edv.setUint32(16, offset, true);
+  const all = parts.concat(central, [end]);
+  const total = all.reduce((n, a) => n + a.length, 0);
+  const out = new Uint8Array(total);
+  let q = 0;
+  for (const a of all) { out.set(a, q); q += a.length; }
+  return out;
+}
+
+// ---- sheet XML helpers ----
+function xlsxCol(n) {                       // 1 -> A, 58 -> BF
+  let s = '';
+  while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = (n - 1 - r) / 26; }
+  return s;
+}
+function xmlEscape(v) {
+  return String(v).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+                  .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+}
+function xlsxLastRow(sheetXml) {
+  let last = 0, m;
+  const re = /<row[^>]*\sr="(\d+)"/g;
+  while ((m = re.exec(sheetXml))) last = Math.max(last, Number(m[1]));
+  return last;
+}
+function xlsxRowXml(values, rowIndex) {
+  const cells = values.map((v, i) => {
+    const ref = xlsxCol(i + 1) + rowIndex;
+    if (v === '' || v === null || v === undefined) return '';
+    // numeric cells stay numeric so Excel can sort and filter them
+    if (/^-?\d+(\.\d+)?$/.test(String(v).trim())) return `<c r="${ref}"><v>${String(v).trim()}</v></c>`;
+    return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xmlEscape(v)}</t></is></c>`;
+  }).join('');
+  return `<row r="${rowIndex}" spans="1:${values.length}">${cells}</row>`;
+}
+// Splice rows in without touching anything else in the sheet.
+function xlsxSpliceRows(sheetXml, rows) {
+  if (!rows.length) return sheetXml;
+  let xml = sheetXml.replace(/<sheetData\s*\/>/, '<sheetData></sheetData>');
+  const start = xlsxLastRow(xml) + 1;
+  const added = rows.map((r, i) => xlsxRowXml(r, start + i)).join('');
+  const close = xml.lastIndexOf('</sheetData>');
+  if (close < 0) throw new Error('no <sheetData> in worksheet');
+  xml = xml.slice(0, close) + added + xml.slice(close);
+  // keep <dimension> honest; Excel repairs it anyway, stale refs upset some readers
+  const lastRow = start + rows.length - 1;
+  const lastCol = xlsxCol(rows[0].length);
+  // Excel writes <dimension ref="A1:BF2"/>, openpyxl writes it with a space
+  // before the slash — match both rather than only the shape we happened to see.
+  xml = xml.replace(/(<dimension\b[^>]*\sref=")([A-Z]+\d+):[A-Z]+\d+(")/,
+    (mm, head, first, tail) => head + first + ':' + lastCol + lastRow + tail);
+  return xml;
+}
+
+// Resolve the first worksheet through workbook.xml.rels rather than assuming
+// sheet1.xml — the file we were given happens to match, others may not.
+function xlsxFirstSheetPath(entries) {
+  const byName = {};
+  entries.forEach(e => { byName[e.name] = e; });
+  const dec = e => new TextDecoder().decode(e.data);
+  const wb = byName['xl/workbook.xml'], rels = byName['xl/_rels/workbook.xml.rels'];
+  if (wb && rels) {
+    const sheet = dec(wb).match(/<sheet\b[^>]*r:id="([^"]+)"/);
+    if (sheet) {
+      const rel = dec(rels).match(new RegExp('<Relationship[^>]*Id="' + sheet[1] + '"[^>]*Target="([^"]+)"'));
+      if (rel) {
+        const target = rel[1].replace(/^\//, '').replace(/^xl\//, '');
+        const path = 'xl/' + target;
+        if (byName[path]) return path;
+      }
+    }
+  }
+  const any = entries.find(e => /^xl\/worksheets\/[^/]+\.xml$/.test(e.name));
+  if (!any) throw new Error('no worksheet found in the workbook');
+  return any.name;
+}
+
+// bytes in -> bytes out, with `rows` appended to the first worksheet
+async function xlsxAppend(bytes, rows) {
+  const entries = await zipRead(bytes);
+  const path = xlsxFirstSheetPath(entries);
+  const sheet = entries.find(e => e.name === path);
+  const xml = new TextDecoder().decode(sheet.data);
+  sheet.data = new TextEncoder().encode(xlsxSpliceRows(xml, rows));
+  return { bytes: await zipWrite(entries), sheet: path, addedAt: xlsxLastRow(xml) + 1 };
+}
+
 // ==================== PRIOR REPORT IMPORT (ver2.0001) ====================
 // Paste a previous report -> prefill the follow-up nodules, so only today's
 // measurements have to be typed.

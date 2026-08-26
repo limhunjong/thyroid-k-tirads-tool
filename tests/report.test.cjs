@@ -10,6 +10,8 @@
 // cover the report generation logic, gating rules, and UI wiring together.
 
 const path = require('path');
+const fs = require('fs');
+const zlib = require('zlib');
 
 function resolvePlaywright() {
   const candidates = [
@@ -36,6 +38,35 @@ async function launch(chromium) {
 
 const tests = [];
 function test(name, fn) { tests.push({ name, fn }); }
+
+
+// Minimal zip reader for asserting on what the page produced.
+function unzip(buf) {
+  let eocd = -1;
+  for (let i = buf.length - 22; i >= 0; i--) if (buf.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('output is not a zip');
+  const count = buf.readUInt16LE(eocd + 10);
+  let p = buf.readUInt32LE(eocd + 16);
+  const out = {};
+  for (let i = 0; i < count; i++) {
+    if (buf.readUInt32LE(p) !== 0x02014b50) throw new Error('bad central directory at entry ' + i);
+    const method = buf.readUInt16LE(p + 10);
+    const crc = buf.readUInt32LE(p + 16);
+    const compSize = buf.readUInt32LE(p + 20);
+    const nameLen = buf.readUInt16LE(p + 28);
+    const extraLen = buf.readUInt16LE(p + 30);
+    const cmtLen = buf.readUInt16LE(p + 32);
+    const local = buf.readUInt32LE(p + 42);
+    const name = buf.slice(p + 46, p + 46 + nameLen).toString('utf8');
+    const dataStart = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
+    const raw = buf.slice(dataStart, dataStart + compSize);
+    const data = method === 8 ? zlib.inflateRawSync(raw) : raw;
+    if (zlib.crc32 && zlib.crc32(data) !== crc) throw new Error('crc mismatch for ' + name);
+    out[name] = data;
+    p += 46 + nameLen + extraLen + cmtLen;
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------- tests --
 
@@ -1045,6 +1076,52 @@ test('risk factor wording spells out what the chip and its count mean', async pa
   assert(r.unitText === 'affected relatives' && r.unitVisible,
     'the count needs its unit on screen, not only in a tooltip: ' + r.unitText);
   assert(/thyroid cancer/i.test(r.inputTitle || ''), 'count tooltip should still spell it out: ' + r.inputTitle);
+});
+
+test('xlsx append: rows land in the sheet and the rest of the workbook survives', async page => {
+  const fixturePath = path.resolve(__dirname, 'fixtures', 'research_fixture.xlsx');
+  const before = unzip(fs.readFileSync(fixturePath));
+  const b64 = fs.readFileSync(fixturePath).toString('base64');
+
+  const res = await page.evaluate(async (input) => {
+    const bin = atob(input);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const out = await xlsxAppend(bytes, [
+      ['20260826', '5', '9001', 'Kim', 'R1', 'a & b <c>'],
+      ['20260826', '5', '9001', 'Kim', 'R2', ''],
+    ]);
+    let s = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < out.bytes.length; i += chunk) s += String.fromCharCode.apply(null, out.bytes.subarray(i, i + chunk));
+    return { b64: btoa(s), sheet: out.sheet, addedAt: out.addedAt };
+  }, b64);
+
+  const after = unzip(Buffer.from(res.b64, 'base64'));
+  assert(res.sheet === 'xl/worksheets/sheet1.xml', 'wrong worksheet resolved: ' + res.sheet);
+  assert(res.addedAt === 3, 'rows must start after the last existing row, got ' + res.addedAt);
+
+  // every part of the package is still there, and only the sheet changed
+  const names = Object.keys(before).sort();
+  assert(Object.keys(after).sort().join('|') === names.join('|'),
+    'zip entries lost: ' + Object.keys(after).sort().join(','));
+  const changed = names.filter(n => !before[n].equals(after[n]));
+  assert(changed.join(',') === 'xl/worksheets/sheet1.xml',
+    'only the worksheet may change, but these did: ' + changed.join(','));
+
+  const xml = after['xl/worksheets/sheet1.xml'].toString('utf8');
+  assert(xml.includes('<row r="3"') && xml.includes('<row r="4"'), 'appended rows missing');
+  assert(/<c r="A3"><v>20260826<\/v><\/c>/.test(xml), 'a numeric value must stay numeric: ' + xml.slice(0, 400));
+  assert(/<c r="E3"[^>]*t="inlineStr"><is><t[^>]*>R1</.test(xml), 'text value must be an inline string');
+  assert(xml.includes('a &amp; b &lt;c&gt;'), 'XML special characters must be escaped');
+  assert(!xml.includes('<c r="F4"'), 'an empty value should not emit a cell');
+  assert(xml.includes('dimension ref="A1:F4"'), 'dimension should follow the new last row');
+
+  // the hand-entered cell and the comment the user left are untouched
+  assert(xml.includes('kept by hand') || after['xl/sharedStrings.xml'],
+    'existing hand-entered data must survive');
+  assert(after['xl/comments/comment1.xml'].toString('utf8').includes('20251020'),
+    'cell comments must survive the round trip');
 });
 
 // ------------------------------------------------------------- runner --
