@@ -1207,8 +1207,8 @@ test('research workbook: rows go into the chosen .xlsx, previous version kept as
 // The type scale drifted to 20 sizes and 21 radii before ver2.0006 because
 // nothing stopped a raw px value from being added. These budgets may shrink
 // as the remaining odd values are folded into the scale — never grow.
-const RAW_FONT_SIZE_BUDGET = 13;
-const RAW_RADIUS_BUDGET = 16;
+const RAW_FONT_SIZE_BUDGET = 3;
+const RAW_RADIUS_BUDGET = 6;
 
 test('design tokens: sizes and radii come from the scale, raw values only shrink', async () => {
   const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
