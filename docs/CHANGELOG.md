@@ -1,5 +1,20 @@
 # Changelog
 
+## ver2.0001
+
+버전 번호를 여기서 다시 시작한다. ver1.52 다음은 ver1.53이 아니라 **ver2.0001**이고,
+이후로는 `ver2.0002`, `ver2.0003` … 처럼 소수 네 자리로 올린다.
+
+- Added **Prior Report** import: paste a previous report and the follow-up nodules are prefilled.
+- Parsed per nodule: side/label (R1, Lt., isthmus, or the section header above), location (upper/mid/lower), the **last** size in a `a -> b -> c` chain, composition, echogenicity, orientation, margin, calcifications, and comet tail artifact. Sizes convert cm to mm; axis order is selectable (L x T x AP by default).
+- Wrapped report lines are joined to the nodule line above them, so findings that spill onto a second line are not lost.
+- Negated features ("without microcalcification") are not imported.
+- Imported nodules are marked as Follow-up and only their **previous** size is filled — today's diameters stay empty on purpose, so an unmeasured nodule can never leave with last year's size.
+- The normal-study confirmations are never set by an import: wording such as "No abnormal lymph node" in the old report cannot confirm today's study (ver1.13 rule).
+- Every parsed item is shown for review before it is applied, unrecognised lines are listed instead of dropped, and Apply is undoable.
+- Regression tests: 44 -> 49.
+- 파일명 규칙 변경: `Thyroid_KTIRADS_verX.YYYY.html` (소수 네 자리).
+
 ## ver0.39
 
 - Restored the Thyroid diagram light-mode card background styling so the day-mode diagram no longer appears black.

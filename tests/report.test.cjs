@@ -839,6 +839,136 @@ test('research CSV: New Patient appends rows to the connected folder without rep
   assert(r.logged === 3, 'localStorage backup must mirror the rows: ' + r.logged);
 });
 
+// ---- prior report import (ver1.53) ----
+
+const PRIOR_SAMPLE = [
+  'CLINICAL INFORMATION:',
+  '1. 2022-05-13 Lt Thyroid lobectomy, isthmectomy and Rt tumorectomy',
+  '   Cellular adenomatoid nodule, Lt. 5.5cm, Rt. 2.2cm, isthmus. 2.9cm',
+  '',
+  'COMPARISON: 2025-02-18 USG',
+  '',
+  'FINDINGS:',
+  '1. s/p Left thyroidectomy and isthmectomy.',
+  '- No remarkable finding in the op. bed.',
+  '2. Right thyroid gland.',
+  '- R1: mid, 1.7x1.2x2.5 -> 1.5x1.6x2.4 -> 2.3x1.6x3.1 -> 1.93x1.30x2.69 cm (slightly decreased in size), predominantly cystic nodule with intracystic echogenic foci (comet tail artifact), low suspicion (K-TIRADS Category 3), probably benign.',
+  '- R2: lower, 1.59x1.12x1.60 cm, predominantly solid nodule without suspicious feature, low suspicion (K-TIRADS Category 3)',
+  '- Several benign looking cysts and nodules, less than 1.0 cm.',
+  '3. No abnormal lymph node in the both neck.',
+  '- No significant lymph node enlargement.',
+  '- No suspicious lymph node.',
+].join('\n');
+
+test('prior report: sample parses into two right nodules with previous sizes in mm', async page => {
+  const r = await page.evaluate(sample => {
+    const p = parsePriorReport(sample);
+    applyPriorReport(p, { axisOrder: 'LTA' });
+    const [n1, n2] = state.nodules.right;
+    return {
+      parsedCount: p.nodules.length,
+      labels: p.nodules.map(n => n.label),
+      comp: [state.compYear, state.compMonth, state.compDay, state.compType, state.compNoPrior],
+      right: state.nodules.right.length,
+      leftIsth: state.nodules.left.length + state.nodules.isthmus.length,
+      n1: n1 && { L: n1.prevL, T: n1.prevT, AP: n1.prevAP, comp: n1.composition,
+                  comet: n1.cometTailArtifact, mid: n1.locationMiddle, fu: n1.sizeChangeFU },
+      n2: n2 && { L: n2.prevL, T: n2.prevT, AP: n2.prevAP, comp: n2.composition, low: n2.locationLower },
+      history: p.nodules[0].history.length,
+    };
+  }, PRIOR_SAMPLE);
+  assert(r.parsedCount === 2, 'expected 2 nodules, got ' + r.parsedCount);
+  assert(r.labels.join(',') === 'R1,R2', 'labels wrong: ' + r.labels);
+  assert(r.right === 2 && r.leftIsth === 0, 'nodules landed in the wrong lobe');
+  assert(r.comp.join('|') === '2025|02|18|US|false', 'comparison date wrong: ' + r.comp.join('|'));
+  // last size of the chain only, cm -> mm, read as L x T x AP
+  assert(r.n1.L === '19.3' && r.n1.T === '13' && r.n1.AP === '26.9',
+    'R1 previous size wrong: ' + JSON.stringify(r.n1));
+  assert(r.history === 3, 'earlier sizes should be kept out of the import: ' + r.history);
+  assert(r.n1.comp === 'P.Cystic' && r.n1.comet === 'Yes' && r.n1.mid === true,
+    'R1 morphology wrong: ' + JSON.stringify(r.n1));
+  assert(r.n1.fu === true, 'imported nodule must be marked as follow-up so Prev size shows');
+  assert(r.n2.L === '15.9' && r.n2.T === '11.2' && r.n2.AP === '16',
+    'R2 previous size wrong: ' + JSON.stringify(r.n2));
+  assert(r.n2.comp === 'P.Solid' && r.n2.low === true, 'R2 morphology wrong: ' + JSON.stringify(r.n2));
+});
+
+test('prior report: today\'s diameters stay empty and validation still blocks', async page => {
+  const r = await page.evaluate(sample => {
+    applyPriorReport(parsePriorReport(sample), { axisOrder: 'LTA' });
+    saveState(); renderAll();
+    const n = state.nodules.right[0];
+    return {
+      diam: [n.diamAP, n.diamT, n.diamL, n.maxSize].join('|'),
+      sizeChangeType: n.sizeChangeType,
+      errs: validateReport(),
+      txt: buildReportText(),
+    };
+  }, PRIOR_SAMPLE);
+  assert(r.diam === '|||', "today's diameters must stay empty, got " + r.diam);
+  assert(r.sizeChangeType === '', 'interval change is today\'s call, not the old report\'s');
+  assert(r.errs.length > 0, 'a nodule without a measured size must still fail validation');
+  assert(!r.txt.includes('19.3'), 'the previous size must not be reported as this study\'s size');
+});
+
+test('prior report: normal-study confirmations are never set by an import', async page => {
+  const r = await page.evaluate(sample => {
+    applyPriorReport(parsePriorReport(sample), { axisOrder: 'LTA' });
+    saveState(); renderAll();
+    return {
+      par: state.confirmNormalParenchyma, nod: state.confirmNoNodule, ln: state.confirmNormalLymph,
+      normalTxt: buildReportText().includes('No abnormal cervical lymph node'),
+    };
+  }, PRIOR_SAMPLE);
+  assert(!r.par && !r.nod && !r.ln,
+    'an old report saying "no abnormal lymph node" must not confirm today\'s study');
+  assert(!r.normalTxt, 'imported wording must not produce a normal lymph node report');
+});
+
+test('prior report: outside-hospital wording and axis order option', async page => {
+  const r = await page.evaluate(() => {
+    const txt = [
+      'Right lobe',
+      '  Rt. mid portion 1.2 x 0.8 x 1.5 cm, solid, markedly hypoechoic, taller than wide,',
+      '  spiculated margin with microcalcifications.',
+      'Left thyroid gland',
+      '  L1 upper, 8.0x6.0x7.0 mm, isoechoic, smooth margin, no microcalcification.',
+    ].join('\n');
+    const p = parsePriorReport(txt);
+    applyPriorReport(p, { axisOrder: 'ATL' });
+    const rt = state.nodules.right[0], lt = state.nodules.left[0];
+    return {
+      counts: [state.nodules.right.length, state.nodules.left.length],
+      rt: { AP: rt.prevAP, T: rt.prevT, L: rt.prevL, comp: rt.composition, echo: rt.echogenicity,
+            ori: rt.orientation, margin: rt.margin, micro: rt.calcification_micro, mid: rt.locationMiddle },
+      lt: { AP: lt.prevAP, T: lt.prevT, L: lt.prevL, echo: lt.echogenicity, margin: lt.margin,
+            micro: lt.calcification_micro, up: lt.locationUpper },
+    };
+  });
+  assert(r.counts.join(',') === '1,1', 'one nodule per lobe expected, got ' + r.counts);
+  assert(r.rt.AP === '12' && r.rt.T === '8' && r.rt.L === '15',
+    'AP x T x L order not honoured: ' + JSON.stringify(r.rt));
+  assert(r.rt.comp === 'Solid' && r.rt.echo === 'Marked hypo', 'rt composition/echo: ' + JSON.stringify(r.rt));
+  assert(r.rt.ori === 'Nonparallel (taller-than-wide)' && r.rt.margin === 'Irregular (spiculated/microlobulated)',
+    'rt orientation/margin: ' + JSON.stringify(r.rt));
+  assert(r.rt.micro === true && r.rt.mid === true, 'rt calcification/location: ' + JSON.stringify(r.rt));
+  // mm stays mm; "no microcalcification" must not set the flag
+  assert(r.lt.AP === '8' && r.lt.T === '6' && r.lt.L === '7', 'mm sizes converted twice: ' + JSON.stringify(r.lt));
+  assert(r.lt.echo === 'Iso' && r.lt.margin === 'Smooth' && r.lt.up === true, 'lt fields: ' + JSON.stringify(r.lt));
+  assert(r.lt.micro === false, 'negated feature must not be imported: ' + JSON.stringify(r.lt));
+});
+
+test('prior report: unrecognised lines are surfaced, not dropped', async page => {
+  const r = await page.evaluate(sample => {
+    const p = parsePriorReport(sample);
+    return { unmapped: p.unmapped, empty: parsePriorReport('').nodules.length };
+  }, PRIOR_SAMPLE);
+  assert(r.empty === 0, 'empty text must parse to nothing');
+  assert(r.unmapped.some(l => /s\/p Left thyroidectomy/.test(l)), 'surgical history line must be surfaced');
+  assert(r.unmapped.some(l => /No abnormal lymph node/.test(l)), 'lymph node line must be surfaced');
+  assert(!r.unmapped.some(l => /^FINDINGS:?$/i.test(l)), 'pure section headers should not be listed');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }

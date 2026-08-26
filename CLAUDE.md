@@ -21,8 +21,15 @@ npm test         # 44개 회귀 테스트 — 수정 전후로 실행, 전부 �
 
 ## 버전 관리
 
-수정한 뒤 `versions/Thyroid_KTIRADS_verX.YZ.html`로 스냅샷을 남기고 `docs/CHANGELOG.md`에 추가한다.
-파일명 규칙은 `Thyroid_KTIRADS_verX.YZ` — `index`나 다른 형식을 쓰지 않는다.
+수정한 뒤 `Thyroid_KTIRADS_verX.YYYY.html`로 **저장소 루트에** 스냅샷을 남기고
+`docs/CHANGELOG.md`에 추가한다. (`versions/` 폴더에는 옛 ver0.x 계열만 있다.)
+
+버전 번호는 **ver2.0001에서 다시 시작했다.** 소수 네 자리를 쓰고 하나씩 올린다 —
+`ver2.0001` → `ver2.0002` → `ver2.0003`. ver1.53은 존재하지 않으니 되살리지 말 것.
+파일명 규칙은 `Thyroid_KTIRADS_verX.YYYY` — `index`나 다른 형식을 쓰지 않는다.
+
+`package.json`의 `version`은 semver라 네 자리를 못 쓴다. `ver2.0001` → `2.0.1`,
+`ver2.0012` → `2.0.12` 로 맞춘다.
 
 ## 작업 방식
 
