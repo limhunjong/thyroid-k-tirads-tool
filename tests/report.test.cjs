@@ -1223,6 +1223,10 @@ test('design tokens: sizes and radii come from the scale, raw values only shrink
     return out;
   };
   const sizes = raw('font-size', '--font-');
+  // heights are a per-breakpoint ladder now: --control-min-h and --h-chip
+  // (the lookbehind keeps line-height out of it)
+  const heights = raw('(?<![\\w-])(?:min-height|height)', '')
+    .filter(v => /^\d+(\.\d+)?px$/.test(v));
   const radii = raw('border-radius', '--r-');
 
   assert(sizes.length <= RAW_FONT_SIZE_BUDGET,
@@ -1231,6 +1235,10 @@ test('design tokens: sizes and radii come from the scale, raw values only shrink
   assert(radii.length <= RAW_RADIUS_BUDGET,
     'a raw border-radius was added — use the --r-* scale. Budget ' + RAW_RADIUS_BUDGET +
     ', found ' + radii.length + ': ' + [...new Set(radii)].join(', '));
+
+  assert(heights.length <= 54,
+    'a raw height was added — controls follow --control-min-h, chips --h-chip. Budget 54, found ' +
+    heights.length + ': ' + [...new Set(heights)].join(', '));
 
   assert(!html.includes('--font-base'), '--font-base duplicated --font-xl and is gone; do not bring it back');
   assert(!html.includes('ui-monospace'), 'there is one monospace stack now: var(--font-mono)');
