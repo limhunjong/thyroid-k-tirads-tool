@@ -1,5 +1,20 @@
 # Changelog
 
+## ver2.0017
+
+- **`REQUIRED FOR A NORMAL REPORT` 배너를 없애고, 확인 게이트를 각 섹션 헤더로 옮겼다.**
+  `Thyroid Parenchyma` 제목 옆에 `Normal parenchyma`, `Thyroid Nodule` 제목줄에 `No thyroid nodule`,
+  `Cervical Lymph Node` 제목줄에 `No abnormal lymph node`가 붙는다. 확인 대상 바로 옆에 컨트롤이 있다.
+- **Lymph 탭에 없던 섹션 제목이 생겼다** (`Cervical Lymph Node`). 배너 자리를 제목줄로 바꾸면서
+  `Reset Lymph Node`도 그 줄로 들어갔다.
+- 칩은 섹션 헤더에 맞게 작아졌다 (13px, padding 4×12) — 옆의 `Reset` 버튼과 같은 크기다.
+  주황 점선/초록 채움/흐림의 3단 상태 표시는 그대로다.
+- 스터디가 완전히 비었을 때 숨기는 규칙도 그대로다 (ver2.0010). Normal Study가 그 구간을 덮는다.
+- **회귀 하나를 잡았다.** `#parenchymaTable:has(input:disabled)`가 실질 섹션 전체를 흐리게 하는
+  규칙인데, 헤더에 들어간 확인 체크박스까지 잡아서 **소견을 입력하면 오히려 섹션이 통째로 회색**이
+  됐다. `tbody`로 범위를 좁혀 고쳤다. 확인해보니 이 규칙은 `normalThyroid`가 참일 때도 테이블 안의
+  입력이 비활성화되지 않아 **원래부터 한 번도 발동한 적이 없는 죽은 코드**였다 (ver2.0016에서도 동일).
+
 ## ver2.0016
 
 - **`↑↓` 버튼을 없앴다.** 순서 바꾸기는 드래그 핸들이 맡고, 행에는 드래그로 할 수 없는 두 가지

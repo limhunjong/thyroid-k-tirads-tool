@@ -1098,27 +1098,24 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
     return {
       klass: chips.map(c => c.className),
       pending, confirmed,
-      notes: document.querySelectorAll('.confirm-note').length,
+      // each gate sits in the header of the section it confirms
+      inSectionHeader: chips.map(c =>
+        !!(c.closest('#parenchymaTable thead') || c.closest('.nodule-section-title'))),
+      leftovers: document.querySelectorAll('.confirm-note, .confirm-bar, .confirm-chips').length,
       // hidden while Normal Study covers the whole study, back once it does not
       hiddenWhenEmpty: (() => {
         state.nodules.right.length = 0; state.confirmNoNodule = false;
         refreshConfirmChips();
-        return [...document.querySelectorAll('.confirm-bar')].every(b => b.classList.contains('is-hidden'));
+        return chips.every(c => c.classList.contains('is-hidden'));
       })(),
       shownWithFindings: (() => {
         state.nodules.right.push(defaultNodule());
         refreshConfirmChips();
-        const shown = [...document.querySelectorAll('.confirm-bar')].every(b => !b.classList.contains('is-hidden'));
+        const shown = chips.every(c => !c.classList.contains('is-hidden'));
         state.nodules.right.length = 0;
         refreshConfirmChips();
         return shown;
       })(),
-      // caption stacked above the chip row, in both action bars
-      captionAbove: [...document.querySelectorAll('.confirm-bar')].map(bar => {
-        const note = bar.querySelector('.confirm-note').getBoundingClientRect();
-        const chips = bar.querySelector('.confirm-chips').getBoundingClientRect();
-        return note.bottom <= chips.top + 1;
-      }),
       // the risk-factor chips share the Quick-chip type scale
       risk: (() => { const l = document.querySelector('.risk-group label'); const s = getComputedStyle(l);
                      return [s.fontSize, s.fontWeight]; })(),
@@ -1130,11 +1127,11 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
     'the three gates must carry their own class, got ' + JSON.stringify(r.klass));
   assert(r.pending.every(b => b === 'dashed'), 'unconfirmed gate must read as outstanding: ' + r.pending);
   assert(r.confirmed.every(b => b === 'solid'), 'confirmed gate must read as settled: ' + r.confirmed);
-  assert(r.notes === 2, 'both action bars need the "required" caption, got ' + r.notes);
+  assert(r.inSectionHeader.every(Boolean),
+    'each gate belongs in its own section header: ' + JSON.stringify(r.inSectionHeader));
+  assert(r.leftovers === 0, 'the standalone banner is gone, found ' + r.leftovers + ' leftovers');
   assert(r.hiddenWhenEmpty, 'an untouched study shows only Normal Study, not a second copy of it');
   assert(r.shownWithFindings, 'the gates must come back as soon as a finding exists');
-  assert(r.captionAbove.every(Boolean),
-    'the caption must sit above its chips, not beside them: ' + JSON.stringify(r.captionAbove));
   assert(r.risk.join() === r.quick.join(),
     'risk chips and quick chips must share a type scale: ' + r.risk + ' vs ' + r.quick);
 });
