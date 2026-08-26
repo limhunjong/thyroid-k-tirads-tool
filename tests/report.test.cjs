@@ -969,6 +969,24 @@ test('prior report: unrecognised lines are surfaced, not dropped', async page =>
   assert(!r.unmapped.some(l => /^FINDINGS:?$/i.test(l)), 'pure section headers should not be listed');
 });
 
+test('version string is single-sourced: tab title, button and download name agree', async page => {
+  const r = await page.evaluate(() => {
+    initDownloadBtn();
+    return {
+      v: APP_VERSION,
+      title: document.title,
+      btnTitle: document.getElementById('downloadVersionBtn').title,
+      // the snapshot files in the repo are Thyroid_KTIRADS_verX.YYYY.html
+      filename: 'Thyroid_KTIRADS_' + APP_VERSION + '.html',
+    };
+  });
+  assert(/^ver\d+\.\d{4}$/.test(r.v), 'version must read verX.YYYY, got ' + r.v);
+  assert(r.title.endsWith(r.v), 'tab title is on a different version: ' + r.title);
+  assert(r.btnTitle.includes(r.v), 'download button tooltip is stale: ' + r.btnTitle);
+  assert(r.filename === 'Thyroid_KTIRADS_' + r.v + '.html',
+    'download name must match the snapshot file naming: ' + r.filename);
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }

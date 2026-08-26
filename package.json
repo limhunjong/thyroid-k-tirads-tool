@@ -1,6 +1,6 @@
 {
   "name": "thyroid-k-tirads-tool",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "description": "Thyroid ultrasound reporting tool based on K-TIRADS 2021 — a single self-contained HTML file",
   "scripts": {

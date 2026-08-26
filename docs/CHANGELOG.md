@@ -1,5 +1,14 @@
 # Changelog
 
+## ver2.0002
+
+- 탭 제목이 `ver0.85`에 68개 버전 뒤처져 있던 것을 고쳤다. 제목은 이제 `APP_VERSION`에서
+  자동으로 만들어지므로 버전 문자열은 `APP_VERSION` 한 곳만 올리면 된다.
+- **Download current version 버튼이 없는 파일을 받으려 하던 버그 수정.** 파일명을
+  `Thyroid_K-TIRADS_verX.html`로 만들고 있었는데 실제 스냅샷은 `Thyroid_KTIRADS_verX.YYYY.html`이다.
+- `APP_VERSION`을 `ver1.52` → `ver2.0002`로 맞췄다.
+- 회귀 테스트 1개 추가 (49 → 50): 탭 제목·버튼 툴팁·다운로드 파일명이 모두 같은 버전을 가리키는지 검사.
+
 ## ver2.0001
 
 버전 번호를 여기서 다시 시작한다. ver1.52 다음은 ver1.53이 아니라 **ver2.0001**이고,
