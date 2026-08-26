@@ -1397,7 +1397,7 @@ test('prior report: the whole size chain is kept, not just the last measurement'
   assert(r.persists === JSON.stringify(r.history), 'history must survive a re-render: ' + r.persists);
 });
 
-test('earlier exams can be reordered and slotted in between', async page => {
+test('earlier exams can be slotted in between and removed', async page => {
   const r = await page.evaluate(() => {
     const n = defaultNodule();
     n.sizeChangeFU = true; n.diamUnit = 'mm';
@@ -1410,19 +1410,14 @@ test('earlier exams can be reordered and slotted in between', async page => {
       .reduce((acc, b) => { const k = b.title; (acc[k] = acc[k] || []).push(b); return acc; }, {});
     const out = {};
     let btns = rowsOf();
-    out.perRow = btns['Move earlier'].length;
-    out.firstUpDisabled = btns['Move earlier'][0].disabled;
-    out.lastDownDisabled = btns['Move later'][2].disabled;
+    out.perRow = btns['Insert a size after this one'].length;
+    out.noArrows = !btns['Move earlier'] && !btns['Move later'];   // the handle reorders now
 
-    btns['Move later'][0].click();                       // oldest moves one step later
-    out.afterMove = state.nodules.right[0].sizeHistory.map(h => h[0]).join(',');
-
-    btns = rowsOf();
-    btns['Insert a size after this one'][0].click();     // blank row lands in the middle
+    btns['Insert a size after this one'][1].click();     // blank row lands in the middle
     const hist = state.nodules.right[0].sizeHistory;
     out.afterInsert = hist.map(h => h[0] || '_').join(',');
 
-    hist[1] = ['66', '42', '58'];                        // fill the slot in
+    hist[2] = ['66', '42', '58'];                        // fill the new blank slot in
     state.nodules.right[0].sizeHistory = hist;
     saveState();
     out.chain = (calcSizeChangeInfo(state.nodules.right[0]).histStr || []).join(' > ');
@@ -1433,12 +1428,11 @@ test('earlier exams can be reordered and slotted in between', async page => {
     return out;
   });
   assert(r.perRow === 3, 'every row needs its own controls, got ' + r.perRow);
-  assert(r.firstUpDisabled && r.lastDownDisabled, 'the ends must not offer a move past them');
-  assert(r.afterMove === '64,68,68', 'move later did not reorder: ' + r.afterMove);
-  assert(r.afterInsert === '64,_,68,68', 'insert must land after the clicked row: ' + r.afterInsert);
-  assert(r.chain === '64×40×60 > 66×42×58 > 68×46×57 > 68×41×63',
+  assert(r.noArrows, 'reordering belongs to the drag handle, the arrows are gone');
+  assert(r.afterInsert === '68,64,_,68', 'insert must land after the clicked row: ' + r.afterInsert);
+  assert(r.chain === '68×46×57 > 64×40×60 > 66×42×58 > 68×41×63',
     'the report chain must follow the edited order: ' + r.chain);
-  assert(r.afterRemove === '64,68,68', 'remove took the wrong row: ' + r.afterRemove);
+  assert(r.afterRemove === '68,66,68', 'remove took the wrong row: ' + r.afterRemove);
 });
 
 test('earlier exams: dragging a handle reorders the chain', async page => {
