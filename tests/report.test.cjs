@@ -987,6 +987,34 @@ test('version string is single-sourced: tab title, button and download name agre
     'download name must match the snapshot file naming: ' + r.filename);
 });
 
+test('normal-report gates look like gates: pending is dashed, confirmed is filled', async page => {
+  const r = await page.evaluate(() => {
+    const ids = ['confirmNormalParenchyma', 'confirmNoNodule', 'confirmNormalLymph'];
+    const chips = ids.map(id => document.getElementById(id).parentElement);
+    const pending = chips.map(c => getComputedStyle(c).borderTopStyle);
+    ids.forEach(id => { state[id] = true; });
+    refreshConfirmChips();
+    const confirmed = chips.map(c => getComputedStyle(c).borderTopStyle);
+    return {
+      klass: chips.map(c => c.className),
+      pending, confirmed,
+      notes: document.querySelectorAll('.confirm-note').length,
+      // the risk-factor chips share the Quick-chip type scale
+      risk: (() => { const l = document.querySelector('.risk-group label'); const s = getComputedStyle(l);
+                     return [s.fontSize, s.fontWeight]; })(),
+      quick: (() => { const c = document.querySelector('#strip-clinInd .preset-chip'); const s = getComputedStyle(c);
+                      return [s.fontSize, s.fontWeight]; })(),
+    };
+  });
+  assert(r.klass.every(c => c.includes('confirm-chip')),
+    'the three gates must carry their own class, got ' + JSON.stringify(r.klass));
+  assert(r.pending.every(b => b === 'dashed'), 'unconfirmed gate must read as outstanding: ' + r.pending);
+  assert(r.confirmed.every(b => b === 'solid'), 'confirmed gate must read as settled: ' + r.confirmed);
+  assert(r.notes === 2, 'both action bars need the "required" caption, got ' + r.notes);
+  assert(r.risk.join() === r.quick.join(),
+    'risk chips and quick chips must share a type scale: ' + r.risk + ' vs ' + r.quick);
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
