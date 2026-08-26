@@ -163,18 +163,72 @@ test('follow-up size delta appears in the report finding line', async page => {
     'delta line missing/incorrect: ' + (txt.match(/increased[^\n]*/) || ['(none)'])[0]);
 });
 
-test('calcSizeChangeInfo flags significant growth (>=20% & >=2mm in >=2 diameters)', async page => {
+test('growth: 2015 ATA rule — >=20% & >=2mm in >=2 diameters, OR >=50% volume', async page => {
   const r = await page.evaluate(() => {
     const n = defaultNodule();
-    n.diamAP = '12'; n.diamT = '10'; n.diamL = '8'; n.diamUnit = 'mm';
-    n.prevAP = '9'; n.prevT = '8'; n.prevL = '7.5';
-    const sig = calcSizeChangeInfo(n).sig;   // AP +3(33%), T +2(25%) → 2 diameters
-    n.prevT = '9'; n.prevL = '7.9';
-    const notSig = calcSizeChangeInfo(n).sig; // only AP qualifies
-    return { sig, notSig };
+    n.diamUnit = 'mm';
+    const at = (ap, t, l, pap, pt, pl) => {
+      n.diamAP = ap; n.diamT = t; n.diamL = l;
+      n.prevAP = pap; n.prevT = pt; n.prevL = pl;
+      return calcSizeChangeInfo(n);
+    };
+    return {
+      // AP +3 (33%), T +2 (25%) -> two diameters qualify
+      twoDims: at('12','10','8','9','8','7.5'),
+      // only AP qualifies and the volume is well under +50%
+      oneDim: at('12','9','7.9','9','9','7.9'),
+      // every diameter is up only 15% and 1.5 mm, so the length rule fails,
+      // but 1.15^3 puts the volume up ~52%
+      volumeOnly: at('11.5','11.5','11.5','10','10','10'),
+      // mirror image: shrinkage
+      shrink: at('9','8','7.5','12','10','8'),
+    };
   });
-  assert(r.sig === true, 'expected significant growth flag');
-  assert(r.notSig === false, 'expected NOT significant with only one qualifying diameter');
+  assert(r.twoDims.sig === true && r.twoDims.auto === 'Increased',
+    'two qualifying diameters must read as growth: ' + JSON.stringify(r.twoDims));
+  assert(r.oneDim.sig === false && r.oneDim.auto === 'Stable',
+    'one diameter alone is not growth: ' + JSON.stringify(r.oneDim));
+  assert(r.volumeOnly.volPct >= 50 && r.volumeOnly.auto === 'Increased',
+    'the volume limb must stand on its own: ' + JSON.stringify(r.volumeOnly));
+  assert(r.shrink.auto === 'Decreased', 'the mirror rule must call shrinkage: ' + JSON.stringify(r.shrink));
+});
+
+test('interval change fills itself in, and a reader\'s own pick is never overwritten', async page => {
+  const r = await page.evaluate(() => {
+    const n = defaultNodule();
+    n.diamUnit = 'mm'; n.sizeChangeFU = true;
+    n.prevAP = '9'; n.prevT = '8'; n.prevL = '7.5';
+    n.diamAP = '12'; n.diamT = '10'; n.diamL = '8';
+    state.nodules.right.push(n);
+    updateNodule('right', 0, n);
+    const auto = n.sizeChangeType;
+
+    // the reader disagrees
+    n.sizeChangeType = 'Stable'; n.sizeChangeManual = true;
+    updateNodule('right', 0, n);
+    const afterManual = n.sizeChangeType;
+
+    // and the measurement changes again — their call still stands
+    n.diamAP = '20';
+    updateNodule('right', 0, n);
+    const afterRemeasure = n.sizeChangeType;
+
+    // clearing the pick hands control back to the calculation
+    n.sizeChangeType = ''; n.sizeChangeManual = false;
+    updateNodule('right', 0, n);
+    const backToAuto = n.sizeChangeType;
+
+    // an initial study has nothing to compare against
+    const m = defaultNodule();
+    m.sizeChangeInitial = true; m.diamAP = '12';
+    updateNodule('right', 0, m);
+    return { auto, afterManual, afterRemeasure, backToAuto, initial: m.sizeChangeType };
+  });
+  assert(r.auto === 'Increased', 'measurements alone should decide: ' + r.auto);
+  assert(r.afterManual === 'Stable', 'a manual pick must survive the next update: ' + r.afterManual);
+  assert(r.afterRemeasure === 'Stable', 'remeasuring must not overwrite the reader: ' + r.afterRemeasure);
+  assert(r.backToAuto === 'Increased', 'clearing the pick should hand control back: ' + r.backToAuto);
+  assert(r.initial === '', 'an initial study has no interval change: ' + r.initial);
 });
 
 test('LN entry includes checked levels and per-level feature tags', async page => {
