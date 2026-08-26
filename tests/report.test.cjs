@@ -631,12 +631,25 @@ test('KeyTips: Alt shows badges, Alt+combo runs actions, context-aware', async p
   await page.keyboard.up('Alt');
   await page.waitForTimeout(80);
   const sticky = await page.evaluate(() => !!document.getElementById('keytips'));
-  assert(badges.includes('Alt+R') && badges.includes('Alt+P'), 'badges missing: ' + badges);
+  assert(badges.includes('Alt+R') && badges.includes('Alt+M'), 'badges missing: ' + badges);
+  // while the study is untouched the per-section gates are hidden, so their
+  // shortcuts are hidden with them — Alt+M (Normal Study) is the one control
+  assert(!badges.includes('Alt+P'), 'a hidden gate must not advertise a shortcut: ' + badges);
   assert(sticky, 'pure Alt tap must keep badges (sticky mode)');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(60);
   const gone = await page.evaluate(() => !document.getElementById('keytips'));
   assert(gone, 'Escape must dismiss sticky badges');
+
+  // a finding brings the gates back, shortcuts included
+  await page.evaluate(() => { state.nodules.right.push(defaultNodule()); saveState(); renderAll(); });
+  await page.keyboard.down('Alt');
+  await page.waitForTimeout(120);
+  const badges2 = await page.evaluate(() => [...document.querySelectorAll('.keytip')].map(b => b.textContent));
+  await page.keyboard.up('Alt');
+  await page.keyboard.press('Escape');
+  assert(badges2.includes('Alt+P'), 'Alt+P must come back once a finding exists: ' + badges2);
+
   await page.keyboard.press('Alt+Digit2');
   await page.waitForTimeout(100);
   const tab = await page.evaluate(() => state.activeTab);
@@ -687,7 +700,7 @@ test('LN column highlight lights the hovered column across both tables', async p
 });
 
 
-test('hotkey trap fixed: Esc closes a dialog even with an input focused; Alt+P works after', async page => {
+test('hotkey trap fixed: Esc closes a dialog even with an input focused; Alt+M works after', async page => {
   await page.click('#clinHistory');
   await page.keyboard.press('Alt+KeyA');
   await page.waitForTimeout(100);
@@ -695,11 +708,13 @@ test('hotkey trap fixed: Esc closes a dialog even with an input focused; Alt+P w
   await page.waitForTimeout(80);
   const closed = await page.evaluate(() => !document.getElementById('confirmDialog').classList.contains('show'));
   assert(closed, 'Escape must close the dialog while an input is focused');
-  await page.keyboard.press('Alt+KeyP');
+  // Alt+M (Normal Study) is the shortcut that applies to an untouched study;
+  // the per-section gates are hidden until a finding exists.
+  await page.keyboard.press('Alt+KeyM');
   await page.waitForTimeout(100);
   const p = await page.evaluate(() => state.confirmNormalParenchyma);
-  assert(p === true, 'Alt+P must work after the dialog is dismissed');
-  await page.keyboard.press('Alt+KeyP');
+  assert(p === true, 'Alt+M must work after the dialog is dismissed');
+  await page.keyboard.press('Alt+KeyM');
   await page.waitForTimeout(60);
 });
 
@@ -1030,6 +1045,20 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
       klass: chips.map(c => c.className),
       pending, confirmed,
       notes: document.querySelectorAll('.confirm-note').length,
+      // hidden while Normal Study covers the whole study, back once it does not
+      hiddenWhenEmpty: (() => {
+        state.nodules.right.length = 0; state.confirmNoNodule = false;
+        refreshConfirmChips();
+        return [...document.querySelectorAll('.confirm-bar')].every(b => b.classList.contains('is-hidden'));
+      })(),
+      shownWithFindings: (() => {
+        state.nodules.right.push(defaultNodule());
+        refreshConfirmChips();
+        const shown = [...document.querySelectorAll('.confirm-bar')].every(b => !b.classList.contains('is-hidden'));
+        state.nodules.right.length = 0;
+        refreshConfirmChips();
+        return shown;
+      })(),
       // caption stacked above the chip row, in both action bars
       captionAbove: [...document.querySelectorAll('.confirm-bar')].map(bar => {
         const note = bar.querySelector('.confirm-note').getBoundingClientRect();
@@ -1048,6 +1077,8 @@ test('normal-report gates look like gates: pending is dashed, confirmed is fille
   assert(r.pending.every(b => b === 'dashed'), 'unconfirmed gate must read as outstanding: ' + r.pending);
   assert(r.confirmed.every(b => b === 'solid'), 'confirmed gate must read as settled: ' + r.confirmed);
   assert(r.notes === 2, 'both action bars need the "required" caption, got ' + r.notes);
+  assert(r.hiddenWhenEmpty, 'an untouched study shows only Normal Study, not a second copy of it');
+  assert(r.shownWithFindings, 'the gates must come back as soon as a finding exists');
   assert(r.captionAbove.every(Boolean),
     'the caption must sit above its chips, not beside them: ' + JSON.stringify(r.captionAbove));
   assert(r.risk.join() === r.quick.join(),
