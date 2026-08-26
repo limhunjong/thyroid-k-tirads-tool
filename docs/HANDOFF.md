@@ -1,0 +1,81 @@
+# 인수인계 (새 세션에서 먼저 읽을 것)
+
+마지막 갱신: 2026-08-26 · 브랜치 `claude/hopeful-faraday-4vtgl9`
+
+## 이 저장소가 무엇인가
+
+갑상선 초음파 판독 도구. **HTML 파일 한 개**로 전부 동작한다 (`index.html`, 약 8,000줄).
+외부 라이브러리 없음, 인터넷 없이 `file://`로 열림, 환자 정보는 그 PC 밖으로 나가지 않음.
+이 세 가지가 설계의 근본 제약이므로 **깨뜨리지 말 것** — 빌드 도구나 CDN 의존성을 도입하지 않는다.
+
+- 현재 버전: **ver1.52** (`versions/Thyroid_KTIRADS_ver1.52.html`)
+- 파일명 규칙: `Thyroid_KTIRADS_verX.YZ.html` — `index`나 다른 이름으로 만들지 말 것
+- 탭 3개만 유지: Thyroid Nodule / Lymph Node / Extrathyroidal Lesion
+  (Postop·RFA·Ethanol은 ver1.0x에서 의도적으로 삭제했다. 되살리지 말 것)
+
+## 작업 전 반드시 실행
+
+```bash
+node tests/report.test.cjs      # 44개 회귀 테스트, 전부 통과해야 정상
+```
+
+수정 후에도 다시 돌린다. 이 테스트는 "A를 고치니 B가 깨지는" 일이 반복돼서 만든 것이다.
+
+## 안전 관련 — 절대 되돌리지 말 것 (ver1.13)
+
+아무것도 입력하지 않았을 때 정상 판독문이 나가면 **누락을 정상으로 오인할 위험**이 있다.
+그래서 명시적 확인 체크를 해야만 정상 판독문이 생성된다:
+
+```js
+state.normalThyroid = isThyroidStudyEmpty() && state.confirmNormalParenchyma && state.confirmNoNodule;
+state.normalLymph   = isLymphStudyEmpty()   && state.confirmNormalLymph;
+```
+
+"빈 화면이면 그냥 정상으로 처리하자"는 방향의 제안은 하지 말 것.
+
+## 과거에 실제로 터졌던 버그 (재발 주의)
+
+| 증상 | 진짜 원인 |
+|---|---|
+| 새로고침하면 입력 내용이 전부 사라짐 (ver1.27, 심각) | 초기화 순서. 반드시 `loadState()` → `renderAll()` → `defaultExamDateToToday()` 순서 |
+| Alt 단축키가 전부 먹지 않음 (ver1.39) | Escape가 입력창 가드에 먹혀 대화상자가 안 닫히고 갇힘. Escape 처리는 가드보다 **앞**에 |
+| 글자가 위아래로 잘림 (4회 반복) | CSS `min-height: unset` 오버라이드. 44px 기본값을 상속하게 둘 것 |
+| 드래그 후 다이어그램이 한 박자 늦게 갱신 | `lnDragActive` 렌더 락. `lnNeedsRender` 플래그로 해제 |
+
+## 미완 / 보류 항목
+
+- **발표자료 4번 슬라이드 문구 수정 필요.** `presentation/build_deck.py`에 "첫 요청은 한 문장이었습니다"라고
+  적혀 있는데 이건 **근거 없는 서술**이다. ver0.1을 만든 실제 최초 프롬프트는 어디에도 기록이 없다
+  (git 첫 커밋이 이미 ver0.1~0.10을 한꺼번에 담고 있고, CHANGELOG도 ver0.8부터만 있다).
+  사용자가 실제 문장을 알려주면 인용구로 넣고, 못 찾으면 지어낸 인용처럼 보이지 않게 문구를 바꿀 것.
+- NAS 수집 서버(B안): `save_report.php`가 아직 9개 열 기준이다. 연구용 58개 열로 갱신 필요.
+- 사용자가 실제 판독문 샘플을 주기로 했다. 받으면 판독문 문장을 그에 맞춰 다듬는다.
+- 미착수(요청 없었음): 태블릿 터치 드래그, JSON 백업/복원, 검증 무시하고 강제 생성, GitHub Actions CI
+
+## 발표자료 (`presentation/`)
+
+이 샌드박스에는 pptxgenjs·python-pptx가 없고 설치도 막혀 있어서 OOXML 작성기를 직접 만들었다.
+LibreOffice도 고장나 있어(plain .txt조차 못 연다) 렌더 확인은 HTML 미러로 한다.
+
+```bash
+cd presentation
+python3 render_html.py                                  # build_deck.py 실행 + preview.html 생성
+NODE_PATH=/opt/node22/lib/node_modules node ../shot.js  # Chromium으로 장별 캡처 (스크립트는 직접 작성)
+python3 check_pptx.py KTIRADS_vibecoding.pptx           # 구조 검증, errors: 0 이어야 함
+```
+
+| 파일 | 역할 |
+|---|---|
+| `pptxlite.py` | 의존성 없는 .pptx 작성기 |
+| `build_deck.py` | 슬라이드 19장 내용 + 발표 노트 |
+| `render_html.py` | 동일 좌표계 HTML 미러 (시각 검수용) |
+| `check_pptx.py` | 패키지 구조 검증 |
+| `img/` | 버전별 HTML에서 뽑은 스크린샷 16장 |
+
+Playwright는 전역 설치되어 있다 — `NODE_PATH=/opt/node22/lib/node_modules` 필요.
+
+## 작업 방식에 대한 사용자 선호
+
+- 큰 작업은 **먼저 계획을 보여주고 확인받은 뒤** 진행한다 (특히 연구 데이터셋 관련).
+- 길이 단위는 전부 **mm**로 통일되어 있다.
+- 디자인은 Thyroid Nodule 탭 기준으로 나머지 탭을 맞춘다. 체크표시 대신 **색상 변화로만** 선택 표시.
