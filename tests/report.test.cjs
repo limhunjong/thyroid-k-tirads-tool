@@ -1124,6 +1124,86 @@ test('xlsx append: rows land in the sheet and the rest of the workbook survives'
     'cell comments must survive the round trip');
 });
 
+test('research workbook: rows go into the chosen .xlsx, previous version kept as backup', async page => {
+  const fixturePath = path.resolve(__dirname, 'fixtures', 'research_fixture.xlsx');
+  const original = fs.readFileSync(fixturePath);
+
+  const out = await page.evaluate(async (input) => {
+    const bin = atob(input);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+    const written = {};
+    const makeHandle = (name, initial) => ({
+      async getFile() { return new File([initial], name); },
+      async createWritable() {
+        const chunks = [];
+        return {
+          async write(d) { chunks.push(d); },
+          async close() { written[name] = new Uint8Array(await new Blob(chunks).arrayBuffer()); },
+        };
+      },
+    });
+    const dir = {
+      name: 'research',
+      async queryPermission() { return 'granted'; },
+      async requestPermission() { return 'granted'; },
+      async *values() {
+        yield { kind: 'file', name: 'study.xlsx' };
+        yield { kind: 'file', name: '~$study.xlsx' };      // Excel lock file
+        yield { kind: 'file', name: 'study_backup.xlsx' }; // ours
+        yield { kind: 'directory', name: 'old' };
+      },
+      async getFileHandle(name, opts) {
+        if (name === 'study.xlsx') return makeHandle(name, bytes);
+        if (opts && opts.create) return makeHandle(name, new Uint8Array());
+        throw new Error('missing ' + name);
+      },
+    };
+
+    const origIdbGet = window.idbGet;
+    window.idbGet = async key => (key === 'researchDir' ? dir : null);
+    const listed = await listFolderXlsx(dir);
+
+    const noTarget = await appendResearchRowsXlsx([['20260826', '5', '9001', 'Kim', 'R1', 'x']]);
+    setXlsxTargetName('study.xlsx');
+    const res = await appendResearchRowsXlsx([['20260826', '5', '9001', 'Kim', 'R1', 'x']]);
+    const wrongWidth = await appendResearchRowsXlsx([['only', 'two']]);
+
+    window.idbGet = origIdbGet;
+    setXlsxTargetName('');
+
+    const b64 = u => {
+      let s = ''; const c = 0x8000;
+      for (let i = 0; i < u.length; i += c) s += String.fromCharCode.apply(null, u.subarray(i, i + c));
+      return btoa(s);
+    };
+    return {
+      listed, noTarget, res, wrongWidth,
+      book: b64(written['study.xlsx']),
+      backup: written['study_backup.xlsx'] ? b64(written['study_backup.xlsx']) : null,
+    };
+  }, original.toString('base64'));
+
+  assert(out.listed.join(',') === 'study.xlsx',
+    'the picker must skip Excel lock files and our own backups: ' + out.listed);
+  assert(out.noTarget.ok === false && out.noTarget.reason === 'no-file',
+    'with no workbook chosen the save must fall through to the CSV, got ' + JSON.stringify(out.noTarget));
+  assert(out.res.ok && out.res.file === 'study.xlsx' && out.res.at === 3,
+    'append result wrong: ' + JSON.stringify(out.res));
+  assert(out.wrongWidth.ok === false && /header columns/.test(out.wrongWidth.reason),
+    'a row of the wrong width must be refused, not poured into the sheet: ' + JSON.stringify(out.wrongWidth));
+
+  const book = unzip(Buffer.from(out.book, 'base64'));
+  const xml = book['xl/worksheets/sheet1.xml'].toString('utf8');
+  assert(xml.includes('<row r="3"'), 'the new row is missing from the saved workbook');
+  assert(/<c r="E3"[^>]*t="inlineStr"><is><t[^>]*>R1</.test(xml), 'row values wrong: ' + xml.slice(-500));
+
+  assert(out.backup !== null, 'the previous version must be kept as a backup');
+  assert(Buffer.from(out.backup, 'base64').equals(original),
+    'the backup must be the file exactly as it was before the write');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
