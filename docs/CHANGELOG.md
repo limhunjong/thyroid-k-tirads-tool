@@ -1,5 +1,17 @@
 # Changelog
 
+## ver2.0011
+
+- **칩 글씨 굵기를 하나로 맞췄다.** `.inline-check-label`과 `.check-group label` 기본 규칙에만
+  `font-weight`가 빠져 있어 400을 상속하고 있었다. `.radio-group` 칩·Risk 칩·확인 칩·preset 칩은
+  전부 600이라, Research Data의 multi-select 칩(PEF characteristics, Comet tail location, Halo,
+  Specific features)과 위치 칩, `No prior exam`만 유독 가늘게 보였다.
+- 이제 모든 옵션 칩이 선택 전 600, 선택 후 700이다.
+- 회귀 테스트 추가 (55 → 56): 화면에 보이는 모든 옵션 칩의 계산된 `font-weight`가 600 미만이면
+  실패한다. 어느 칩군이 빠지면 바로 잡힌다.
+- 굵어진 만큼 글자 폭이 늘어나므로 1500·1024·768·390px에서 가로 넘침과 잘림을 ver2.0010과
+  비교했다 — 양쪽 모두 0으로 동일하다.
+
 ## ver2.0010
 
 - **아무것도 입력하지 않은 동안에는 확인 칩 바를 숨긴다.** 그 구간에서는 `Normal Study` 한 번이

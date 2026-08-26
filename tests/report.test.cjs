@@ -1282,6 +1282,34 @@ test('design tokens: sizes and radii come from the scale, raw values only shrink
     'inputs must stay 16px or mobile browsers zoom the page on focus');
 });
 
+test('chips share one weight: every option label is 600, selected 700', async page => {
+  const r = await page.evaluate(() => {
+    const nod = defaultNodule();
+    nod.rsExpanded = true;
+    nod.locationMiddle = true;         // one selected chip to check the 700 step
+    state.nodules.right.push(nod);
+    saveState();
+    renderAll();
+    const labels = [...document.querySelectorAll(
+      '.radio-group label, .check-group label, .inline-check-label, .confirm-chip, .preset-chip')]
+      .filter(el => el.offsetHeight > 0);
+    const light = labels
+      .filter(el => Number(getComputedStyle(el).fontWeight) < 600)
+      .map(el => (el.className || el.parentElement.className) + ':' + el.textContent.trim().slice(0, 18));
+    const selected = labels.filter(el => el.querySelector('input:checked'));
+    return {
+      total: labels.length,
+      light,
+      selectedWeights: [...new Set(selected.map(el => getComputedStyle(el).fontWeight))],
+    };
+  });
+  assert(r.total > 20, 'expected the nodule card to render its chips, got ' + r.total);
+  assert(r.light.length === 0,
+    'these chips inherit a lighter weight than the rest: ' + r.light.join(' | '));
+  assert(r.selectedWeights.every(w => Number(w) >= 600),
+    'a selected chip must not get lighter: ' + r.selectedWeights.join(','));
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
