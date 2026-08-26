@@ -1204,6 +1204,45 @@ test('research workbook: rows go into the chosen .xlsx, previous version kept as
     'the backup must be the file exactly as it was before the write');
 });
 
+// The type scale drifted to 20 sizes and 21 radii before ver2.0006 because
+// nothing stopped a raw px value from being added. These budgets may shrink
+// as the remaining odd values are folded into the scale — never grow.
+const RAW_FONT_SIZE_BUDGET = 13;
+const RAW_RADIUS_BUDGET = 16;
+
+test('design tokens: sizes and radii come from the scale, raw values only shrink', async () => {
+  const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+  const raw = (prop, tokenPrefix) => {
+    const out = [];
+    const re = new RegExp(prop + '\\s*:\\s*([^;}"\']+)', 'g');
+    let m;
+    while ((m = re.exec(html))) {
+      const v = m[1].trim().replace(' !important', '');
+      if (!v.startsWith('var(' + tokenPrefix)) out.push(v);
+    }
+    return out;
+  };
+  const sizes = raw('font-size', '--font-');
+  const radii = raw('border-radius', '--r-');
+
+  assert(sizes.length <= RAW_FONT_SIZE_BUDGET,
+    'a raw font-size was added — use the --font-* scale. Budget ' + RAW_FONT_SIZE_BUDGET +
+    ', found ' + sizes.length + ': ' + [...new Set(sizes)].join(', '));
+  assert(radii.length <= RAW_RADIUS_BUDGET,
+    'a raw border-radius was added — use the --r-* scale. Budget ' + RAW_RADIUS_BUDGET +
+    ', found ' + radii.length + ': ' + [...new Set(radii)].join(', '));
+
+  assert(!html.includes('--font-base'), '--font-base duplicated --font-xl and is gone; do not bring it back');
+  assert(!html.includes('ui-monospace'), 'there is one monospace stack now: var(--font-mono)');
+
+  // the scale itself must stay complete and ordered
+  const scale = ['--font-2xs: 11px', '--font-xs: 12px', '--font-sm: 13px', '--font-md: 14px',
+                 '--font-lg: 15px', '--font-xl: 16px', '--font-2xl: 17px'];
+  scale.forEach(step => assert(html.includes(step), 'missing type scale step: ' + step));
+  assert(html.includes('--font-xl: 16px'),
+    'inputs must stay 16px or mobile browsers zoom the page on focus');
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
