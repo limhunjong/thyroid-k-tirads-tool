@@ -1441,6 +1441,43 @@ test('earlier exams can be reordered and slotted in between', async page => {
   assert(r.afterRemove === '64,68,68', 'remove took the wrong row: ' + r.afterRemove);
 });
 
+test('earlier exams: dragging a handle reorders the chain', async page => {
+  await page.evaluate(() => {
+    const n = defaultNodule();
+    n.sizeChangeFU = true; n.diamUnit = 'mm';
+    n.prevAP = '76'; n.prevT = '35'; n.prevL = '54';
+    n.sizeHistory = [['11','11','11'], ['22','22','22'], ['33','33','33']];
+    state.nodules.right.push(n);
+    saveState(); renderAll();
+  });
+
+  const before = await page.evaluate(() => state.nodules.right[0].sizeHistory.map(h => h[0]).join(','));
+  const handles = await page.$$('.hist-handle');
+  assert(handles.length === 3, 'every row needs a drag handle, got ' + handles.length);
+
+  // the nodule card sits far down the page; the rows must be on screen to be dragged
+  await handles[1].scrollIntoViewIfNeeded();
+  await page.waitForTimeout(80);
+
+  // drag the top row down past the second one
+  const from = await handles[0].boundingBox();
+  const to = await handles[2].boundingBox();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(120);
+
+  const after = await page.evaluate(() => state.nodules.right[0].sizeHistory.map(h => h[0]).join(','));
+  const chain = await page.evaluate(() => calcSizeChangeInfo(state.nodules.right[0]).histStr.join(' > '));
+  assert(before === '11,22,33', 'unexpected starting order: ' + before);
+  assert(after !== before, 'the drag did not reorder anything: ' + after);
+  assert(after === '22,33,11' || after === '22,11,33',
+    'dragging the first row down should move it later: ' + after);
+  assert(chain.startsWith(after.split(',')[0] + '×'),
+    'the report chain must follow the dragged order: ' + chain);
+});
+
 // ------------------------------------------------------------- runner --
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
